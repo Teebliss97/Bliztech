@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}BlizTech Cyber Awareness{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+
+    <!-- Brand -->
+    <a class="brand" href="{{ url_for('main.home') }}">
+      <!-- keep your logo as it is now -->
+      <img class="brand-logo" src="{{ url_for('static', filename='img/logo-mark.svg') }}" alt="BlizTech logo">
+      <span class="brand-name">BlizTech</span>
+      <span class="brand-tag">Cyber Awareness</span>
+    </a>
+
+    <!-- Nav links -->
+    <nav class="nav-links">
+      <a href="{{ url_for('main.home') }}"
+         class="{% if request.endpoint == 'main.home' %}active{% endif %}">
+        Home
+      </a>
+
+      <a href="{{ url_for('topics.list_topics') }}"
+         class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
+        Topics
+      </a>
+
+      {% if current_user.is_authenticated %}
+        <span class="chip pill-dark">{{ current_user.email }}</span>
+        <a class="btn btn-outline" href="{{ url_for('auth.logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}"
+           class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
+          Login
+        </a>
+        <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Sign up</a>
+      {% endif %}
+    </nav>
+
+  </div>
+</header>
+
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <small>© 2025 BlizTech Cybersecurity Awareness</small>
+  </div>
+</footer>
+
+</body>
+</html>

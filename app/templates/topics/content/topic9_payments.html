@@ -1,0 +1,32 @@
+{% from "topics/_blocks.html" import callout, bullets, takeaway %}
+
+<h2>Online Shopping & Payment Safety</h2>
+<p>
+  Shopping scams are common: fake stores, fake delivery texts, and payment tricks.
+  This topic helps you avoid losing money.
+</p>
+
+{{ callout("warn", "High-risk payment method", "Bank transfer to a stranger is risky. Once sent, it’s difficult to recover.") }}
+
+<h3>How to shop safely</h3>
+{{ bullets("Safe shopping habits", [
+  "Buy from reputable websites and verified sellers",
+  "Check reviews (not only on the site itself)",
+  "Be cautious with deals that are ‘too cheap’",
+  "Use card payment where possible (better protection than transfer)",
+  "Never share OTP, PIN, or full card details with strangers"
+]) }}
+
+<h3>Delivery scam signs</h3>
+<ul>
+  <li>“Pay a small fee to reschedule delivery” from unknown sender</li>
+  <li>Link goes to a suspicious domain</li>
+  <li>Message creates urgency</li>
+</ul>
+
+{{ takeaway([
+  "Fake stores and delivery scams target emotions and urgency",
+  "Verify the seller + domain before paying",
+  "Card payment is generally safer than bank transfer",
+  "Never share OTP or PIN"
+]) }}

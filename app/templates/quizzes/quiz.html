@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1 class="page-title">{{ quiz.title }}</h1>
+  <p class="page-subtitle">Pass mark: {{ pass_mark }}%. Answer all questions then submit.</p>
+
+  <div class="quiz-shell">
+    <div class="quiz-top">
+      <span class="badge">🧠 Quiz</span>
+      <span class="badge">📝 {{ quiz.questions|length }} questions</span>
+      <span class="badge">🎯 {{ pass_mark }}% to pass</span>
+    </div>
+
+    <form class="quiz-form" method="post" action="{{ url_for('quizzes.submit', slug=slug) }}">
+      {% for q in quiz.questions %}
+        {% set q_index = loop.index0 %}
+        <div class="quiz-card">
+          <div class="quiz-qhead">
+            <div class="qnum">Q{{ loop.index }}</div>
+            <div class="qmeta">
+              <div class="qprogress">Question {{ loop.index }} of {{ quiz.questions|length }}</div>
+              <div class="qtext">{{ q.q }}</div>
+            </div>
+          </div>
+
+          <div class="choices">
+            {% for choice in q.choices %}
+              <label class="choice">
+                <input
+                  type="radio"
+                  name="q{{ q_index }}"
+                  value="{{ loop.index0 }}"
+                  required
+                >
+                <span class="choice-dot"></span>
+                <span class="choice-text">{{ choice }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+
+      <div class="quiz-actions">
+        <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">← Back to Topics</a>
+        <button class="btn" type="submit">Submit Quiz</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

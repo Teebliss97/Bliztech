@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1 class="page-title">Locked Topic</h1>
+  <p class="page-subtitle">
+    You need to pass the previous topic quiz to unlock:
+    <strong>{{ topic.title }}</strong>
+  </p>
+
+  <div class="content-card">
+    <p><strong>What to do:</strong></p>
+    <ol>
+      <li>Go back to Topics</li>
+      <li>Complete the previous quiz</li>
+      <li>Come back and continue</li>
+    </ol>
+
+    <div class="actions" style="margin-top:14px;">
+      <a class="btn" href="{{ url_for('topics.list_topics') }}">Back to Topics</a>
+    </div>
+  </div>
+{% endblock %}

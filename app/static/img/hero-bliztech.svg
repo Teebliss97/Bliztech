@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 560" fill="none">
+  <defs>
+    <radialGradient id="bg1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(240 140) rotate(30) scale(520 320)">
+      <stop stop-color="#38bdf8" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bg2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(720 240) rotate(-25) scale(520 340)">
+      <stop stop-color="#6366f1" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shield" x1="360" y1="120" x2="560" y2="460">
+      <stop stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="920" height="560" rx="32" fill="#0b1220"/>
+  <rect x="0" y="0" width="920" height="560" rx="32" fill="url(#bg1)"/>
+  <rect x="0" y="0" width="920" height="560" rx="32" fill="url(#bg2)"/>
+
+  <!-- subtle grid -->
+  <g opacity=".18" stroke="#e5e7eb">
+    <path d="M80 120h760M80 200h760M80 280h760M80 360h760M80 440h760"/>
+    <path d="M160 80v440M260 80v440M360 80v440M460 80v440M560 80v440M660 80v440M760 80v440"/>
+  </g>
+
+  <!-- main shield -->
+  <path d="M460 110c86 52 156 52 156 52v156c0 122-78 206-156 242-78-36-156-120-156-242V162s70 0 156-52z"
+        fill="url(#shield)" opacity=".95"/>
+  <path d="M460 210c44 26 88 26 88 26v88c0 72-44 120-88 140-44-20-88-68-88-140v-88s44 0 88-26z"
+        fill="#06111f" opacity=".55"/>
+
+  <!-- check -->
+  <path d="M430 340l-26-26 16-16 10 10 74-74 16 16-90 90z" fill="#e5e7eb"/>
+
+  <!-- caption -->
+  <g opacity=".95">
+    <text x="90" y="120" fill="#e5e7eb" font-size="34" font-family="Arial" font-weight="700">BlizTech</text>
+    <text x="90" y="160" fill="#9ca3af" font-size="16" font-family="Arial">Learn • Quiz • Unlock</text>
+    <text x="90" y="198" fill="#9ca3af" font-size="14" font-family="Arial">Practical cybersecurity awareness for everyone.</text>
+  </g>
+</svg>

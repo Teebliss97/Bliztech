@@ -1,0 +1,32 @@
+{% from "topics/_blocks.html" import callout, bullets, takeaway %}
+
+<h2>Safe Browsing & Downloads</h2>
+<p>
+  Many attacks happen while browsing — fake sites, fake buttons, and downloads that look legit.
+  This topic teaches you how to click safely.
+</p>
+
+{{ callout("warn", "Watch for this", "Fake ‘Download’ buttons on websites. They’re often ads trying to install malware.") }}
+
+<h3>Safe browsing habits</h3>
+{{ bullets("Do this every time", [
+  "Check the website address (domain) carefully",
+  "Look for HTTPS + the correct domain name",
+  "Avoid downloading random ‘tools’ from unknown sites",
+  "Use an ad-blocker and browser security features",
+  "When in doubt, search the official website and download from there"
+]) }}
+
+<h3>Red flags</h3>
+<ul>
+  <li>Pop-ups saying “Your device is infected”</li>
+  <li>Forced downloads without you clicking</li>
+  <li>Sites asking you to install extensions to view content</li>
+</ul>
+
+{{ takeaway([
+  "Most browser attacks rely on tricking you to click/install",
+  "Verify domains before you trust a site",
+  "Download only from official sources",
+  "Pop-up ‘virus alerts’ are often scams"
+]) }}

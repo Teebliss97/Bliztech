@@ -1,0 +1,31 @@
+{% from "topics/_blocks.html" import callout, bullets, takeaway %}
+
+<h2>Public Wi-Fi & Mobile Safety</h2>
+<p>
+  Public Wi-Fi can be risky because attackers may intercept traffic or create fake hotspots
+  that look legitimate.
+</p>
+
+{{ callout("warn", "Fake hotspot trick", "Attackers create Wi-Fi names like ‘Free Airport Wi-Fi’. People connect and attackers monitor activity.") }}
+
+<h3>Safer ways to use public Wi-Fi</h3>
+{{ bullets("Do this", [
+  "Avoid banking or sensitive logins on public Wi-Fi",
+  "Use a VPN if you must use public Wi-Fi",
+  "Turn off auto-connect to Wi-Fi networks",
+  "Use mobile data/hotspot for important tasks"
+]) }}
+
+<h3>Mobile safety basics</h3>
+<ul>
+  <li>Use a screen lock (PIN/biometrics)</li>
+  <li>Keep OS/apps updated</li>
+  <li>Only install apps from official stores</li>
+</ul>
+
+{{ takeaway([
+  "Public Wi-Fi can be monitored or faked",
+  "Avoid sensitive tasks on public Wi-Fi",
+  "VPN helps reduce risk",
+  "Mobile updates + screen lock are essential"
+]) }}

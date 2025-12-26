@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Topics</h1>
+    <p class="page-subtitle">Read a topic, take the quiz, and unlock the next one.</p>
+
+    <!-- Overall Progress -->
+    <div class="course-progress">
+      <div class="course-progress-top">
+        <span class="badge">Progress</span>
+        <span class="course-progress-text">
+          <strong>{{ completed_count }}</strong> / {{ total_topics }} completed • {{ progress_pct }}%
+        </span>
+      </div>
+
+      <div class="course-bar">
+        <div class="course-bar-fill" style="width: {{ progress_pct }}%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topics-grid">
+    {% for t in topics %}
+      <div class="topic-card {% if not t.unlocked %}is-locked{% endif %} {% if t.completed %}is-completed{% endif %}">
+        <div class="topic-top">
+          <div class="topic-title-wrap">
+            <div class="topic-title">{{ t.title }}</div>
+
+            <div class="topic-badges">
+              {% if t.completed %}
+                <span class="pill pill-green">✅ Completed{% if t.score is not none %} • {{ t.score }}%{% endif %}</span>
+              {% elif t.unlocked %}
+                <span class="pill pill-blue">🔓 Unlocked</span>
+              {% else %}
+                <span class="pill pill-gray">🔒 Locked</span>
+              {% endif %}
+
+              {% if t.time %}
+                <span class="pill pill-dark">⏱ {{ t.time }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="topic-desc">
+          Learn the key ideas and test yourself with a short quiz.
+        </div>
+
+        <div class="topic-actions">
+          {% if t.unlocked %}
+            <a class="btn" href="{{ url_for('topics.topic_detail', slug=t.slug) }}">Read</a>
+            <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=t.slug) }}">Take Quiz</a>
+          {% else %}
+            <button class="btn btn-disabled" disabled>Read</button>
+            <button class="btn btn-outline btn-disabled" disabled>Take Quiz</button>
+          {% endif %}
+        </div>
+
+        {% if not t.unlocked %}
+          <div class="topic-lock-hint">
+            Pass the previous quiz to unlock this topic.
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

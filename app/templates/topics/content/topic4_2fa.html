@@ -1,0 +1,33 @@
+{% from "topics/_blocks.html" import callout, bullets, takeaway %}
+
+<h2>Two-Factor Authentication (2FA)</h2>
+<p>
+  2FA adds a second layer of security. Even if someone steals your password,
+  they still need the second factor to log in.
+</p>
+
+{{ callout("info", "Simple idea", "Password = something you know. 2FA = something you have (phone/app) or something you are (biometrics).") }}
+
+<h3>Common 2FA methods (best to worst)</h3>
+{{ bullets("2FA options", [
+  "Authenticator app (recommended): Google Authenticator, Microsoft Authenticator, Authy",
+  "Passkeys / device prompts: ‘Approve sign-in’ on your phone",
+  "Hardware key: YubiKey (very strong)",
+  "SMS codes: better than nothing, but can be intercepted"
+]) }}
+
+{{ callout("warn", "Important", "Never share a 2FA code/OTP with anyone — not even ‘support’ or ‘bank staff’.") }}
+
+<h3>Best practice</h3>
+<ul>
+  <li>Use an authenticator app where possible</li>
+  <li>Save backup codes in a safe place</li>
+  <li>Turn on 2FA for email first (email controls resets for other accounts)</li>
+</ul>
+
+{{ takeaway([
+  "2FA blocks account takeovers even if password is stolen",
+  "Authenticator apps are safer than SMS",
+  "Backup codes are your recovery plan",
+  "Never share OTP codes with anyone"
+]) }}

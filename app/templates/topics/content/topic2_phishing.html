@@ -1,0 +1,41 @@
+{% from "topics/_blocks.html" import callout, bullets, takeaway %}
+
+<h2>Phishing & Scam Awareness</h2>
+<p>
+  Phishing is when attackers pretend to be someone you trust to steal your information, money,
+  or access to your accounts.
+</p>
+
+{{ callout("warn", "Big red flag", "Any message asking for your OTP / verification code is almost always a scam.") }}
+
+<h3>Common phishing types</h3>
+{{ bullets("You’ll see phishing in many forms", [
+  "Email phishing: fake emails from ‘banks’, ‘HMRC’, ‘delivery’, etc.",
+  "Smishing: phishing via SMS/text messages",
+  "Vishing: phishing via phone calls",
+  "Social media DMs: fake giveaways, urgent messages, impersonation"
+]) }}
+
+<h3>How to spot it fast</h3>
+{{ bullets("Phishing signs", [
+  "Urgency: ‘act now’, ‘account will be closed’",
+  "Pressure: ‘don’t tell anyone’, ‘do it quickly’",
+  "Suspicious links: strange domain names or shortened links",
+  "Requests for codes, passwords, bank details, or remote access",
+  "Poor spelling, odd formatting, strange sender address"
+]) }}
+
+<h3>What to do if you receive one</h3>
+<ul>
+  <li>Don’t click the link</li>
+  <li>Open the app/website yourself (official route)</li>
+  <li>Verify using a different channel (call the known number)</li>
+  <li>Report and block the sender</li>
+</ul>
+
+{{ takeaway([
+  "Phishing = pretending to be trusted",
+  "Urgency + OTP request = huge warning",
+  "Verify by going to the official app/website yourself",
+  "When unsure, pause and confirm through another channel"
+]) }}

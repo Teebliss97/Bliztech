@@ -1,0 +1,35 @@
+{% from "topics/_blocks.html" import callout, bullets, takeaway %}
+
+<h2>Introduction to Cybersecurity</h2>
+<p>
+  Cybersecurity is about protecting your devices, accounts, and data from digital attacks.
+  It’s not only for “tech people” — it affects everyone who uses the internet.
+</p>
+
+{{ callout("info", "Think of it like this", "Cybersecurity is like locking your house: doors (passwords), alarm (2FA), CCTV (monitoring), and safe habits (awareness).") }}
+
+<h3>What are we protecting?</h3>
+{{ bullets("Key things worth protecting", [
+  "Your money (banking, shopping, transfers)",
+  "Your identity (personal details, IDs, accounts)",
+  "Your privacy (messages, photos, location)",
+  "Your devices (phone, laptop, tablet)",
+  "Your reputation (social accounts, impersonation)"
+]) }}
+
+<h3>Common threats (you’ll meet these in later topics)</h3>
+<ul>
+  <li><strong>Phishing:</strong> fake messages that trick you into clicking or paying</li>
+  <li><strong>Malware:</strong> harmful software that steals data or damages devices</li>
+  <li><strong>Password attacks:</strong> guessing, re-use, and leaked passwords</li>
+  <li><strong>Scams:</strong> manipulation + urgency to make you act fast</li>
+</ul>
+
+{{ callout("warn", "Golden rule", "If something is urgent, emotional, or too good to be true — slow down and verify.") }}
+
+{{ takeaway([
+  "Cybersecurity is for everyone online",
+  "Protect money, identity, privacy, and devices",
+  "Most attacks succeed because of human tricks, not ‘high-level hacking’",
+  "Slow down, verify, and build safe habits"
+]) }}

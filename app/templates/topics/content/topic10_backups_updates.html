@@ -1,0 +1,31 @@
+{% from "topics/_blocks.html" import callout, bullets, takeaway %}
+
+<h2>Backups & Device Updates</h2>
+<p>
+  Updates fix security holes. Backups protect you if something goes wrong (lost device, ransomware,
+  accidental deletion).
+</p>
+
+<h3>Why updates matter</h3>
+{{ callout("info", "Simple truth", "Most successful hacks use old known vulnerabilities that updates already fixed.") }}
+
+{{ bullets("Update habits", [
+  "Turn on automatic updates where possible",
+  "Update browsers, apps, and operating system",
+  "Restart your device when updates require it"
+]) }}
+
+<h3>Backups (your recovery plan)</h3>
+{{ bullets("Good backup approach", [
+  "Use cloud backup (Google Drive, OneDrive, iCloud) for key files",
+  "Keep an external drive backup for important data",
+  "Test restore occasionally (make sure it actually works)"
+]) }}
+
+{{ callout("warn", "Ransomware protection", "If you have a backup, ransomware loses power over you. You can wipe and restore instead of paying.") }}
+
+{{ takeaway([
+  "Updates close security holes",
+  "Backups protect you from loss and ransomware",
+  "Automatic updates + cloud backup = strong baseline security"
+]) }}

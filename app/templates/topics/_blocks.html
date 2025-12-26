@@ -1,0 +1,30 @@
+{# Reusable lesson blocks #}
+
+{% macro callout(kind, title, text) %}
+  <div class="callout callout-{{ kind }}">
+    <div class="callout-title">{{ title }}</div>
+    <div class="callout-text">{{ text }}</div>
+  </div>
+{% endmacro %}
+
+{% macro bullets(title, items) %}
+  <div class="bullets">
+    <div class="bullets-title">{{ title }}</div>
+    <ul>
+      {% for i in items %}
+        <li>{{ i }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
+
+{% macro takeaway(items) %}
+  <div class="takeaway">
+    <div class="takeaway-title">Key takeaways</div>
+    <ul>
+      {% for i in items %}
+        <li>{{ i }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="hero">
+    <div class="hero-left">
+      <div class="pill">
+        <span class="dot"></span>
+        Cybersecurity Awareness • BlizTech
+      </div>
+
+      <h1 class="hero-title">Stay safe online — one topic at a time.</h1>
+      <p class="hero-subtitle">
+        Learn practical cybersecurity skills in minutes. Read a lesson, take a short quiz,
+        and unlock the next topic — step by step.
+      </p>
+
+      {# ✅ Course completed badge (shows ONLY when finished all topics) #}
+      {% if course_done %}
+        <div class="continue-card pop-in">
+          <div class="continue-top">
+            <div>
+              <div class="continue-title">🏆 Course Completed</div>
+              <div class="continue-sub">
+                You’ve successfully completed all {{ total_topics }} topics. Great work!
+              </div>
+            </div>
+            <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">
+              View Topics
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ✅ If progress exists, show only Continue + View Topics #}
+      {% if progress and progress.next_slug %}
+        <div class="continue-card">
+          <div class="continue-top">
+            <span class="badge-pill">Progress</span>
+            <span class="continue-meta">
+              {{ progress.completed }}/{{ progress.total }} completed • {{ progress.percent }}%
+            </span>
+          </div>
+
+          <div class="bar">
+            <div class="bar-fill" style="width: {{ progress.percent }}%;"></div>
+          </div>
+
+          <div class="continue-body">
+            <h3>Continue learning</h3>
+            {% if progress.last_title %}
+              <p class="muted">Last completed: <strong>{{ progress.last_title }}</strong></p>
+            {% endif %}
+          </div>
+
+          <div class="hero-actions">
+            <a class="btn" href="{{ url_for('topics.topic_detail', slug=progress.next_slug) }}">
+              Continue: {{ progress.next_label }}
+            </a>
+            <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View Topics</a>
+          </div>
+        </div>
+
+      {% else %}
+        {# ✅ No progress yet → show Start + View Topics only #}
+        <div class="hero-actions">
+          <a class="btn" href="{{ url_for('topics.list_topics') }}">Start Learning</a>
+          <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View Topics</a>
+        </div>
+      {% endif %}
+
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">10</div>
+          <div class="stat-label">Topics</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Questions per quiz</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">3–6 min</div>
+          <div class="stat-label">Per lesson</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-visual">
+        <img class="hero-img"
+          src="{{ url_for('static', filename='img/hero-bliztech.svg') }}"
+          alt="BlizTech cybersecurity awareness hero"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="section-grid">
+    <div class="feature">
+      <div class="feature-icon">
+        <img src="{{ url_for('static', filename='img/icon-lesson.svg') }}" alt="Lessons">
+      </div>
+      <h3>Simple lessons</h3>
+      <p>No jargon. Just clear explanations and real examples.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">
+        <img src="{{ url_for('static', filename='img/icon-quiz.svg') }}" alt="Quizzes">
+      </div>
+      <h3>Quick quizzes</h3>
+      <p>Test yourself after each topic and build confidence.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">
+        <img src="{{ url_for('static', filename='img/icon-unlock.svg') }}" alt="Progression">
+      </div>
+      <h3>Progression</h3>
+      <p>Pass to unlock the next topic — learn in the right order.</p>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">
+        <img src="{{ url_for('static', filename='img/icon-tips.svg') }}" alt="Practical tips">
+      </div>
+      <h3>Practical tips</h3>
+      <p>Spot scams, protect accounts, and stay safer online.</p>
+    </div>
+  </section>
+
+  <section class="how-card">
+    <h2>How it works</h2>
+    <ol>
+      <li>Read a topic</li>
+      <li>Take a quiz</li>
+      <li>Pass to unlock the next topic</li>
+    </ol>
+
+    <div class="how-actions">
+      <a class="btn" href="{{ url_for('topics.list_topics') }}">Browse Topics</a>
+      {% if progress and progress.next_slug %}
+        <a class="btn btn-outline" href="{{ url_for('topics.topic_detail', slug=progress.next_slug) }}">Continue</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta-inner">
+      <div>
+        <h2>Ready to level up your online safety?</h2>
+        <p>Start with Topic 1 and unlock your way through the course.</p>
+      </div>
+      <a class="btn" href="{{ url_for('topics.list_topics') }}">View Topics</a>
+    </div>
+  </section>
+{% endblock %}

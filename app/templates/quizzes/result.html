@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="top-actions" style="display:flex; gap:10px; flex-wrap:wrap; margin:14px 0;">
+    <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">← Back to Topics</a>
+    {% if passed and next_slug %}
+      <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_slug) }}">Next Topic →</a>
+    {% endif %}
+  </div>
+
+  <h1 class="page-title">Quiz Result</h1>
+
+  <div class="result-shell">
+
+    {% if passed %}
+      <div class="result-banner pass pop-in">
+        <div class="result-title">✅ Passed</div>
+        <div class="result-sub">
+          Score: <strong>{{ result.score_pct }}%</strong>
+          ({{ result.correct }}/{{ result.total }})
+        </div>
+
+        <div class="bar">
+          <div class="bar-fill" style="width: {{ result.score_pct }}%;"></div>
+        </div>
+
+        <p class="result-text">
+          Great job! You’ve unlocked the next topic.
+        </p>
+
+        <div class="result-actions">
+          {% if next_slug %}
+            <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_slug) }}">Next Topic →</a>
+          {% endif %}
+          <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Back to Topics</a>
+          <a class="btn btn-outline" href="{{ url_for('topics.topic_detail', slug=result.slug) }}">Review Lesson</a>
+        </div>
+      </div>
+    {% else %}
+      <div class="result-banner fail shake">
+        <div class="result-title">❌ Not Passed</div>
+        <div class="result-sub">
+          Score: <strong>{{ result.score_pct }}%</strong>
+          ({{ result.correct }}/{{ result.total }}) — Need {{ pass_mark }}%
+        </div>
+
+        <div class="bar">
+          <div class="bar-fill" style="width: {{ result.score_pct }}%;"></div>
+        </div>
+
+        <p class="result-text">
+          Review the explanations below and try again.
+        </p>
+
+        <div class="result-actions">
+          <a class="btn" href="{{ url_for('quizzes.quiz', slug=result.slug) }}">Retry Quiz</a>
+          <a class="btn btn-outline" href="{{ url_for('topics.topic_detail', slug=result.slug) }}">Review Lesson</a>
+          <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Back to Topics</a>
+        </div>
+      </div>
+    {% endif %}
+
+    <h2 class="section-title">Review</h2>
+    <p class="page-subtitle">
+      Compare your answers with the correct ones.
+    </p>
+
+    {% for q in quiz.questions %}
+      {% set user_ans = result.answers[loop.index0] %}
+
+      <div class="review-card">
+        <div class="review-q">
+          <span class="badge">Q{{ loop.index }}</span>
+          <strong>{{ q.q }}</strong>
+        </div>
+
+        <div class="review-grid">
+          <div class="review-item">
+            <div class="review-label">Your answer</div>
+            <div class="review-value
+              {% if user_ans is not none and user_ans == q.answer %}
+                good
+              {% else %}
+                bad
+              {% endif %}
+            ">
+              {% if user_ans is not none %}
+                {{ q.choices[user_ans] }}
+              {% else %}
+                No answer
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="review-item">
+            <div class="review-label">Correct answer</div>
+            <div class="review-value good">
+              {{ q.choices[q.answer] }}
+            </div>
+          </div>
+        </div>
+
+        <div class="review-explain">
+          <span class="badge">💡 Explanation</span>
+          <span>{{ q.explain }}</span>
+        </div>
+      </div>
+    {% endfor %}
+
+  </div>
+{% endblock %}

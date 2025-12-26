@@ -1,0 +1,51 @@
+from datetime import datetime
+
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from app.extensions import db, login_manager
+
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def set_password(self, raw_password: str) -> None:
+        self.password_hash = generate_password_hash(raw_password)
+
+    def check_password(self, raw_password: str) -> bool:
+        return check_password_hash(self.password_hash, raw_password)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+class Progress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    # store either "anon:<uuid>" or "user:<id>"
+    user_id = db.Column(db.String(80), nullable=False, index=True)
+    slug = db.Column(db.String(50), nullable=False, index=True)
+
+    attempts = db.Column(db.Integer, default=0)
+    score = db.Column(db.Integer, default=0)
+    passed = db.Column(db.Boolean, default=False)
+
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "slug", name="uq_progress_user_slug"),
+    )
+
+    def to_dict(self):
+        return {
+            "slug": self.slug,
+            "score": self.score,
+            "passed": bool(self.passed),
+            "attempts": self.attempts or 0,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

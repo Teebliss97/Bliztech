@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="lesson-header">
+    <div>
+      <h1 class="page-title">{{ topic.title }}</h1>
+      <p class="page-subtitle">
+        Read carefully, then take the quiz to unlock the next topic.
+        {% if topic.time %}<span class="lesson-time">⏱ {{ topic.time }}</span>{% endif %}
+      </p>
+    </div>
+
+    <div class="lesson-header-actions">
+      <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">← Back</a>
+      <a class="btn" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">Take Quiz</a>
+    </div>
+  </div>
+
+  <div class="lesson-layout">
+    <article class="lesson-card">
+      {% include "topics/content/" + content_template %}
+    </article>
+
+    <aside class="lesson-side">
+      <div class="side-card">
+        <div class="side-title">Quick checklist</div>
+        <ul class="side-list">
+          <li>Read the full lesson</li>
+          <li>Note the red flags</li>
+          <li>Take the quiz</li>
+          <li>Pass to unlock next topic</li>
+        </ul>
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">Tip</div>
+        <p class="side-text">
+          Don’t rush. Real safety comes from habits — not just information.
+        </p>
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">Next step</div>
+        <p class="side-text">
+          When you’re ready, click <strong>Take Quiz</strong>.
+        </p>
+        <a class="btn" style="margin-top:10px; width:100%;" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">Take Quiz</a>
+      </div>
+    </aside>
+  </div>
+{% endblock %}
