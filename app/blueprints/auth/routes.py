@@ -1,3 +1,4 @@
+import os
 import uuid
 from flask import render_template, request, redirect, url_for, flash, session
 from flask_login import login_user, logout_user, current_user
@@ -45,6 +46,33 @@ def _merge_progress(anon_id: str, user_id: str):
     db.session.commit()
 
 
+def _admin_emails_set() -> set[str]:
+    """
+    Comma-separated list in Render env var ADMIN_EMAILS
+    Example: "toheebatinuke@gmail.com, another@email.com"
+    """
+    raw = os.getenv("ADMIN_EMAILS", "")
+    return {e.strip().lower() for e in raw.split(",") if e.strip()}
+
+
+def _ensure_admin_if_allowed(user: User) -> bool:
+    """
+    If user's email is in ADMIN_EMAILS, make them admin.
+    Returns True if we changed anything.
+    """
+    allowed = _admin_emails_set()
+    if not allowed:
+        return False
+
+    if user.email.lower() in allowed and not getattr(user, "is_admin", False):
+        user.is_admin = True
+        db.session.add(user)
+        db.session.commit()
+        return True
+
+    return False
+
+
 @auth_bp.route("/signup", methods=["GET", "POST"])
 def signup():
     if current_user.is_authenticated:
@@ -74,6 +102,11 @@ def signup():
 
         user = User(email=email)
         user.set_password(password)
+
+        # ✅ auto-admin for allowed emails
+        if email in _admin_emails_set():
+            user.is_admin = True
+
         db.session.add(user)
         db.session.commit()
 
@@ -105,6 +138,9 @@ def login():
         if not user or not user.check_password(password):
             flash("Invalid email or password.", "error")
             return render_template("auth/login.html")
+
+        # ✅ if this email should be admin, ensure it
+        _ensure_admin_if_allowed(user)
 
         login_user(user)
 

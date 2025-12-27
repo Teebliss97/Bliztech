@@ -13,7 +13,6 @@
 
     <!-- Brand -->
     <a class="brand" href="{{ url_for('main.home') }}">
-      <!-- keep your logo as it is now -->
       <img class="brand-logo" src="{{ url_for('static', filename='img/logo-mark.svg') }}" alt="BlizTech logo">
       <span class="brand-name">BlizTech</span>
       <span class="brand-tag">Cyber Awareness</span>
@@ -30,6 +29,13 @@
          class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
         Topics
       </a>
+
+      {% if current_user.is_authenticated and current_user.is_admin %}
+        <a href="{{ url_for('admin.dashboard') }}"
+           class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
+          Admin
+        </a>
+      {% endif %}
 
       {% if current_user.is_authenticated %}
         <span class="chip pill-dark">{{ current_user.email }}</span>
