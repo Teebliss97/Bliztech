@@ -3,22 +3,54 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 
+def _get_sendgrid_config():
+    """
+    Supports either env naming:
+      - SENDGRID_API_KEY
+      - MAIL_FROM  (recommended)
+      - or SENDGRID_FROM_EMAIL (your current naming)
+    """
+    api_key = os.getenv("SENDGRID_API_KEY")
+    from_email = os.getenv("MAIL_FROM") or os.getenv("SENDGRID_FROM_EMAIL")
+    return api_key, from_email
+
+
+def send_email(to_email: str, subject: str, html_content: str) -> bool:
+    """
+    Generic SendGrid email sender.
+    Returns True if sent, False otherwise.
+    """
+    api_key, from_email = _get_sendgrid_config()
+
+    if not api_key or not from_email:
+        print("❌ SendGrid not configured: missing SENDGRID_API_KEY or MAIL_FROM/SENDGRID_FROM_EMAIL")
+        return False
+
+    message = Mail(
+        from_email=from_email,
+        to_emails=to_email,
+        subject=subject,
+        html_content=html_content,
+    )
+
+    try:
+        sg = SendGridAPIClient(api_key)
+        response = sg.send(message)
+        print("✅ Email sent:", response.status_code)
+        return True
+    except Exception as e:
+        print("❌ SendGrid error:", e)
+        return False
+
+
 def send_course_completion_email(to_email: str) -> bool:
     """
     Sends course completion email using SendGrid.
     Returns True if sent successfully, False otherwise.
     """
-
-    api_key = os.getenv("SENDGRID_API_KEY")
-    from_email = os.getenv("SENDGRID_FROM_EMAIL")
-
-    if not api_key or not from_email:
-        print("❌ SendGrid not configured")
-        return False
-
     subject = "🎉 Congratulations! You completed the BlizTech Cyber Awareness Course"
 
-    html_content = f"""
+    html_content = """
     <html>
       <body style="font-family: Arial, sans-serif; background:#0b1220; color:#ffffff; padding:20px;">
         <h2>🏆 Course Completed!</h2>
@@ -42,18 +74,4 @@ def send_course_completion_email(to_email: str) -> bool:
     </html>
     """
 
-    message = Mail(
-        from_email=from_email,
-        to_emails=to_email,
-        subject=subject,
-        html_content=html_content,
-    )
-
-    try:
-        sg = SendGridAPIClient(api_key)
-        response = sg.send(message)
-        print("✅ Completion email sent:", response.status_code)
-        return True
-    except Exception as e:
-        print("❌ SendGrid error:", e)
-        return False
+    return send_email(to_email=to_email, subject=subject, html_content=html_content)

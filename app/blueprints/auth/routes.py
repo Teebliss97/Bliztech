@@ -1,9 +1,11 @@
 import os
 import uuid
-from flask import render_template, request, redirect, url_for, flash, session
+
+from flask import render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, current_user
 
 from app.blueprints.auth import auth_bp
+from app.email_utils import send_email
 from app.extensions import db
 from app.models import User, Progress
 
@@ -161,3 +163,62 @@ def logout():
         logout_user()
     flash("Logged out.", "success")
     return redirect(url_for("main.home"))
+
+
+# ---------------------------
+# Password reset routes
+# ---------------------------
+
+@auth_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+
+        # Always respond the same (avoid account enumeration)
+        flash("If that email exists, a reset link has been sent.", "success")
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            token = user.generate_reset_token()
+
+            base_url = os.getenv("RENDER_EXTERNAL_URL", "").rstrip("/")
+            reset_path = url_for("auth.reset_password", token=token)
+            reset_link = f"{base_url}{reset_path}" if base_url else reset_path
+
+            html = render_template("emails/reset_password.html", reset_link=reset_link)
+
+            ok = send_email(user.email, "Reset your BlizTech password", html)
+            if not ok:
+                current_app.logger.error("SendGrid email failed for %s", user.email)
+
+        return redirect(url_for("auth.login"))
+
+    return render_template("auth/forgot_password.html")
+
+
+@auth_bp.route("/reset/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    user = User.verify_reset_token(token, max_age_seconds=3600)
+    if not user:
+        flash("That reset link is invalid or has expired.", "error")
+        return redirect(url_for("auth.forgot_password"))
+
+    if request.method == "POST":
+        password = request.form.get("password") or ""
+        confirm = request.form.get("confirm") or ""
+
+        if len(password) < 8:
+            flash("Password should be at least 8 characters.", "error")
+            return render_template("auth/reset_password.html")
+
+        if password != confirm:
+            flash("Passwords do not match.", "error")
+            return render_template("auth/reset_password.html")
+
+        user.set_password(password)
+        db.session.commit()
+
+        flash("Password updated successfully ✅ Please log in.", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("auth/reset_password.html")

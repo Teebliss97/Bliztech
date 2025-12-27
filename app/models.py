@@ -1,6 +1,8 @@
+import os
 from datetime import datetime
 
 from flask_login import UserMixin
+from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.extensions import db, login_manager
@@ -18,6 +20,32 @@ class User(db.Model, UserMixin):
 
     def check_password(self, raw_password: str) -> bool:
         return check_password_hash(self.password_hash, raw_password)
+
+    # ---------------------------
+    # Password reset token helpers
+    # ---------------------------
+    def generate_reset_token(self) -> str:
+        """
+        Generates a signed token that encodes the user_id.
+        Token expires when verified using verify_reset_token(max_age_seconds).
+        """
+        secret = os.getenv("SECRET_KEY", "dev-secret")
+        s = URLSafeTimedSerializer(secret)
+        return s.dumps({"user_id": self.id}, salt="password-reset")
+
+    @staticmethod
+    def verify_reset_token(token: str, max_age_seconds: int = 3600):
+        """
+        Verifies a token and returns the user if valid, else None.
+        """
+        secret = os.getenv("SECRET_KEY", "dev-secret")
+        s = URLSafeTimedSerializer(secret)
+        try:
+            data = s.loads(token, salt="password-reset", max_age=max_age_seconds)
+            user_id = int(data.get("user_id"))
+            return User.query.get(user_id)
+        except Exception:
+            return None
 
 
 @login_manager.user_loader
