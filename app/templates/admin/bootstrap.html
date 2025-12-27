@@ -1,15 +1,19 @@
 {% extends "base.html" %}
+{% block title %}Admin Bootstrap{% endblock %}
+
 {% block content %}
-<h1>Bootstrap First Admin</h1>
-<p>This page only works once (only if no admin exists yet).</p>
+  <div class="card">
+    <h2>Admin Bootstrap</h2>
+    <p>Create the first admin user (only works once).</p>
 
-<form method="POST">
-  <label>Email (must already exist):</label><br>
-  <input name="email" type="email" required><br><br>
+    <form method="POST">
+      <label>Token</label>
+      <input name="token" type="password" required>
 
-  <label>Bootstrap Token:</label><br>
-  <input name="token" type="password" required><br><br>
+      <label>Your account email</label>
+      <input name="email" type="email" required>
 
-  <button type="submit">Make Admin</button>
-</form>
+      <button class="btn" type="submit">Make Admin</button>
+    </form>
+  </div>
 {% endblock %}

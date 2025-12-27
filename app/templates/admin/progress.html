@@ -1,20 +1,31 @@
 {% extends "base.html" %}
-{% block content %}
-<h1>Recent Progress (last 200)</h1>
+{% block title %}Admin • Progress{% endblock %}
 
-<table border="1" cellpadding="6">
-  <tr>
-    <th>User ID</th><th>Slug</th><th>Attempts</th><th>Score</th><th>Passed</th><th>Updated</th>
-  </tr>
-  {% for r in rows %}
-  <tr>
-    <td>{{ r.user_id }}</td>
-    <td>{{ r.slug }}</td>
-    <td>{{ r.attempts }}</td>
-    <td>{{ r.score }}</td>
-    <td>{{ "Yes" if r.passed else "No" }}</td>
-    <td>{{ r.updated_at }}</td>
-  </tr>
-  {% endfor %}
-</table>
+{% block content %}
+  <h2>Latest Progress (last 200)</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>User Key</th>
+        <th>Slug</th>
+        <th>Passed</th>
+        <th>Score</th>
+        <th>Attempts</th>
+        <th>Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.user_id }}</td>
+        <td>{{ r.slug }}</td>
+        <td>{{ "Yes" if r.passed else "No" }}</td>
+        <td>{{ r.score }}</td>
+        <td>{{ r.attempts }}</td>
+        <td>{{ r.updated_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}

@@ -1,15 +1,28 @@
 {% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
 {% block content %}
-<h1>Admin Dashboard</h1>
+  <h2>Admin Dashboard</h2>
 
-<ul>
-  <li>Total Users: <b>{{ total_users }}</b></li>
-  <li>Total Progress Records: <b>{{ total_progress }}</b></li>
-  <li>Total Passed Quizzes: <b>{{ passed_count }}</b></li>
-</ul>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num">{{ total_users }}</div>
+      <div class="stat-label">Total users</div>
+    </div>
 
-<p>
-  <a href="{{ url_for('admin.users') }}">View Users</a> |
-  <a href="{{ url_for('admin.progress') }}">View Progress</a>
-</p>
+    <div class="stat-card">
+      <div class="stat-num">{{ total_progress }}</div>
+      <div class="stat-label">Progress rows</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-num">{{ passed_count }}</div>
+      <div class="stat-label">Passed topics</div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;">
+    <a class="btn btn-outline" href="{{ url_for('admin.users') }}">View Users</a>
+    <a class="btn btn-outline" href="{{ url_for('admin.progress') }}">View Progress</a>
+  </div>
 {% endblock %}

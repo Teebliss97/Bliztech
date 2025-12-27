@@ -1,10 +1,11 @@
 import os
 from functools import wraps
 from flask import Blueprint, abort, render_template, request, redirect, url_for, flash
-from flask_login import current_user
+from flask_login import login_required, current_user
 
 from app.extensions import db
 from app.models import User, Progress
+from app.blueprints.admin import admin_bp
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
