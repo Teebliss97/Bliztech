@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Recent Progress (last 200)</h1>
+
+<table border="1" cellpadding="6">
+  <tr>
+    <th>User ID</th><th>Slug</th><th>Attempts</th><th>Score</th><th>Passed</th><th>Updated</th>
+  </tr>
+  {% for r in rows %}
+  <tr>
+    <td>{{ r.user_id }}</td>
+    <td>{{ r.slug }}</td>
+    <td>{{ r.attempts }}</td>
+    <td>{{ r.score }}</td>
+    <td>{{ "Yes" if r.passed else "No" }}</td>
+    <td>{{ r.updated_at }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

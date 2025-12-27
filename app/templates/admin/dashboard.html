@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+<ul>
+  <li>Total Users: <b>{{ total_users }}</b></li>
+  <li>Total Progress Records: <b>{{ total_progress }}</b></li>
+  <li>Total Passed Quizzes: <b>{{ passed_count }}</b></li>
+</ul>
+
+<p>
+  <a href="{{ url_for('admin.users') }}">View Users</a> |
+  <a href="{{ url_for('admin.progress') }}">View Progress</a>
+</p>
+{% endblock %}

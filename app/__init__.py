@@ -37,12 +37,15 @@ def create_app():
     from app.blueprints.quizzes.routes import quizzes_bp
     from app.blueprints.auth import auth_bp
     from app.blueprints.cert.routes import cert_bp
+    from app.blueprints.admin.routes import admin_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(topics_bp)
     app.register_blueprint(quizzes_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(cert_bp)
+    app.register_blueprint(admin_bp)
+
 
     # Test-only blueprint (disabled on production by default)
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
