@@ -29,6 +29,11 @@
         </p>
 
         <div class="result-actions">
+
+          {% if show_certificate_btn %}
+            <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
+          {% endif %}
+
           {% if next_slug %}
             <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_slug) }}">Next Topic →</a>
           {% endif %}

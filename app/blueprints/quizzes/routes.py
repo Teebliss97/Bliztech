@@ -595,4 +595,32 @@ def result(slug):
         return redirect(url_for("quizzes.quiz", slug=slug))
 
     passed = res["score_pct"] >= PASS_MARK
-    return render_template("quizzes/result.html", quiz=quiz_data, result=res, passed=passed, pass_mark=PASS_MARK)
+
+    # ✅ Next topic slug (only if passed)
+    next_slug = None
+    try:
+        idx = next(i for i, t in enumerate(TOPICS) if t["slug"] == slug)
+        if passed and idx < len(TOPICS) - 1:
+            next_slug = TOPICS[idx + 1]["slug"]
+    except StopIteration:
+        next_slug = None
+
+    # ✅ Show certificate button only when:
+    # - logged in
+    # - Topic 10 result
+    # - passed
+    # - all topics completed
+    show_certificate_btn = False
+    if current_user.is_authenticated and slug == "topic10" and passed:
+        progress_user_id = _progress_key()
+        show_certificate_btn = _all_topics_completed(progress_user_id)
+
+    return render_template(
+        "quizzes/result.html",
+        quiz=quiz_data,
+        result=res,
+        passed=passed,
+        pass_mark=PASS_MARK,
+        next_slug=next_slug,
+        show_certificate_btn=show_certificate_btn,
+    )
