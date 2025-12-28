@@ -2,7 +2,16 @@ import io
 import os
 from datetime import datetime
 
-from flask import render_template, request, redirect, url_for, flash, send_file, abort
+from flask import (
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    send_file,
+    abort,
+    current_app,
+)
 from flask_login import login_required, current_user
 
 from reportlab.lib.pagesizes import A4
@@ -12,44 +21,41 @@ from app.blueprints.cert import cert_bp
 from app.extensions import db
 from app.models import Certificate, Progress
 
-# Import your TOPICS list so we only count real topic slugs
-from app.blueprints.topics.routes import TOPICS
-
 
 def _user_progress_key() -> str:
     return f"user:{current_user.id}"
 
 
-def _required_topics_count() -> int:
+def _required_topics() -> int:
     """
-    By default: required = len(TOPICS) (your full course)
-    But you can temporarily test with 1 topic by setting:
-      CERT_REQUIRED_TOPICS=1   (in Render env vars)
+    Number of topics required before certificate unlock.
+    Priority:
+      1) Flask config CERT_REQUIRED_TOPICS
+      2) Environment variable CERT_REQUIRED_TOPICS
+      3) Default: 10
     """
-    raw = os.getenv("CERT_REQUIRED_TOPICS", "").strip()
-    if raw.isdigit():
-        return max(1, int(raw))
-    return len(TOPICS)
+    v = current_app.config.get("CERT_REQUIRED_TOPICS")
+    if v is None:
+        v = os.getenv("CERT_REQUIRED_TOPICS", "10")
+    try:
+        return max(1, int(v))
+    except Exception:
+        return 10
 
 
 def user_completed_course() -> bool:
     """
-    Only count PASSED rows for real topic slugs (topic1..topic10).
+    Count ONLY real topics (topic1..topicN) that are passed=True.
+    Avoid counting flag rows like "__course_completion_emailed__".
     """
-    topic_slugs = [t["slug"] for t in TOPICS]
-
     passed_count = (
-        Progress.query.filter(
-            Progress.user_id == _user_progress_key(),
-            Progress.passed.is_(True),
-            Progress.slug.in_(topic_slugs),
-        )
+        Progress.query.filter_by(user_id=_user_progress_key(), passed=True)
+        .filter(Progress.slug.like("topic%"))
         .with_entities(Progress.slug)
         .distinct()
         .count()
     )
-
-    return passed_count >= _required_topics_count()
+    return passed_count >= _required_topics()
 
 
 def get_or_create_certificate(recipient_name: str) -> Certificate:
@@ -75,7 +81,10 @@ def get_or_create_certificate(recipient_name: str) -> Certificate:
 @login_required
 def certificate_home():
     if not user_completed_course():
-        flash("Complete all topics to unlock your certificate ✅", "error")
+        flash(
+            f"Complete at least {_required_topics()} topic(s) to unlock your certificate ✅",
+            "error",
+        )
         return redirect(url_for("topics.list_topics"))
 
     default_name = (current_user.email.split("@")[0] or "Student").replace(".", " ").title()
@@ -95,21 +104,18 @@ def certificate_pdf():
 
     cert = get_or_create_certificate(name)
 
-    # Create PDF in memory
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
     c.setTitle("BlizTech Certificate")
 
-    # Header
     c.setFont("Helvetica-Bold", 22)
     c.drawCentredString(width / 2, height - 120, "CERTIFICATE OF COMPLETION")
 
     c.setFont("Helvetica", 12)
     c.drawCentredString(width / 2, height - 150, "This certifies that")
 
-    # Name
     c.setFont("Helvetica-Bold", 26)
     c.drawCentredString(width / 2, height - 200, cert.recipient_name)
 
@@ -119,19 +125,16 @@ def certificate_pdf():
     c.setFont("Helvetica-Bold", 16)
     c.drawCentredString(width / 2, height - 260, "BlizTech Cyber Awareness Course")
 
-    # Details
     c.setFont("Helvetica", 11)
     c.drawCentredString(width / 2, height - 310, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
     c.drawCentredString(width / 2, height - 330, f"Certificate ID: {cert.cert_id}")
 
-    # Verification URL (Render env var)
-    base_url = (os.getenv("RENDER_EXTERNAL_URL") or "").strip().rstrip("/")
+    base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     if base_url:
         verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"
         c.setFont("Helvetica", 10)
         c.drawCentredString(width / 2, 110, f"Verify: {verify_url}")
 
-    # Footer
     c.setFont("Helvetica-Oblique", 10)
     c.drawCentredString(width / 2, 80, "BlizTech • Learn. Protect. Stay Safe.")
 
