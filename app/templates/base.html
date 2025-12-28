@@ -30,24 +30,27 @@
         Topics
       </a>
 
-      {% if current_user.is_authenticated and current_user.is_admin %}
-        <a href="{{ url_for('admin.dashboard') }}"
-           class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
-          Admin
-        </a>
-      {% endif %}
-
       {% if current_user.is_authenticated %}
+        <!-- ✅ Certificate link should be visible AFTER login -->
+        <a href="{{ url_for('cert.certificate_home') }}"
+           class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
+          Certificate
+        </a>
+
+        {% if current_user.is_admin %}
+          <a href="{{ url_for('admin.dashboard') }}"
+             class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
+            Admin
+          </a>
+        {% endif %}
+
         <span class="chip pill-dark">{{ current_user.email }}</span>
         <a class="btn btn-outline" href="{{ url_for('auth.logout') }}">Logout</a>
+
       {% else %}
         <a href="{{ url_for('auth.login') }}"
            class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
           Login
-        </a>
-        <a href="{{ url_for('cert.certificate_home') }}"
-           class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
-           Certificate
         </a>
         <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Sign up</a>
       {% endif %}
