@@ -1,4 +1,5 @@
 import io
+import os
 from datetime import datetime
 
 from flask import render_template, request, redirect, url_for, flash, send_file, abort
@@ -11,29 +12,49 @@ from app.blueprints.cert import cert_bp
 from app.extensions import db
 from app.models import Certificate, Progress
 
+# Import your TOPICS list so we only count real topic slugs
+from app.blueprints.topics.routes import TOPICS
 
-TOTAL_TOPICS = 10  # change later if your course count changes
 
-
-def _user_progress_key():
+def _user_progress_key() -> str:
     return f"user:{current_user.id}"
 
 
+def _required_topics_count() -> int:
+    """
+    By default: required = len(TOPICS) (your full course)
+    But you can temporarily test with 1 topic by setting:
+      CERT_REQUIRED_TOPICS=1   (in Render env vars)
+    """
+    raw = os.getenv("CERT_REQUIRED_TOPICS", "").strip()
+    if raw.isdigit():
+        return max(1, int(raw))
+    return len(TOPICS)
+
+
 def user_completed_course() -> bool:
-    # completed = number of distinct slugs with passed=True
+    """
+    Only count PASSED rows for real topic slugs (topic1..topic10).
+    """
+    topic_slugs = [t["slug"] for t in TOPICS]
+
     passed_count = (
-        Progress.query.filter_by(user_id=_user_progress_key(), passed=True)
+        Progress.query.filter(
+            Progress.user_id == _user_progress_key(),
+            Progress.passed.is_(True),
+            Progress.slug.in_(topic_slugs),
+        )
         .with_entities(Progress.slug)
         .distinct()
         .count()
     )
-    return passed_count >= TOTAL_TOPICS
+
+    return passed_count >= _required_topics_count()
 
 
 def get_or_create_certificate(recipient_name: str) -> Certificate:
     existing = Certificate.query.filter_by(user_id=current_user.id).first()
     if existing:
-        # If they re-issue, keep same cert_id but update name if they changed it
         if recipient_name and recipient_name != existing.recipient_name:
             existing.recipient_name = recipient_name
             db.session.commit()
@@ -57,7 +78,6 @@ def certificate_home():
         flash("Complete all topics to unlock your certificate ✅", "error")
         return redirect(url_for("topics.list_topics"))
 
-    # Prefill name using email before @ (user can edit)
     default_name = (current_user.email.split("@")[0] or "Student").replace(".", " ").title()
     return render_template("cert/certificate.html", default_name=default_name)
 
@@ -80,7 +100,6 @@ def certificate_pdf():
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
-    # Background style
     c.setTitle("BlizTech Certificate")
 
     # Header
@@ -105,9 +124,8 @@ def certificate_pdf():
     c.drawCentredString(width / 2, height - 310, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
     c.drawCentredString(width / 2, height - 330, f"Certificate ID: {cert.cert_id}")
 
-    # Verification URL (optional env var)
-    from flask import current_app
-    base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
+    # Verification URL (Render env var)
+    base_url = (os.getenv("RENDER_EXTERNAL_URL") or "").strip().rstrip("/")
     if base_url:
         verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"
         c.setFont("Helvetica", 10)

@@ -45,6 +45,10 @@
            class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
           Login
         </a>
+        <a href="{{ url_for('cert.certificate_home') }}"
+           class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
+           Certificate
+        </a>
         <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Sign up</a>
       {% endif %}
     </nav>
