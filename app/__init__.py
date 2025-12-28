@@ -36,7 +36,7 @@ def create_app():
     from app.blueprints.topics.routes import topics_bp
     from app.blueprints.quizzes.routes import quizzes_bp
     from app.blueprints.auth import auth_bp
-    from app.blueprints.cert.routes import cert_bp
+    from app.blueprints.cert import cert_bp
     from app.blueprints.admin.routes import admin_bp
 
     app.register_blueprint(main_bp)

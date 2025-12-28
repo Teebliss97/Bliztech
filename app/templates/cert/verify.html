@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="auth-card">
+    <h1 class="page-title">Certificate Verification</h1>
+
+    {% if not found %}
+      <p class="page-subtitle">No certificate found for ID: <strong>{{ cert_id }}</strong></p>
+    {% else %}
+      <p class="page-subtitle">✅ Certificate is valid</p>
+      <div style="margin-top:10px;">
+        <p><strong>Name:</strong> {{ cert.recipient_name }}</p>
+        <p><strong>Email:</strong> {{ cert.user_email }}</p>
+        <p><strong>Issued:</strong> {{ cert.issued_at.strftime('%d %b %Y') }}</p>
+        <p><strong>Certificate ID:</strong> {{ cert.cert_id }}</p>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

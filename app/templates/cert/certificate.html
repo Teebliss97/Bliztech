@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="auth-card">
+    <h1 class="page-title">Your Certificate</h1>
+    <p class="page-subtitle">Enter your name and download your certificate (PDF).</p>
+
+    <form method="POST" action="{{ url_for('cert.certificate_pdf') }}" class="form">
+      <label>Your name (as it should appear)</label>
+      <input name="name" type="text" value="{{ default_name }}" required>
+
+      <button class="btn" type="submit">Download Certificate (PDF)</button>
+    </form>
+
+    <p class="muted" style="margin-top:12px;">
+      Tip: Use your real full name so you can share it professionally.
+    </p>
+  </div>
+{% endblock %}

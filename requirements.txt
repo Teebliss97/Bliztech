@@ -7,3 +7,4 @@ Werkzeug
 sendgrid
 Flask-Migrate
 psycopg[binary]
+reportlab

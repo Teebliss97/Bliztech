@@ -17,6 +17,15 @@
       <div class="course-bar">
         <div class="course-bar-fill" style="width: {{ progress_pct }}%;"></div>
       </div>
+
+      <!-- ✅ Certificate CTA -->
+      {% if can_get_certificate %}
+        <div style="margin-top:14px;">
+          <a class="btn" href="{{ url_for('cert.certificate_home') }}">
+            🎓 Get Certificate (PDF)
+          </a>
+        </div>
+      {% endif %}
     </div>
   </div>
 

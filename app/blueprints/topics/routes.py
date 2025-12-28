@@ -54,6 +54,14 @@ def _is_unlocked(slug: str, progress: dict) -> bool:
     return bool(progress.get(prev_slug, {}).get("passed"))
 
 
+def _course_completed(progress: dict) -> bool:
+    """
+    True if all topics are passed in progress dict.
+    (Ignores any special slugs like __course_completion_emailed__)
+    """
+    return all(bool(progress.get(t["slug"], {}).get("passed")) for t in TOPICS)
+
+
 @topics_bp.route("/")
 def list_topics():
     user_id = _progress_key()
@@ -82,12 +90,16 @@ def list_topics():
     total = len(TOPICS)
     progress_pct = int(round((completed_count / total) * 100)) if total else 0
 
+    # ✅ Certificate button only for logged-in users who completed all topics
+    can_get_certificate = bool(current_user.is_authenticated and _course_completed(progress))
+
     return render_template(
         "topics/list.html",
         topics=view,
         completed_count=completed_count,
         total_topics=total,
-        progress_pct=progress_pct
+        progress_pct=progress_pct,
+        can_get_certificate=can_get_certificate,
     )
 
 
