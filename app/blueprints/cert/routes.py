@@ -14,7 +14,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
@@ -49,7 +49,7 @@ def user_completed_course() -> bool:
     return _passed_topic_count() >= _required_topics()
 
 
-def get_or_create_certificate(recipient_name: str) -> Certificate:
+def get_or_create_certificate(recipient_name: str):
     existing = Certificate.query.filter_by(user_id=current_user.id).first()
     if existing:
         if recipient_name and recipient_name != existing.recipient_name:
@@ -108,14 +108,16 @@ def certificate_pdf():
 
     cert = get_or_create_certificate(name)
 
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
+    # ✅ LANDSCAPE A4 (this matches your certificate artwork style)
+    pagesize = landscape(A4)
+    width, height = pagesize
 
-    c.setTitle("BlizTech Certificate of Completion")
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=pagesize)
+    c.setTitle("BlizTech Certificate")
 
     # =========================================================
-    # BACKGROUND (fills the entire page)
+    # Background image fill (no stretching weirdness)
     # =========================================================
     bg_path = os.path.join(current_app.root_path, "static", "img", "certificate-bg.png")
     try:
@@ -126,59 +128,51 @@ def certificate_pdf():
         pass
 
     # =========================================================
-    # TEXT (keep clean, no duplicate Director of Training text)
-    # - Use italic for body text (not watermark)
+    # TEXT PLACEMENT
+    # - Remove extra "CERTIFICATE OF COMPLETION" title (background already has it)
+    # - Put everything UNDER the watermark title area
+    # - Italic where appropriate
     # =========================================================
 
-    # Title (keep, but small enough to not fight watermark)
-    c.setFont("Helvetica-Bold", 24)
-    c.drawCentredString(width / 2, height - 110, "CERTIFICATE OF COMPLETION")
+    center_x = width / 2
 
-    # Intro (italic)
+    # This block is deliberately placed BELOW the background watermark title area
+    # and ABOVE the big diagonal watermark, to avoid overlaps.
+    y_top = height - 170  # start of text block
+
+    c.setFont("Helvetica-Oblique", 14)
+    c.drawCentredString(center_x, y_top, "This is to certify that")
+
+    c.setFont("Helvetica-Bold", 32)
+    c.drawCentredString(center_x, y_top - 55, cert.recipient_name)
+
+    c.setFont("Helvetica-Oblique", 14)
+    c.drawCentredString(center_x, y_top - 90, "has successfully completed the")
+
+    c.setFont("Helvetica-Bold", 20)
+    c.drawCentredString(center_x, y_top - 120, "BlizTech Cyber Awareness Course")
+
     c.setFont("Helvetica-Oblique", 12)
-    c.drawCentredString(width / 2, height - 150, "This is to certify that")
-
-    # Name (bold, clean area)
-    c.setFont("Helvetica-Bold", 28)
-    c.drawCentredString(width / 2, height - 210, cert.recipient_name)
-
-    # Body (italic)
-    c.setFont("Helvetica-Oblique", 12)
-    c.drawCentredString(width / 2, height - 250, "has successfully completed the")
-
-    # Course name (bold)
-    c.setFont("Helvetica-Bold", 18)
-    c.drawCentredString(width / 2, height - 280, "BlizTech Cyber Awareness Course")
-
-    # Extra line (italic)
-    c.setFont("Helvetica-Oblique", 11)
     c.drawCentredString(
-        width / 2,
-        height - 305,
+        center_x,
+        y_top - 145,
         "demonstrating practical knowledge of cybersecurity best practices.",
     )
 
     # =========================================================
-    # Footer details (keep near bottom, no extra signature text)
+    # Footer (keep small so it doesn't fight the signature area)
     # =========================================================
     c.setFont("Helvetica-Oblique", 10)
-    c.drawCentredString(width / 2, 120, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
-    c.drawCentredString(width / 2, 105, f"Certificate ID: {cert.cert_id}")
+    c.drawCentredString(center_x, 62, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
+    c.drawCentredString(center_x, 46, f"Certificate ID: {cert.cert_id}")
 
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     if base_url:
         verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"
         c.setFont("Helvetica-Oblique", 9)
-        c.drawCentredString(width / 2, 90, f"Verify: {verify_url}")
+        c.drawCentredString(center_x, 30, f"Verify: {verify_url}")
 
-    # Tagline (italic) - optional and subtle
-    c.setFont("Helvetica-Oblique", 9)
-    c.drawCentredString(width / 2, 70, "BlizTech • Learn. Protect. Stay Safe.")
-
-    # =========================================================
-    # IMPORTANT: Only ONE PAGE
-    # Do NOT call showPage() twice.
-    # =========================================================
+    # ✅ ONE PAGE ONLY
     c.showPage()
     c.save()
 
@@ -199,5 +193,4 @@ def verify_certificate(cert_id: str):
     cert = Certificate.query.filter_by(cert_id=cert_id).first()
     if not cert:
         return render_template("cert/verify.html", found=False, cert_id=cert_id)
-
     return render_template("cert/verify.html", found=True, cert=cert)
