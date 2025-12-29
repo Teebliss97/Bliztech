@@ -108,7 +108,7 @@ def certificate_pdf():
 
     cert = get_or_create_certificate(name)
 
-    # ✅ LANDSCAPE A4 (this matches your certificate artwork style)
+    # ✅ Landscape A4 (matches your background art)
     pagesize = landscape(A4)
     width, height = pagesize
 
@@ -117,7 +117,7 @@ def certificate_pdf():
     c.setTitle("BlizTech Certificate")
 
     # =========================================================
-    # Background image fill (no stretching weirdness)
+    # Background image (full page)
     # =========================================================
     bg_path = os.path.join(current_app.root_path, "static", "img", "certificate-bg.png")
     try:
@@ -127,52 +127,56 @@ def certificate_pdf():
     except Exception:
         pass
 
-    # =========================================================
-    # TEXT PLACEMENT
-    # - Remove extra "CERTIFICATE OF COMPLETION" title (background already has it)
-    # - Put everything UNDER the watermark title area
-    # - Italic where appropriate
-    # =========================================================
-
     center_x = width / 2
 
-    # This block is deliberately placed BELOW the background watermark title area
-    # and ABOVE the big diagonal watermark, to avoid overlaps.
-    y_top = height - 170  # start of text block
+    # =========================================================
+    # Text block positioning (FINAL TUNING)
+    # - Move down so it doesn't collide with the watermark title
+    # =========================================================
+    y_top = height - 215  # moved DOWN from -170
 
-    c.setFont("Helvetica-Oblique", 14)
+    # Smaller italic line (so it won't touch watermark)
+    c.setFont("Helvetica-Oblique", 12)
     c.drawCentredString(center_x, y_top, "This is to certify that")
 
+    # Name
     c.setFont("Helvetica-Bold", 32)
-    c.drawCentredString(center_x, y_top - 55, cert.recipient_name)
+    c.drawCentredString(center_x, y_top - 50, cert.recipient_name)
 
-    c.setFont("Helvetica-Oblique", 14)
-    c.drawCentredString(center_x, y_top - 90, "has successfully completed the")
-
-    c.setFont("Helvetica-Bold", 20)
-    c.drawCentredString(center_x, y_top - 120, "BlizTech Cyber Awareness Course")
-
+    # Body line
     c.setFont("Helvetica-Oblique", 12)
+    c.drawCentredString(center_x, y_top - 82, "has successfully completed the")
+
+    # Course name
+    c.setFont("Helvetica-Bold", 20)
+    c.drawCentredString(center_x, y_top - 112, "BlizTech Cyber Awareness Course")
+
+    # Extra line
+    c.setFont("Helvetica-Oblique", 11)
     c.drawCentredString(
         center_x,
-        y_top - 145,
+        y_top - 135,
         "demonstrating practical knowledge of cybersecurity best practices.",
     )
 
     # =========================================================
-    # Footer (keep small so it doesn't fight the signature area)
+    # Footer (raise it slightly; DON'T print tagline because background already has it)
     # =========================================================
-    c.setFont("Helvetica-Oblique", 10)
-    c.drawCentredString(center_x, 62, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
-    c.drawCentredString(center_x, 46, f"Certificate ID: {cert.cert_id}")
+    footer_y1 = 78
+    footer_y2 = 62
+    footer_y3 = 46
+
+    c.setFont("Helvetica-Oblique", 9.5)
+    c.drawCentredString(center_x, footer_y1, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
+    c.drawCentredString(center_x, footer_y2, f"Certificate ID: {cert.cert_id}")
 
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     if base_url:
         verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"
         c.setFont("Helvetica-Oblique", 9)
-        c.drawCentredString(center_x, 30, f"Verify: {verify_url}")
+        c.drawCentredString(center_x, footer_y3, f"Verify: {verify_url}")
 
-    # ✅ ONE PAGE ONLY
+    # ✅ One page only
     c.showPage()
     c.save()
 
