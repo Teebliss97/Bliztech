@@ -133,7 +133,7 @@ def certificate_pdf():
     # Text block positioning (FINAL TUNING)
     # - Move down so it doesn't collide with the watermark title
     # =========================================================
-    y_top = height - 215  # moved DOWN from -170
+    y_top = height - 235  # moved DOWN from -170
 
     # Smaller italic line (so it won't touch watermark)
     c.setFont("Helvetica-Oblique", 12)
