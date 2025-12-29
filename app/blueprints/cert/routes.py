@@ -128,36 +128,44 @@ def certificate_pdf():
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
-
     c.setTitle("BlizTech Certificate")
 
-    c.setFont("Helvetica-Bold", 22)
-    c.drawCentredString(width / 2, height - 120, "CERTIFICATE OF COMPLETION")
+    # =========================================================
+    # ✅ 1) Draw your branded PNG background (FULL PAGE)
+    # =========================================================
+    # Make sure the file exists here:
+    # app/static/img/certificate-bg.png
+    bg_path = os.path.join(current_app.root_path, "static", "img", "certificate-bg.png")
+
+    try:
+        c.drawImage(
+            bg_path,
+            0,
+            0,
+            width=width,
+            height=height,
+            mask="auto",
+        )
+    except Exception:
+        # If the image is missing or fails to load, continue without background
+        pass
+
+    # =========================================================
+    # ✅ 2) Overlay dynamic text (Name, Date, Certificate ID, Verify URL)
+    #    Adjust Y positions if needed to match your background design
+    # =========================================================
+    c.setFont("Helvetica-Bold", 28)
+    c.drawCentredString(width / 2, height - 260, cert.recipient_name)
 
     c.setFont("Helvetica", 12)
-    c.drawCentredString(width / 2, height - 150, "This certifies that")
-
-    c.setFont("Helvetica-Bold", 26)
-    c.drawCentredString(width / 2, height - 200, cert.recipient_name)
-
-    c.setFont("Helvetica", 12)
-    c.drawCentredString(width / 2, height - 230, "has successfully completed the")
-
-    c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(width / 2, height - 260, "BlizTech Cyber Awareness Course")
-
-    c.setFont("Helvetica", 11)
-    c.drawCentredString(width / 2, height - 310, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
-    c.drawCentredString(width / 2, height - 330, f"Certificate ID: {cert.cert_id}")
+    c.drawCentredString(width / 2, 160, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
+    c.drawCentredString(width / 2, 140, f"Certificate ID: {cert.cert_id}")
 
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     if base_url:
         verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"
         c.setFont("Helvetica", 10)
-        c.drawCentredString(width / 2, 110, f"Verify: {verify_url}")
-
-    c.setFont("Helvetica-Oblique", 10)
-    c.drawCentredString(width / 2, 80, "BlizTech • Learn. Protect. Stay Safe.")
+        c.drawCentredString(width / 2, 115, f"Verify: {verify_url}")
 
     c.showPage()
     c.save()
@@ -180,6 +188,4 @@ def verify_certificate(cert_id: str):
     if not cert:
         return render_template("cert/verify.html", found=False, cert_id=cert_id)
 
-    # If you added revocation fields, show revoked status in UI
-    # (Your template should handle cert.revoked, cert.revoked_reason, etc.)
     return render_template("cert/verify.html", found=True, cert=cert)
