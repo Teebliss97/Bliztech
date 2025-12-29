@@ -28,16 +28,7 @@ def _user_progress_key() -> str:
 
 
 def _required_topics() -> int:
-    """
-    Number of topics required before certificate unlock.
-    Priority:
-      1) Flask config CERT_REQUIRED_TOPICS
-      2) Environment variable CERT_REQUIRED_TOPICS
-      3) Default: 10
-    """
-    v = current_app.config.get("CERT_REQUIRED_TOPICS")
-    if v is None:
-        v = os.getenv("CERT_REQUIRED_TOPICS", "10")
+    v = current_app.config.get("CERT_REQUIRED_TOPICS") or os.getenv("CERT_REQUIRED_TOPICS", "10")
     try:
         return max(1, int(v))
     except Exception:
@@ -45,10 +36,6 @@ def _required_topics() -> int:
 
 
 def _passed_topic_count() -> int:
-    """
-    Count ONLY real topics (topic1..topicN) that are passed=True.
-    Avoid counting special slugs like "__course_completion_emailed__".
-    """
     return (
         Progress.query.filter_by(user_id=_user_progress_key(), passed=True)
         .filter(Progress.slug.like("topic%"))
@@ -94,9 +81,7 @@ def certificate_home():
 
     default_name = (current_user.email.split("@")[0] or "Student").replace(".", " ").title()
 
-    # Show existing cert info on the page if already issued
     existing = Certificate.query.filter_by(user_id=current_user.id).first()
-
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     verify_url = None
     if existing and base_url:
@@ -126,11 +111,11 @@ def certificate_pdf():
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
+
     c.setTitle("BlizTech Certificate of Completion")
 
     # =========================================================
-    # 1) Draw background image (PNG) FULL PAGE
-    #    Put the file in: app/static/img/certificate-bg.png
+    # BACKGROUND (fills the entire page)
     # =========================================================
     bg_path = os.path.join(current_app.root_path, "static", "img", "certificate-bg.png")
     try:
@@ -138,65 +123,62 @@ def certificate_pdf():
             bg = ImageReader(bg_path)
             c.drawImage(bg, 0, 0, width=width, height=height, mask="auto")
     except Exception:
-        # If PNG fails, still generate a usable certificate (no crash)
         pass
 
     # =========================================================
-    # 2) Standard certificate wording (Professional)
-    #    Adjust these Y values later if needed.
+    # TEXT (keep clean, no duplicate Director of Training text)
+    # - Use italic for body text (not watermark)
     # =========================================================
 
-    # Title
-    c.setFont("Helvetica-Bold", 26)
-    c.drawCentredString(width / 2, height - 130, "CERTIFICATE OF COMPLETION")
+    # Title (keep, but small enough to not fight watermark)
+    c.setFont("Helvetica-Bold", 24)
+    c.drawCentredString(width / 2, height - 110, "CERTIFICATE OF COMPLETION")
 
-    # Intro
-    c.setFont("Helvetica", 12)
-    c.drawCentredString(width / 2, height - 170, "This is to certify that")
+    # Intro (italic)
+    c.setFont("Helvetica-Oblique", 12)
+    c.drawCentredString(width / 2, height - 150, "This is to certify that")
 
-    # Recipient Name (moved away from title to avoid overlap)
-    c.setFont("Helvetica-Bold", 30)
-    c.drawCentredString(width / 2, height - 225, cert.recipient_name)
+    # Name (bold, clean area)
+    c.setFont("Helvetica-Bold", 28)
+    c.drawCentredString(width / 2, height - 210, cert.recipient_name)
 
-    # Body
-    c.setFont("Helvetica", 12)
-    c.drawCentredString(width / 2, height - 265, "has successfully completed the")
+    # Body (italic)
+    c.setFont("Helvetica-Oblique", 12)
+    c.drawCentredString(width / 2, height - 250, "has successfully completed the")
 
+    # Course name (bold)
     c.setFont("Helvetica-Bold", 18)
-    c.drawCentredString(width / 2, height - 295, "BlizTech Cyber Awareness Course")
+    c.drawCentredString(width / 2, height - 280, "BlizTech Cyber Awareness Course")
 
-    c.setFont("Helvetica", 11)
+    # Extra line (italic)
+    c.setFont("Helvetica-Oblique", 11)
     c.drawCentredString(
         width / 2,
-        height - 320,
+        height - 305,
         "demonstrating practical knowledge of cybersecurity best practices.",
     )
 
     # =========================================================
-    # 3) Footer: date, cert id, verify link
+    # Footer details (keep near bottom, no extra signature text)
     # =========================================================
-    c.setFont("Helvetica", 11)
-    c.drawCentredString(width / 2, 135, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
-    c.drawCentredString(width / 2, 118, f"Certificate ID: {cert.cert_id}")
+    c.setFont("Helvetica-Oblique", 10)
+    c.drawCentredString(width / 2, 120, f"Issued: {cert.issued_at.strftime('%d %b %Y')}")
+    c.drawCentredString(width / 2, 105, f"Certificate ID: {cert.cert_id}")
 
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     if base_url:
         verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"
-        c.setFont("Helvetica", 9)
-        c.drawCentredString(width / 2, 98, f"Verify: {verify_url}")
+        c.setFont("Helvetica-Oblique", 9)
+        c.drawCentredString(width / 2, 90, f"Verify: {verify_url}")
 
-    # =========================================================
-    # 4) Signature / Authority
-    # =========================================================
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(90, 80, "Toheeb Atinuke")
-    c.setFont("Helvetica", 10)
-    c.drawString(90, 66, "Director of Training")
-
-    # Tagline
+    # Tagline (italic) - optional and subtle
     c.setFont("Helvetica-Oblique", 9)
-    c.drawCentredString(width / 2, 45, "BlizTech • Learn. Protect. Stay Safe.")
+    c.drawCentredString(width / 2, 70, "BlizTech • Learn. Protect. Stay Safe.")
 
+    # =========================================================
+    # IMPORTANT: Only ONE PAGE
+    # Do NOT call showPage() twice.
+    # =========================================================
     c.showPage()
     c.save()
 
@@ -215,9 +197,7 @@ def certificate_pdf():
 def verify_certificate(cert_id: str):
     cert_id = (cert_id or "").strip().upper()
     cert = Certificate.query.filter_by(cert_id=cert_id).first()
-
     if not cert:
         return render_template("cert/verify.html", found=False, cert_id=cert_id)
 
-    # Template can show revoked status if you want later
     return render_template("cert/verify.html", found=True, cert=cert)
