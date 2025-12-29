@@ -4,15 +4,39 @@
     <h1 class="page-title">Certificate Verification</h1>
 
     {% if not found %}
-      <p class="page-subtitle">No certificate found for ID: <strong>{{ cert_id }}</strong></p>
+      <p class="page-subtitle">
+        ❌ No certificate found for ID: <strong>{{ cert_id }}</strong>
+      </p>
+
     {% else %}
-      <p class="page-subtitle">✅ Certificate is valid</p>
-      <div style="margin-top:10px;">
+
+      {% if cert.revoked %}
+        <div class="flash error" style="margin-top:12px;">
+          <strong>❌ Certificate has been revoked</strong>
+          {% if cert.revoked_at %}
+            <div class="muted" style="margin-top:6px;">
+              Revoked on {{ cert.revoked_at.strftime('%d %b %Y %H:%M') }}
+            </div>
+          {% endif %}
+          {% if cert.revoked_reason %}
+            <div class="muted" style="margin-top:6px;">
+              Reason: {{ cert.revoked_reason }}
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="flash success" style="margin-top:12px;">
+          <strong>✅ Certificate is valid</strong>
+        </div>
+      {% endif %}
+
+      <div style="margin-top:12px;">
         <p><strong>Name:</strong> {{ cert.recipient_name }}</p>
         <p><strong>Email:</strong> {{ cert.user_email }}</p>
         <p><strong>Issued:</strong> {{ cert.issued_at.strftime('%d %b %Y') }}</p>
         <p><strong>Certificate ID:</strong> {{ cert.cert_id }}</p>
       </div>
+
     {% endif %}
   </div>
 {% endblock %}

@@ -43,19 +43,22 @@ def _required_topics() -> int:
         return 10
 
 
-def user_completed_course() -> bool:
+def _passed_topic_count() -> int:
     """
     Count ONLY real topics (topic1..topicN) that are passed=True.
-    Avoid counting flag rows like "__course_completion_emailed__".
+    Avoid counting special slugs like "__course_completion_emailed__".
     """
-    passed_count = (
+    return (
         Progress.query.filter_by(user_id=_user_progress_key(), passed=True)
         .filter(Progress.slug.like("topic%"))
         .with_entities(Progress.slug)
         .distinct()
         .count()
     )
-    return passed_count >= _required_topics()
+
+
+def user_completed_course() -> bool:
+    return _passed_topic_count() >= _required_topics()
 
 
 def get_or_create_certificate(recipient_name: str) -> Certificate:
@@ -80,15 +83,33 @@ def get_or_create_certificate(recipient_name: str) -> Certificate:
 @cert_bp.route("/", methods=["GET"])
 @login_required
 def certificate_home():
-    if not user_completed_course():
+    required = _required_topics()
+    passed_count = _passed_topic_count()
+
+    if passed_count < required:
+        remaining = required - passed_count
         flash(
-            f"Complete at least {_required_topics()} topic(s) to unlock your certificate ✅",
-            "error",
+            f"Complete {remaining} more topic(s) to unlock your certificate.",
+            "info",
         )
         return redirect(url_for("topics.list_topics"))
 
     default_name = (current_user.email.split("@")[0] or "Student").replace(".", " ").title()
-    return render_template("cert/certificate.html", default_name=default_name)
+
+    # If a certificate already exists, show its ID + verify link on the page
+    existing = Certificate.query.filter_by(user_id=current_user.id).first()
+
+    base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
+    verify_url = None
+    if existing and base_url:
+        verify_url = f"{base_url}/certificate/verify/{existing.cert_id}"
+
+    return render_template(
+        "cert/certificate.html",
+        default_name=default_name,
+        cert=existing,
+        verify_url=verify_url,
+    )
 
 
 @cert_bp.route("/pdf", methods=["POST"])
@@ -159,4 +180,6 @@ def verify_certificate(cert_id: str):
     if not cert:
         return render_template("cert/verify.html", found=False, cert_id=cert_id)
 
+    # If you added revocation fields, show revoked status in UI
+    # (Your template should handle cert.revoked, cert.revoked_reason, etc.)
     return render_template("cert/verify.html", found=True, cert=cert)

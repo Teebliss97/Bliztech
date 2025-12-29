@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="hero" style="grid-template-columns: 1fr;">
+    <div>
+      <h1 class="page-title" style="margin-bottom:6px;">🎉 You finished the BlizTech Cyber Awareness Course!</h1>
+      <p class="page-subtitle">Nice work. Your results are saved in your progress dashboard.</p>
+
+      <div class="actions" style="margin-top:14px;">
+        <a class="btn" href="{{ url_for('main.my_progress') }}">View my progress</a>
+        <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Review topics</a>
+
+        {% if is_logged_in %}
+          <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Get certificate</a>
+        {% else %}
+          <a class="btn" href="{{ url_for('auth.signup') }}">Create account to get certificate</a>
+        {% endif %}
+      </div>
+
+      {% if not is_logged_in %}
+        <div class="flash" style="margin-top:14px;">
+          You completed the course as a guest. If you create an account now, we will keep your progress and you can download a certificate.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

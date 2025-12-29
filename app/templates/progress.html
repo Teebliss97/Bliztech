@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">My Progress</h1>
+    <p class="page-subtitle">Track your completed topics, quiz scores, and what to do next.</p>
+
+    <div class="course-progress">
+      <div class="course-progress-top">
+        <span class="badge">Progress</span>
+        <span class="course-progress-text">
+          <strong>{{ completed }}</strong> / {{ total }} completed • {{ percent }}%
+        </span>
+      </div>
+      <div class="course-bar">
+        <div class="course-bar-fill" style="width: {{ percent }}%;"></div>
+      </div>
+
+      <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Go to Topics</a>
+
+        {% if course_done and is_logged_in %}
+          <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Get Certificate</a>
+        {% elif course_done and not is_logged_in %}
+          <a class="btn" href="{{ url_for('auth.signup') }}">Create account to get certificate</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card" style="margin-top:18px;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Topic</th>
+          <th>Status</th>
+          <th>Score</th>
+          <th>Attempts</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>{{ r.i }}</td>
+            <td>{{ r.title }}</td>
+            <td>
+              {% if r.passed %}
+                <span class="pill pill-green">✅ Passed</span>
+              {% elif r.unlocked %}
+                <span class="pill pill-blue">🔓 Unlocked</span>
+              {% else %}
+                <span class="pill pill-gray">🔒 Locked</span>
+              {% endif %}
+            </td>
+            <td>{% if r.score is not none %}{{ r.score }}%{% else %}—{% endif %}</td>
+            <td>{{ r.attempts }}</td>
+            <td style="text-align:right;">
+              {% if r.unlocked %}
+                <a class="btn btn-sm" href="{{ url_for('topics.topic_detail', slug=r.slug) }}">Read</a>
+                <a class="btn btn-sm btn-outline" href="{{ url_for('quizzes.quiz', slug=r.slug) }}">Quiz</a>
+              {% else %}
+                <span class="muted">Pass previous quiz</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="auth-card" style="margin-top:18px;">
+    <h3 style="margin:0 0 8px;">Reset course</h3>
+    <p class="muted" style="margin:0 0 12px;">
+      This will delete your saved progress for this browser/account. To confirm, type <strong>RESET</strong>.
+    </p>
+    <form method="POST" action="{{ url_for('main.reset_progress') }}" class="form" style="max-width:520px;">
+      <input name="confirm" placeholder="Type RESET" autocomplete="off" />
+      <button class="btn btn-outline" type="submit">Reset my progress</button>
+    </form>
+  </div>
+{% endblock %}

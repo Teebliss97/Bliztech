@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Admin • Certificates{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Certificates</h1>
+    <p class="page-subtitle">Search by certificate ID, email, or recipient name.</p>
+
+    <form method="GET" action="{{ url_for('admin.certificates') }}" class="form" style="max-width:520px;">
+      <input name="q" placeholder="Search..." value="{{ q }}" />
+      <button class="btn btn-outline" type="submit">Search</button>
+    </form>
+  </div>
+
+  <div class="table-card" style="margin-top:18px;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Certificate ID</th>
+          <th>Recipient</th>
+          <th>Email</th>
+          <th>Issued</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in certs %}
+          <tr>
+            <td style="font-weight:900; letter-spacing:.5px;">{{ c.cert_id }}</td>
+            <td>{{ c.recipient_name }}</td>
+            <td>{{ c.user_email }}</td>
+            <td>{% if c.issued_at %}{{ c.issued_at.strftime('%d %b %Y') }}{% else %}—{% endif %}</td>
+            <td>
+              {% if c.revoked %}
+                <span class="pill pill-gray">Revoked</span>
+              {% else %}
+                <span class="pill pill-green">Active</span>
+              {% endif %}
+            </td>
+            <td style="text-align:right;">
+              <a class="btn btn-sm btn-outline" href="{{ url_for('admin.certificate_detail', cert_id=c.cert_id) }}">
+                Manage
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:14px;">
+    <a class="btn btn-outline" href="{{ url_for('admin.dashboard') }}">Back to dashboard</a>
+  </div>
+{% endblock %}

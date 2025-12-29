@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Admin • Certificate {{ cert.cert_id }}{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Certificate</h1>
+    <p class="page-subtitle">Manage a certificate (reissue / revoke / un-revoke).</p>
+  </div>
+
+  <div class="auth-card">
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:flex-start;">
+      <div>
+        <div class="muted" style="font-size:13px;">Certificate ID</div>
+        <div style="font-weight:900; letter-spacing:.8px; font-size:20px;">{{ cert.cert_id }}</div>
+        <div style="margin-top:10px;">
+          <p style="margin:6px 0;"><strong>Recipient:</strong> {{ cert.recipient_name }}</p>
+          <p style="margin:6px 0;"><strong>Email:</strong> {{ cert.user_email }}</p>
+          <p style="margin:6px 0;"><strong>Issued:</strong> {{ cert.issued_at.strftime('%d %b %Y') }}</p>
+          <p style="margin:6px 0;"><strong>User progress passed:</strong> {{ passed_count }} topic(s)</p>
+        </div>
+
+        <div class="actions" style="margin-top:12px;">
+          <a class="btn btn-outline" href="{{ url_for('cert.verify_certificate', cert_id=cert.cert_id) }}">Public verify page</a>
+        </div>
+      </div>
+
+      <div style="min-width:280px;">
+        {% if cert.revoked %}
+          <div class="flash error" style="margin-top:0;">
+            <strong>Revoked</strong>
+            {% if cert.revoked_at %}<div class="muted">{{ cert.revoked_at.strftime('%d %b %Y %H:%M') }}</div>{% endif %}
+            {% if cert.revoked_reason %}<div class="muted" style="margin-top:6px;">Reason: {{ cert.revoked_reason }}</div>{% endif %}
+          </div>
+        {% else %}
+          <div class="flash success" style="margin-top:0;">
+            <strong>Active</strong>
+          </div>
+        {% endif %}
+
+        <div class="card" style="padding:14px; margin-top:12px;">
+          <h3 style="margin:0 0 10px;">Actions</h3>
+
+          <form method="POST" action="{{ url_for('admin.certificate_reissue', cert_id=cert.cert_id) }}" style="margin-bottom:10px;">
+            <button class="btn btn-outline" type="submit">Reissue (new ID)</button>
+          </form>
+
+          {% if not cert.revoked %}
+            <form method="POST" action="{{ url_for('admin.certificate_revoke', cert_id=cert.cert_id) }}">
+              <input name="reason" placeholder="Reason (optional)" />
+              <button class="btn" type="submit" style="margin-top:10px;">Revoke</button>
+            </form>
+          {% else %}
+            <form method="POST" action="{{ url_for('admin.certificate_unrevoke', cert_id=cert.cert_id) }}">
+              <button class="btn" type="submit">Un-revoke</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;">
+    <a class="btn btn-outline" href="{{ url_for('admin.certificates') }}">Back to certificates</a>
+  </div>
+{% endblock %}

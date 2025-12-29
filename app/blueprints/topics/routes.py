@@ -32,6 +32,11 @@ def _progress_key():
     """
     if current_user.is_authenticated:
         return f"user:{current_user.id}"
+    
+    if "anon_id" not in session:
+        import uuid
+        session["anon_id"] = f"anon:{uuid.uuid4().hex}"
+        
     return session.get("anon_id")
 
 

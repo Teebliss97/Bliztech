@@ -65,6 +65,11 @@ class Certificate(db.Model):
     recipient_name = db.Column(db.String(120), nullable=False)
     issued_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+    # Admin controls
+    revoked = db.Column(db.Boolean, default=False, nullable=False)
+    revoked_at = db.Column(db.DateTime, nullable=True)
+    revoked_reason = db.Column(db.String(255), nullable=True)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not getattr(self, "cert_id", None):

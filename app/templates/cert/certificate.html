@@ -4,7 +4,30 @@
     <h1 class="page-title">Your Certificate</h1>
     <p class="page-subtitle">Enter your name and download your certificate (PDF).</p>
 
-    <form method="POST" action="{{ url_for('cert.certificate_pdf') }}" class="form">
+    {% if cert %}
+      {% if cert.revoked %}
+        <div class="flash error" style="margin-top:12px;">
+          <strong>❌ Your certificate is currently revoked</strong>
+          {% if cert.revoked_reason %}
+            <div class="muted" style="margin-top:6px;">Reason: {{ cert.revoked_reason }}</div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="flash success" style="margin-top:12px;">
+          <strong>✅ Certificate ready</strong>
+          <div class="muted" style="margin-top:6px;">
+            Certificate ID: <strong>{{ cert.cert_id }}</strong>
+          </div>
+          {% if verify_url %}
+            <div class="muted" style="margin-top:6px;">
+              Verify link: <a href="{{ verify_url }}" target="_blank" rel="noopener">Open verification page</a>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('cert.certificate_pdf') }}" class="form" style="margin-top:14px;">
       <label>Your name (as it should appear)</label>
       <input name="name" type="text" value="{{ default_name }}" required>
 
@@ -14,5 +37,11 @@
     <p class="muted" style="margin-top:12px;">
       Tip: Use your real full name so you can share it professionally.
     </p>
+
+    {% if cert and not cert.revoked %}
+      <p class="muted" style="margin-top:10px;">
+        If you download again, the system will reuse the same certificate ID.
+      </p>
+    {% endif %}
   </div>
 {% endblock %}

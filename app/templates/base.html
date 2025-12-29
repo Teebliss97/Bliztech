@@ -4,21 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}BlizTech Cyber Awareness{% endblock %}</title>
+
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
+<!-- ===================== NAVBAR ===================== -->
 <header class="nav">
   <div class="container nav-inner">
 
     <!-- Brand -->
     <a class="brand" href="{{ url_for('main.home') }}">
-      <img class="brand-logo" src="{{ url_for('static', filename='img/logo-mark.svg') }}" alt="BlizTech logo">
+      <img
+        class="brand-logo"
+        src="{{ url_for('static', filename='img/logo-mark.svg') }}"
+        alt="BlizTech logo"
+      >
       <span class="brand-name">BlizTech</span>
       <span class="brand-tag">Cyber Awareness</span>
     </a>
 
-    <!-- Nav links -->
+    <!-- Navigation links -->
     <nav class="nav-links">
       <a href="{{ url_for('main.home') }}"
          class="{% if request.endpoint == 'main.home' %}active{% endif %}">
@@ -30,8 +37,12 @@
         Topics
       </a>
 
+      <a href="{{ url_for('main.my_progress') }}"
+         class="{% if request.endpoint == 'main.my_progress' %}active{% endif %}">
+        My Progress
+      </a>
+
       {% if current_user.is_authenticated %}
-        <!-- ✅ Certificate link should be visible AFTER login -->
         <a href="{{ url_for('cert.certificate_home') }}"
            class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
           Certificate
@@ -59,10 +70,26 @@
   </div>
 </header>
 
+<!-- ===================== MAIN CONTENT ===================== -->
 <main class="container">
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash {{ category|e }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
   {% block content %}{% endblock %}
 </main>
 
+<!-- ===================== FOOTER ===================== -->
 <footer class="footer">
   <div class="container">
     <small>© 2025 BlizTech Cybersecurity Awareness</small>
