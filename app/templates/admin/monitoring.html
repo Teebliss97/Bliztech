@@ -8,73 +8,56 @@
     <div>
       <h2 style="margin:0;">Monitoring</h2>
       <div style="opacity:0.85; margin-top:6px;">
-        Security signals & recent events (last 24h counters + latest 200 events).
+        Security events stored in DB (filter + pagination).
       </div>
     </div>
     <div style="opacity:0.8; font-size: 12px; margin-top:6px;">
-      UTC now: {{ now.strftime('%Y-%m-%d %H:%M:%S') }}
+      Total events: {{ total }}
     </div>
   </div>
 
-  <div class="stats" style="margin-top:14px;">
-    <div class="stat-card">
-      <div class="stat-num">{{ counts.rate_limited_24h }}</div>
-      <div class="stat-label">429 rate-limited (24h)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">{{ counts.auth_failed_24h }}</div>
-      <div class="stat-label">Login failures (24h)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">{{ counts.auth_locked_24h }}</div>
-      <div class="stat-label">Lockouts (24h)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">{{ counts.http_error_24h }}</div>
-      <div class="stat-label">HTTP errors 4xx/5xx (24h)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">{{ counts.slow_request_24h }}</div>
-      <div class="stat-label">Slow requests (24h)</div>
-    </div>
-  </div>
-
-  <div style="margin-top:18px;">
-    <h3 style="margin:0 0 10px;">Currently Locked (live)</h3>
-    <div style="border:1px solid rgba(255,255,255,0.12); border-radius:14px; overflow:hidden;">
-      <div style="overflow:auto;">
-        <table style="width:100%; border-collapse:collapse;">
-          <thead>
-            <tr style="background: rgba(255,255,255,0.06);">
-              <th style="text-align:left; padding:12px;">Email</th>
-              <th style="text-align:left; padding:12px;">IP</th>
-              <th style="text-align:left; padding:12px;">Attempts</th>
-              <th style="text-align:left; padding:12px;">Locked Until (UTC)</th>
-              <th style="text-align:left; padding:12px;">Last Attempt (UTC)</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% if not locked_now %}
-            <tr><td colspan="5" style="padding:12px; opacity:0.85;">No active lockouts 🎉</td></tr>
-          {% else %}
-            {% for row in locked_now %}
-            <tr style="border-top: 1px solid rgba(255,255,255,0.10);">
-              <td style="padding:12px;">{{ row.email }}</td>
-              <td style="padding:12px;">{{ row.ip }}</td>
-              <td style="padding:12px;">{{ row.attempts }}</td>
-              <td style="padding:12px;">{{ row.locked_until.strftime('%Y-%m-%d %H:%M:%S') if row.locked_until else '' }}</td>
-              <td style="padding:12px;">{{ row.last_attempt_at.strftime('%Y-%m-%d %H:%M:%S') if row.last_attempt_at else '' }}</td>
-            </tr>
-            {% endfor %}
-          {% endif %}
-          </tbody>
-        </table>
+  <!-- Filters -->
+  <div style="margin-top:14px; border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px;">
+    <form method="get" action="{{ url_for('admin.monitoring') }}" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="font-size:12px; opacity:0.8;">Event</label>
+        <input name="event" value="{{ event or '' }}" placeholder="auth_login_failed, rate_limited..."
+               style="min-width:220px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
       </div>
-    </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="font-size:12px; opacity:0.8;">IP</label>
+        <input name="ip" value="{{ ip or '' }}" placeholder="90.214..."
+               style="min-width:180px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="font-size:12px; opacity:0.8;">Path</label>
+        <input name="path" value="{{ path or '' }}" placeholder="/admin/users"
+               style="min-width:200px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="font-size:12px; opacity:0.8;">Status</label>
+        <input name="status" value="{{ status or '' }}" placeholder="429"
+               style="width:120px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="font-size:12px; opacity:0.8;">Text contains</label>
+        <input name="q" value="{{ q or '' }}" placeholder="detail / endpoint contains..."
+               style="min-width:220px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn" type="submit">Filter</button>
+        <a class="btn btn-outline" href="{{ url_for('admin.monitoring') }}">Reset</a>
+      </div>
+    </form>
   </div>
 
-  <div style="margin-top:18px;">
-    <h3 style="margin:0 0 10px;">Latest Security Events</h3>
+  <!-- Events table -->
+  <div style="margin-top:16px;">
     <div style="border:1px solid rgba(255,255,255,0.12); border-radius:14px; overflow:hidden;">
       <div style="overflow:auto;">
         <table style="width:100%; border-collapse:collapse;">
@@ -82,16 +65,18 @@
             <tr style="background: rgba(255,255,255,0.06);">
               <th style="text-align:left; padding:12px;">Time (UTC)</th>
               <th style="text-align:left; padding:12px;">Event</th>
-              <th style="text-align:left; padding:12px;">Email</th>
               <th style="text-align:left; padding:12px;">IP</th>
+              <th style="text-align:left; padding:12px;">Method</th>
+              <th style="text-align:left; padding:12px;">Path</th>
               <th style="text-align:left; padding:12px;">Endpoint</th>
               <th style="text-align:left; padding:12px;">Status</th>
+              <th style="text-align:left; padding:12px;">Duration (ms)</th>
               <th style="text-align:left; padding:12px;">Detail</th>
             </tr>
           </thead>
           <tbody>
           {% if not events %}
-            <tr><td colspan="7" style="padding:12px; opacity:0.85;">No events yet.</td></tr>
+            <tr><td colspan="9" style="padding:12px; opacity:0.85;">No events match your filters.</td></tr>
           {% else %}
             {% for e in events %}
             <tr style="border-top: 1px solid rgba(255,255,255,0.10);">
@@ -99,10 +84,12 @@
                 {{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') if e.created_at else '' }}
               </td>
               <td style="padding:12px; font-weight:600;">{{ e.event }}</td>
-              <td style="padding:12px;">{{ e.email_masked or '' }}</td>
               <td style="padding:12px;">{{ e.ip or '' }}</td>
+              <td style="padding:12px;">{{ e.method or '' }}</td>
+              <td style="padding:12px;">{{ e.path or '' }}</td>
               <td style="padding:12px;">{{ e.endpoint or '' }}</td>
               <td style="padding:12px;">{{ e.status if e.status is not none else '' }}</td>
+              <td style="padding:12px;">{{ e.duration_ms if e.duration_ms is not none else '' }}</td>
               <td style="padding:12px; max-width: 420px; word-break: break-word; opacity:0.9;">
                 {{ e.detail or '' }}
               </td>
@@ -114,7 +101,33 @@
       </div>
     </div>
 
-    <div style="margin-top:10px; opacity:0.75; font-size:12px;">Showing latest 200 events.</div>
+    <!-- Pagination -->
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px;">
+      <div style="opacity:0.75; font-size:12px;">
+        Page {{ page }} of {{ pages }} • Showing {{ events|length }} items
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        {% if has_prev %}
+          <a class="btn btn-outline"
+             href="{{ url_for('admin.monitoring', page=prev_num, q=q, event=event, ip=ip, path=path, status=status) }}">
+             ← Prev
+          </a>
+        {% else %}
+          <span class="btn btn-outline" style="opacity:0.5; pointer-events:none;">← Prev</span>
+        {% endif %}
+
+        {% if has_next %}
+          <a class="btn btn-outline"
+             href="{{ url_for('admin.monitoring', page=next_num, q=q, event=event, ip=ip, path=path, status=status) }}">
+             Next →
+          </a>
+        {% else %}
+          <span class="btn btn-outline" style="opacity:0.5; pointer-events:none;">Next →</span>
+        {% endif %}
+      </div>
+    </div>
+
   </div>
 
 </div>

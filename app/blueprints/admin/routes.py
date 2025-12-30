@@ -6,7 +6,7 @@ from flask import Blueprint, abort, render_template, request, redirect, url_for,
 from flask_login import current_user
 
 from app.extensions import db, limiter
-from app.models import User, Progress, Certificate, AdminAuditLog
+from app.models import User, Progress, Certificate, AdminAuditLog, SecurityEvent
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -221,6 +221,82 @@ def audit_logs():
 
     logs = query.limit(200).all()
     return render_template("admin/audit.html", logs=logs, q=q)
+
+
+# ✅ Phase 5.2: Monitoring dashboard (DB-backed)
+@admin_bp.route("/monitoring")
+@admin_required
+@limiter.limit("30 per minute")
+def monitoring():
+    q = (request.args.get("q") or "").strip()
+    event = (request.args.get("event") or "").strip()
+    ip = (request.args.get("ip") or "").strip()
+    path = (request.args.get("path") or "").strip()
+    status = (request.args.get("status") or "").strip()
+
+    # pagination
+    try:
+        page = int(request.args.get("page") or "1")
+        if page < 1:
+            page = 1
+    except Exception:
+        page = 1
+
+    per_page = 50
+
+    query = SecurityEvent.query.order_by(SecurityEvent.created_at.desc())
+
+    if q:
+        query = query.filter(SecurityEvent.detail.ilike(f"%{q}%") | SecurityEvent.endpoint.ilike(f"%{q}%"))
+
+    if event:
+        query = query.filter(SecurityEvent.event.ilike(f"%{event}%"))
+
+    if ip:
+        query = query.filter(SecurityEvent.ip.ilike(f"%{ip}%"))
+
+    if path:
+        query = query.filter(SecurityEvent.path.ilike(f"%{path}%"))
+
+    if status and status.isdigit():
+        query = query.filter(SecurityEvent.status == int(status))
+
+    # Flask-SQLAlchemy 3 compatible pagination
+    try:
+        page_obj = query.paginate(page=page, per_page=per_page, error_out=False)
+        items = page_obj.items
+        total = page_obj.total
+        pages = page_obj.pages
+        has_prev = page_obj.has_prev
+        has_next = page_obj.has_next
+        prev_num = page_obj.prev_num
+        next_num = page_obj.next_num
+    except Exception:
+        # fallback manual pagination
+        total = query.count()
+        pages = (total + per_page - 1) // per_page
+        items = query.limit(per_page).offset((page - 1) * per_page).all()
+        has_prev = page > 1
+        has_next = page < pages
+        prev_num = page - 1
+        next_num = page + 1
+
+    return render_template(
+        "admin/monitoring.html",
+        events=items,
+        q=q,
+        event=event,
+        ip=ip,
+        path=path,
+        status=status,
+        page=page,
+        pages=pages,
+        total=total,
+        has_prev=has_prev,
+        has_next=has_next,
+        prev_num=prev_num,
+        next_num=next_num,
+    )
 
 
 @admin_bp.route("/bootstrap", methods=["GET", "POST"])

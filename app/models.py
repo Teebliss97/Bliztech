@@ -129,20 +129,22 @@ class SecurityEvent(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    # e.g. "rate_limited", "auth_login_failed", "auth_login_locked", "http_error", "slow_request"
+    # event name like: auth_login_failed, rate_limited, slow_request, http_error
     event = db.Column(db.String(80), nullable=False, index=True)
 
-    # optional context
+    # request context
     ip = db.Column(db.String(64), nullable=True, index=True)
-    email_masked = db.Column(db.String(255), nullable=True, index=True)
-    endpoint = db.Column(db.String(160), nullable=True, index=True)
-    path = db.Column(db.String(300), nullable=True)
-    method = db.Column(db.String(10), nullable=True)
-
+    endpoint = db.Column(db.String(200), nullable=True, index=True)
+    path = db.Column(db.String(500), nullable=True, index=True)
+    method = db.Column(db.String(12), nullable=True)
     status = db.Column(db.Integer, nullable=True, index=True)
     duration_ms = db.Column(db.Integer, nullable=True)
 
-    # small details (keep it short)
+    # free-form details (limit, reason, etc.)
     detail = db.Column(db.Text, nullable=True)
 
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    def __repr__(self):
+        return f"<SecurityEvent {self.event} {self.status} {self.ip}>"
+
