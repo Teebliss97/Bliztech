@@ -14,57 +14,76 @@
         and unlock the next topic — step by step.
       </p>
 
-      {# ✅ Course completed badge (shows ONLY when finished all topics) #}
-      {% if course_done %}
+      {# ================================
+         Phase 6.2.2: Logged-in "Welcome back" nudge
+         - Shows even at 0% (to start Topic 1)
+         - Shows resume/continue CTA
+         ================================ #}
+      {% if current_user.is_authenticated and progress %}
         <div class="continue-card pop-in">
           <div class="continue-top">
             <div>
-              <div class="continue-title">🏆 Course Completed</div>
+              <div class="continue-title">Welcome back 👋</div>
               <div class="continue-sub">
-                You’ve successfully completed all {{ total_topics }} topics. Great work!
+                You’re <strong>{{ progress.percent }}%</strong> done — {{ progress.completed }}/{{ progress.total }} completed.
               </div>
             </div>
-            <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">
-              View Topics
+            <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">
+              Open Dashboard
             </a>
-          </div>
-        </div>
-      {% endif %}
-
-      {# ✅ If progress exists, show only Continue + View Topics #}
-      {% if progress and progress.next_slug %}
-        <div class="continue-card">
-          <div class="continue-top">
-            <span class="badge-pill">Progress</span>
-            <span class="continue-meta">
-              {{ progress.completed }}/{{ progress.total }} completed • {{ progress.percent }}%
-            </span>
           </div>
 
           <div class="bar">
             <div class="bar-fill" style="width: {{ progress.percent }}%;"></div>
           </div>
 
-          <div class="continue-body">
-            <h3>Continue learning</h3>
-            {% if progress.last_title %}
-              <p class="muted">Last completed: <strong>{{ progress.last_title }}</strong></p>
+          <div class="continue-body" style="margin-top:10px;">
+            {% if progress.course_done %}
+              <p class="muted">🎉 You’ve completed the full course. Your certificate is ready.</p>
+            {% elif progress.resume %}
+              <p class="muted">
+                Continue where you stopped: <strong>{{ progress.resume.title }}</strong>
+              </p>
+            {% elif progress.next_topic %}
+              <p class="muted">
+                Next step: <strong>{{ progress.next_topic.label }}</strong>
+              </p>
+            {% else %}
+              <p class="muted">Start with Topic 1 and build your way up.</p>
             {% endif %}
           </div>
 
           <div class="hero-actions">
-            <a class="btn" href="{{ url_for('topics.topic_detail', slug=progress.next_slug) }}">
-              Continue: {{ progress.next_label }}
-            </a>
-            <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View Topics</a>
+            {% if progress.course_done %}
+              <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
+              <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Review Topics</a>
+
+            {% elif progress.resume %}
+              <a class="btn" href="{{ url_for('topics.topic_detail', slug=progress.resume.slug) }}">
+                ▶ Continue where you stopped
+              </a>
+              <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=progress.resume.slug) }}">
+                Take Quiz
+              </a>
+
+            {% elif progress.next_topic %}
+              <a class="btn" href="{{ url_for('topics.topic_detail', slug=progress.next_topic.slug) }}">
+                Continue: {{ progress.next_topic.label }}
+              </a>
+              <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View Topics</a>
+
+            {% else %}
+              <a class="btn" href="{{ url_for('topics.topic_detail', slug='topic1') }}">Start Topic 1</a>
+              <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View Topics</a>
+            {% endif %}
           </div>
         </div>
 
       {% else %}
-        {# ✅ No progress yet → show Start + View Topics only #}
+        {# Logged-out users #}
         <div class="hero-actions">
           <a class="btn" href="{{ url_for('topics.list_topics') }}">Start Learning</a>
-          <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View Topics</a>
+          <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
         </div>
       {% endif %}
 
@@ -138,8 +157,8 @@
 
     <div class="how-actions">
       <a class="btn" href="{{ url_for('topics.list_topics') }}">Browse Topics</a>
-      {% if progress and progress.next_slug %}
-        <a class="btn btn-outline" href="{{ url_for('topics.topic_detail', slug=progress.next_slug) }}">Continue</a>
+      {% if current_user.is_authenticated %}
+        <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">Dashboard</a>
       {% endif %}
     </div>
   </section>

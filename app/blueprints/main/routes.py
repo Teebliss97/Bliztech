@@ -60,7 +60,7 @@ def _course_stats(pmap: dict):
     total = len(TOPICS)
     completed = 0
     attempts_total = 0
-    last_activity = None  # datetime
+    last_activity = None
 
     for t in TOPICS:
         row = pmap.get(t["slug"])
@@ -85,10 +85,6 @@ def _course_stats(pmap: dict):
 
 
 def _next_unlocked_incomplete(pmap: dict):
-    """
-    Next step for the user:
-    - first topic that is unlocked AND not passed
-    """
     for i, t in enumerate(TOPICS, start=1):
         slug = t["slug"]
         row = pmap.get(slug)
@@ -103,18 +99,11 @@ def _next_unlocked_incomplete(pmap: dict):
 
 
 def _resume_topic(pmap: dict):
-    """
-    Continue where you stopped:
-    - choose the most recently updated topic row that is NOT passed.
-    - if none, fall back to next_unlocked_incomplete.
-    """
     candidate = None
     for t in TOPICS:
         slug = t["slug"]
         row = pmap.get(slug)
-        if not row:
-            continue
-        if row.passed:
+        if not row or row.passed:
             continue
         if row.updated_at and (candidate is None or row.updated_at > candidate.updated_at):
             candidate = row
@@ -127,40 +116,41 @@ def _resume_topic(pmap: dict):
             "updated_at": candidate.updated_at,
         }
 
-    # fallback
-    nxt = _next_unlocked_incomplete(pmap)
-    if nxt:
-        return {"slug": nxt["slug"], "title": nxt["title"], "updated_at": None}
-    return None
+    return _next_unlocked_incomplete(pmap)
 
 
 # -------------------------
-# HOME (keep it simple)
+# HOME — Phase 6.2.2
 # -------------------------
 @main_bp.route("/")
 def home():
     """
-    Home remains public.
-    If logged in, show lightweight progress teaser (optional).
-    If anon, just show normal homepage.
+    Public homepage.
+    Logged-in users see 'Welcome back' + resume CTA.
     """
     if not current_user.is_authenticated:
-        return render_template("home.html", progress=None, total_topics=len(TOPICS), course_done=False)
+        return render_template(
+            "home.html",
+            progress=None,
+            total_topics=len(TOPICS),
+            course_done=False,
+        )
 
     progress_user_id = _progress_key()
     pmap = _progress_map(progress_user_id)
+
     stats = _course_stats(pmap)
+    resume = _resume_topic(pmap)
     nxt = _next_unlocked_incomplete(pmap)
 
-    progress = None
-    if stats["completed"] > 0 and nxt:
-        progress = {
-            "completed": stats["completed"],
-            "total": stats["total"],
-            "percent": stats["percent"],
-            "next_slug": nxt["slug"],
-            "next_label": nxt["label"],
-        }
+    progress = {
+        "completed": stats["completed"],
+        "total": stats["total"],
+        "percent": stats["percent"],
+        "course_done": stats["course_done"],
+        "resume": resume,
+        "next_topic": nxt,
+    }
 
     return render_template(
         "home.html",
@@ -171,7 +161,7 @@ def home():
 
 
 # -------------------------
-# Phase 6.1.1: DASHBOARD
+# DASHBOARD
 # -------------------------
 @main_bp.route("/dashboard")
 def dashboard():
@@ -186,18 +176,16 @@ def dashboard():
     resume = _resume_topic(pmap)
     nxt = _next_unlocked_incomplete(pmap)
 
-    # Build topic table rows (for quick glance)
     rows = []
     for i, t in enumerate(TOPICS, start=1):
         slug = t["slug"]
         row = pmap.get(slug)
-        passed = bool(row and row.passed)
         rows.append(
             {
                 "i": i,
                 "slug": slug,
                 "title": t["title"],
-                "passed": passed,
+                "passed": bool(row and row.passed),
                 "score": (row.score if row else None),
                 "attempts": (row.attempts if row else 0),
                 "updated_at": (row.updated_at if row else None),
@@ -215,7 +203,7 @@ def dashboard():
 
 
 # -------------------------
-# Backward compatible: /progress -> /dashboard
+# Backward compatible
 # -------------------------
 @main_bp.route("/progress")
 def my_progress():
@@ -228,10 +216,6 @@ def my_progress():
 @main_bp.route("/progress/reset", methods=["POST"])
 @rate_limit(limit=3, window_seconds=60, key_prefix="reset")
 def reset_progress():
-    """
-    Logged-in users only: reset THEIR own progress.
-    (Aligns with Phase 6: no anon progress.)
-    """
     gate = _require_login("Please log in to reset your progress.")
     if gate:
         return gate
@@ -242,9 +226,7 @@ def reset_progress():
         return redirect(url_for("main.dashboard"))
 
     from app.extensions import db
-    progress_user_id = _progress_key()
-
-    Progress.query.filter_by(user_id=progress_user_id).delete(synchronize_session=False)
+    Progress.query.filter_by(user_id=_progress_key()).delete(synchronize_session=False)
     db.session.commit()
 
     session.pop("last_result", None)
@@ -254,21 +236,14 @@ def reset_progress():
 
 @main_bp.route("/complete")
 def completion_page():
-    """
-    Completion page should be logged-in only (certificate + trust).
-    """
     gate = _require_login("Please log in to view the completion page.")
     if gate:
         return gate
 
-    progress_user_id = _progress_key()
-    pmap = _progress_map(progress_user_id)
+    pmap = _progress_map(_progress_key())
+    completed = sum(1 for t in TOPICS if pmap.get(t["slug"]) and pmap[t["slug"]].passed)
 
-    total = len(TOPICS)
-    completed = sum(1 for t in TOPICS if bool(pmap.get(t["slug"]) and pmap[t["slug"]].passed))
-    course_done = (total > 0 and completed == total)
-
-    if not course_done:
+    if completed != len(TOPICS):
         flash("Finish all topics to unlock the completion page.", "error")
         return redirect(url_for("topics.list_topics"))
 
