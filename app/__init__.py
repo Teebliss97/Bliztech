@@ -1,17 +1,67 @@
 import os
 import uuid
+import logging
+from logging.config import dictConfig
 
-from flask import Flask, session, request, redirect
+from flask import Flask, session, request, g
 from dotenv import load_dotenv
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.extensions import db, login_manager, migrate
+
+
+def _configure_logging(app: Flask) -> None:
+    """
+    Render/Gunicorn friendly logging:
+    - logs to stdout
+    - includes request id
+    """
+    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+
+    dictConfig({
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s %(name)s rid=%(request_id)s - %(message)s"
+            }
+        },
+        "filters": {
+            "request_id": {
+                "()": "app.__init__.RequestIdFilter",
+            }
+        },
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+                "formatter": "default",
+                "filters": ["request_id"],
+            }
+        },
+        "root": {
+            "level": log_level,
+            "handlers": ["wsgi"]
+        }
+    })
+
+    # Flask's default logger uses app.logger; ensure it inherits root config
+    app.logger.setLevel(log_level)
+
+
+class RequestIdFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.request_id = getattr(g, "request_id", "-")
+        return True
 
 
 def create_app():
     load_dotenv()
 
     app = Flask(__name__)
+
+    # -------------------
+    # Core config
+    # -------------------
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
     # DB URL (Render Postgres sometimes uses postgres://)
@@ -22,86 +72,76 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # ---- Production detection ----
-    is_production = (os.getenv("FLASK_ENV") == "production") or (os.getenv("RENDER") == "true")
-
-    # ---- Proxy / HTTPS correctness on Render ----
-    # Render sits behind a reverse proxy. This makes Flask respect:
-    # X-Forwarded-Proto, X-Forwarded-For, etc.
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
-
-    # ---- Cookie hardening ----
-    # (Important for auth/session security)
+    # Cookie safety (works well for production)
     app.config["SESSION_COOKIE_HTTPONLY"] = True
-    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"   # safe default; use "Strict" if you want even tighter
-    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
-    app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+    # Render is HTTPS; keep secure cookies on production
+    app.config["SESSION_COOKIE_SECURE"] = os.getenv("COOKIE_SECURE", "1") == "1"
 
-    if is_production:
-        app.config["SESSION_COOKIE_SECURE"] = True
-        app.config["REMEMBER_COOKIE_SECURE"] = True
+    # Optional: certificate required topics from env
+    if os.getenv("CERT_REQUIRED_TOPICS"):
+        try:
+            app.config["CERT_REQUIRED_TOPICS"] = int(os.getenv("CERT_REQUIRED_TOPICS"))
+        except Exception:
+            pass
 
-    # Optional: allow you to force https redirects in production
-    # Set env FORCE_HTTPS=1 on Render
-    force_https = os.getenv("FORCE_HTTPS", "0") == "1"
+    # Used by certificate verify URL (your code reads this)
+    if os.getenv("RENDER_EXTERNAL_URL"):
+        app.config["RENDER_EXTERNAL_URL"] = os.getenv("RENDER_EXTERNAL_URL")
 
+    # -------------------
+    # Logging
+    # -------------------
+    _configure_logging(app)
+
+    # -------------------
+    # Extensions
+    # -------------------
     db.init_app(app)
     login_manager.init_app(app)
-
-    # ✅ Flask-Migrate init
     migrate.init_app(app, db)
 
+    # -------------------
+    # Request hooks
+    # -------------------
     @app.before_request
-    def ensure_anon_id():
+    def ensure_anon_and_request_id():
+        # Request id for tracing issues in Render logs
+        g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:12]
+
+        # Stable anon id (your topics logic depends on this)
         if "anon_id" not in session:
             session["anon_id"] = f"anon:{uuid.uuid4().hex}"
 
-    # ---- Force HTTPS redirect (production, optional) ----
-    @app.before_request
-    def redirect_to_https():
-        if not is_production or not force_https:
-            return
-        # After ProxyFix, request.is_secure will work properly on Render
-        if request.is_secure:
-            return
-        # Avoid redirect loops on healthchecks or local
-        if request.headers.get("X-Forwarded-Proto", "").lower() == "https":
-            return
-        url = request.url.replace("http://", "https://", 1)
-        return redirect(url, code=301)
-
-    # ---- Security headers ----
     @app.after_request
-    def add_security_headers(resp):
-        # Basic hardening
-        resp.headers["X-Content-Type-Options"] = "nosniff"
-        resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        resp.headers["X-Frame-Options"] = "DENY"
-        resp.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-
-        # HSTS only when you're on HTTPS in production
-        if is_production:
-            # 1 year + include subdomains
-            resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-
-        # CSP (conservative, should not break your current templates)
-        # If you later add external CDNs, we can extend this safely.
-        csp = (
-            "default-src 'self'; "
-            "img-src 'self' data:; "
-            "style-src 'self' 'unsafe-inline'; "
-            "script-src 'self' 'unsafe-inline'; "
-            "font-src 'self' data:; "
-            "connect-src 'self'; "
-            "frame-ancestors 'none'; "
-            "base-uri 'self'; "
-            "form-action 'self';"
-        )
-        resp.headers["Content-Security-Policy"] = csp
-
+    def attach_request_id(resp):
+        resp.headers["X-Request-ID"] = getattr(g, "request_id", "")
         return resp
 
-    # Core blueprints
+    # -------------------
+    # Error logging (no sensitive dumps)
+    # -------------------
+    @app.errorhandler(500)
+    def internal_error(err):
+        app.logger.exception("500 Internal Server Error: %s %s", request.method, request.path)
+        return err, 500
+
+    @app.errorhandler(404)
+    def not_found(err):
+        # Keep 404 logs light (optional)
+        app.logger.info("404 Not Found: %s %s", request.method, request.path)
+        return err, 404
+
+    # -------------------
+    # Health check (Render-friendly)
+    # -------------------
+    @app.get("/healthz")
+    def healthz():
+        return {"status": "ok"}, 200
+
+    # -------------------
+    # Blueprints
+    # -------------------
     from app.blueprints.main.routes import main_bp
     from app.blueprints.topics.routes import topics_bp
     from app.blueprints.quizzes.routes import quizzes_bp
@@ -121,13 +161,6 @@ def create_app():
         from app.blueprints.main.test_email import test_bp
         app.register_blueprint(test_bp)
 
-    # ---- Error pages (use your Phase 2 templates) ----
-    @app.errorhandler(404)
-    def not_found(e):
-        return (app.jinja_env.get_or_select_template("errors/404.html").render(), 404)
-
-    @app.errorhandler(500)
-    def server_error(e):
-        return (app.jinja_env.get_or_select_template("errors/500.html").render(), 500)
+    app.logger.info("App started. env=%s", os.getenv("FLASK_ENV", "production"))
 
     return app
