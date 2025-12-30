@@ -3,28 +3,55 @@ import uuid
 import logging
 from logging.config import dictConfig
 
-from flask import Flask, session, request, g, has_request_context
+from flask import Flask, session, jsonify, g, has_request_context, request
 from dotenv import load_dotenv
 
 from app.extensions import db, login_manager, migrate
 
 
-def configure_logging():
+class RequestIdFilter(logging.Filter):
+    """
+    Safe logging filter: only reads g.request_id when a request context exists.
+    Prevents: 'Working outside of application context'
+    """
+    def filter(self, record: logging.LogRecord) -> bool:
+        if has_request_context():
+            record.request_id = getattr(g, "request_id", "-")
+            record.remote_addr = request.headers.get("X-Forwarded-For", request.remote_addr)
+            record.path = request.path
+            record.method = request.method
+        else:
+            record.request_id = "-"
+            record.remote_addr = "-"
+            record.path = "-"
+            record.method = "-"
+        return True
+
+
+def _configure_logging():
+    """
+    Works on Render + locally. Adds request_id if available.
+    """
     log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 
     dictConfig({
         "version": 1,
         "disable_existing_loggers": False,
+        "filters": {
+            "request_id": {
+                "()": RequestIdFilter
+            }
+        },
         "formatters": {
             "default": {
-                "format": "[%(asctime)s] %(levelname)s %(name)s - %(message)s"
+                "format": "[%(asctime)s] %(levelname)s request_id=%(request_id)s %(remote_addr)s %(method)s %(path)s - %(message)s"
             }
         },
         "handlers": {
             "wsgi": {
                 "class": "logging.StreamHandler",
-                "stream": "ext://sys.stdout",
                 "formatter": "default",
+                "filters": ["request_id"]
             }
         },
         "root": {
@@ -34,24 +61,16 @@ def configure_logging():
     })
 
 
-class RequestLoggerAdapter(logging.LoggerAdapter):
-    def process(self, msg, kwargs):
-        # ✅ Only access g/request_id when we are inside a request
-        if has_request_context():
-            rid = getattr(g, "request_id", "-")
-        else:
-            rid = "-"
-        return f"rid={rid} {msg}", kwargs
-
-
 def create_app():
     load_dotenv()
 
+    _configure_logging()
+
     app = Flask(__name__)
 
-    # --------------------
+    # -------------------------
     # Core config
-    # --------------------
+    # -------------------------
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
     db_url = os.getenv("DATABASE_URL", "sqlite:///bliztech.db")
@@ -61,52 +80,49 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # Cookies (prod)
+    # -------------------------
+    # Proxy / HTTPS settings (Render is behind a proxy)
+    # -------------------------
+    # If you already use ProxyFix somewhere else, keep only ONE place.
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+    # Cookies more secure in production
     app.config["SESSION_COOKIE_HTTPONLY"] = True
-    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+    # Only mark secure cookies in production (https)
+    if os.getenv("FLASK_ENV") == "production":
+        app.config["SESSION_COOKIE_SECURE"] = True
 
-    # External base URL (used for verify links etc.)
-    if os.getenv("RENDER_EXTERNAL_URL"):
-        app.config["RENDER_EXTERNAL_URL"] = os.getenv("RENDER_EXTERNAL_URL")
-
-    # --------------------
-    # Logging
-    # --------------------
-    configure_logging()
-    app.logger = RequestLoggerAdapter(app.logger, {})
-
-    # --------------------
-    # Extensions
-    # --------------------
+    # -------------------------
+    # Init extensions
+    # -------------------------
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
 
-    # --------------------
-    # Request hooks
-    # --------------------
+    # -------------------------
+    # Request IDs + anon session ID
+    # -------------------------
     @app.before_request
-    def attach_request_id_and_anon_id():
-        g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:12]
+    def ensure_ids():
+        # anonymous id (for anonymous progress)
         if "anon_id" not in session:
             session["anon_id"] = f"anon:{uuid.uuid4().hex}"
 
-    @app.after_request
-    def add_request_id_header(resp):
-        resp.headers["X-Request-ID"] = getattr(g, "request_id", "-")
-        return resp
+        # request id (for logs + tracing)
+        g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
 
-    # --------------------
-    # Health check
-    # --------------------
+    # -------------------------
+    # Health check (Phase 4)
+    # -------------------------
     @app.get("/healthz")
     def healthz():
-        return {"status": "ok"}, 200
+        return jsonify({"status": "ok"})
 
-    # --------------------
+    # -------------------------
     # Blueprints
-    # --------------------
+    # -------------------------
     from app.blueprints.main.routes import main_bp
     from app.blueprints.topics.routes import topics_bp
     from app.blueprints.quizzes.routes import quizzes_bp
@@ -126,7 +142,5 @@ def create_app():
         from app.blueprints.main.test_email import test_bp
         app.register_blueprint(test_bp)
 
-    # ✅ Safe now (no request context needed)
     app.logger.info("Application started successfully")
-
     return app
