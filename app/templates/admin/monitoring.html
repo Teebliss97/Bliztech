@@ -16,6 +16,41 @@
     </div>
   </div>
 
+  <!-- Phase 5.3: Retention cleanup -->
+  <div style="margin-top:14px; border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px;">
+    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+      <div>
+        <div style="font-weight:600;">Retention cleanup</div>
+        <div style="opacity:0.8; font-size:12px; margin-top:6px;">
+          Keeps your database small by deleting old records (Security Events + Admin Audit Logs).
+        </div>
+      </div>
+      <div style="opacity:0.8; font-size:12px;">
+        Recommended: SecurityEvent 30 days • Audit 180 days
+      </div>
+    </div>
+
+    <form method="post" action="{{ url_for('admin.monitoring_cleanup') }}"
+          style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-top:12px;">
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="font-size:12px; opacity:0.8;">Keep Security Events (days)</label>
+        <input name="keep_security_days" value="30"
+               style="width:180px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label style="font-size:12px; opacity:0.8;">Keep Admin Audit Logs (days)</label>
+        <input name="keep_audit_days" value="180"
+               style="width:200px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
+      </div>
+
+      <button class="btn" type="submit"
+              onclick="return confirm('This will delete old records. Continue?');">
+        Run cleanup
+      </button>
+    </form>
+  </div>
+
   <!-- Filters -->
   <div style="margin-top:14px; border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px;">
     <form method="get" action="{{ url_for('admin.monitoring') }}" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
