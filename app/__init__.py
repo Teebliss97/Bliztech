@@ -3,7 +3,7 @@ import uuid
 import logging
 from logging.config import dictConfig
 
-from flask import Flask, session, request, g
+from flask import Flask, session, request, g, has_request_context
 from dotenv import load_dotenv
 
 from app.extensions import db, login_manager, migrate
@@ -36,7 +36,11 @@ def configure_logging():
 
 class RequestLoggerAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
-        rid = getattr(g, "request_id", "-")
+        # ✅ Only access g/request_id when we are inside a request
+        if has_request_context():
+            rid = getattr(g, "request_id", "-")
+        else:
+            rid = "-"
         return f"rid={rid} {msg}", kwargs
 
 
@@ -57,10 +61,12 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    # Cookies (prod)
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.config["SESSION_COOKIE_SECURE"] = True
 
+    # External base URL (used for verify links etc.)
     if os.getenv("RENDER_EXTERNAL_URL"):
         app.config["RENDER_EXTERNAL_URL"] = os.getenv("RENDER_EXTERNAL_URL")
 
@@ -81,28 +87,15 @@ def create_app():
     # Request hooks
     # --------------------
     @app.before_request
-    def attach_request_id():
+    def attach_request_id_and_anon_id():
         g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:12]
         if "anon_id" not in session:
             session["anon_id"] = f"anon:{uuid.uuid4().hex}"
 
     @app.after_request
     def add_request_id_header(resp):
-        resp.headers["X-Request-ID"] = g.request_id
+        resp.headers["X-Request-ID"] = getattr(g, "request_id", "-")
         return resp
-
-    # --------------------
-    # Errors
-    # --------------------
-    @app.errorhandler(500)
-    def server_error(err):
-        app.logger.exception("500 error on %s %s", request.method, request.path)
-        return err, 500
-
-    @app.errorhandler(404)
-    def not_found(err):
-        app.logger.info("404 %s %s", request.method, request.path)
-        return err, 404
 
     # --------------------
     # Health check
@@ -128,10 +121,12 @@ def create_app():
     app.register_blueprint(cert_bp)
     app.register_blueprint(admin_bp)
 
+    # Test-only blueprint (disabled on production by default)
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp
         app.register_blueprint(test_bp)
 
+    # ✅ Safe now (no request context needed)
     app.logger.info("Application started successfully")
 
     return app
