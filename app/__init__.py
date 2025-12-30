@@ -1,6 +1,6 @@
 import os
 import uuid
-from flask import Flask, session
+from flask import Flask, session, render_template
 from dotenv import load_dotenv
 
 from app.extensions import db, login_manager, migrate
@@ -46,6 +46,16 @@ def create_app():
     app.register_blueprint(cert_bp)
     app.register_blueprint(admin_bp)
 
+    # ----------------------------
+    # ✅ Production-safe error pages
+    # ----------------------------
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        return render_template("errors/500.html"), 500
 
     # Test-only blueprint (disabled on production by default)
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":

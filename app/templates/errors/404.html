@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="auth-card">
+    <h1 class="page-title">Page not found</h1>
+    <p class="page-subtitle">The page you’re looking for doesn’t exist (404).</p>
+
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+      <a class="btn" href="{{ url_for('main.home') }}">Go Home</a>
+      <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View Topics</a>
+    </div>
+  </div>
+{% endblock %}
