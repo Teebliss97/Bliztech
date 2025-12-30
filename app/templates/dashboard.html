@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Continue your course and track your growth.</p>
+  </div>
+
+  <div class="course-progress" style="margin-top:14px;">
+    <div class="course-progress-top">
+      <span class="badge">Progress</span>
+      <span class="course-progress-text">
+        <strong>{{ stats.completed }}</strong> / {{ stats.total }} completed • {{ stats.percent }}%
+      </span>
+    </div>
+
+    <div class="course-bar">
+      <div class="course-bar-fill" style="width: {{ stats.percent }}%;"></div>
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+      {% if stats.course_done %}
+        <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Get Certificate</a>
+        <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Review Topics</a>
+      {% else %}
+        {% if resume %}
+          <a class="btn" href="{{ url_for('topics.topic_detail', slug=resume.slug) }}">▶ Continue where you stopped</a>
+          <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=resume.slug) }}">Take Quiz</a>
+        {% elif next_topic %}
+          <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_topic.slug) }}">▶ Continue: {{ next_topic.label }}</a>
+          <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=next_topic.slug) }}">Take Quiz</a>
+        {% else %}
+          <a class="btn" href="{{ url_for('topics.list_topics') }}">Go to Topics</a>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
+      <span class="pill pill-dark">🧾 Total attempts: {{ stats.attempts_total }}</span>
+      {% if stats.last_activity %}
+        <span class="pill pill-dark">🕒 Last activity: {{ stats.last_activity.strftime('%d %b %Y, %H:%M') }}</span>
+      {% else %}
+        <span class="pill pill-dark">🕒 Last activity: Not yet</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="topics-grid" style="margin-top:18px;">
+    {% for r in rows %}
+      <div class="topic-card {% if not r.unlocked %}is-locked{% endif %} {% if r.passed %}is-completed{% endif %}">
+        <div class="topic-top">
+          <div class="topic-title-wrap">
+            <div class="topic-title">{{ r.title }}</div>
+
+            <div class="topic-badges">
+              {% if r.passed %}
+                <span class="pill pill-green">✅ Completed{% if r.score is not none %} • {{ r.score }}%{% endif %}</span>
+              {% elif r.unlocked %}
+                <span class="pill pill-blue">🔓 Unlocked</span>
+              {% else %}
+                <span class="pill pill-gray">🔒 Locked</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="topic-desc">
+          Attempts: <strong>{{ r.attempts }}</strong>
+          {% if r.updated_at %}
+            • Last updated: <strong>{{ r.updated_at.strftime('%d %b %Y') }}</strong>
+          {% endif %}
+        </div>
+
+        <div class="topic-actions">
+          {% if r.unlocked %}
+            <a class="btn" href="{{ url_for('topics.topic_detail', slug=r.slug) }}">Read</a>
+            <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=r.slug) }}">Take Quiz</a>
+          {% else %}
+            <button class="btn btn-disabled" disabled>Read</button>
+            <button class="btn btn-outline btn-disabled" disabled>Take Quiz</button>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top:18px;">
+    <form method="POST" action="{{ url_for('main.reset_progress') }}" class="form" style="max-width:520px;">
+      <h2 class="section-title">Reset progress</h2>
+      <p class="page-subtitle">Type <strong>RESET</strong> to clear your progress for this course.</p>
+      <input name="confirm" placeholder="Type RESET to confirm" required>
+      <button class="btn btn-outline" type="submit" style="margin-top:10px;">Reset</button>
+    </form>
+  </div>
+{% endblock %}

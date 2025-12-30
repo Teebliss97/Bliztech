@@ -37,9 +37,9 @@
         Topics
       </a>
 
-      <a href="{{ url_for('main.my_progress') }}"
-         class="{% if request.endpoint == 'main.my_progress' %}active{% endif %}">
-        My Progress
+      <a href="{{ url_for('main.dashboard') }}"
+         class="{% if request.endpoint in ['main.dashboard', 'main.my_progress'] %}active{% endif %}">
+        Dashboard
       </a>
 
       {% if current_user.is_authenticated %}
