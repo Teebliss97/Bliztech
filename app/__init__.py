@@ -84,44 +84,36 @@ def create_app():
     # -------------------------
     # Proxy / HTTPS settings (Render is behind a proxy)
     # -------------------------
-    # If you already use ProxyFix somewhere else, keep only ONE place.
     from werkzeug.middleware.proxy_fix import ProxyFix
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
     # Cookies more secure in production
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
-    # Only mark secure cookies in production (https)
     if os.getenv("FLASK_ENV") == "production":
         app.config["SESSION_COOKIE_SECURE"] = True
 
     # -------------------------
     # Canonical domain enforcement (Phase 4.1)
     # -------------------------
-    # Recommended canonical: https://bliztechacademy.com (non-www)
     CANONICAL_HOST = os.getenv("CANONICAL_HOST", "bliztechacademy.com")
 
     @app.before_request
     def enforce_canonical_domain():
-        # Avoid breaking local development
         if request.host.startswith("localhost") or request.host.startswith("127.0.0.1"):
             return
 
-        # Determine scheme (ProxyFix usually makes request.scheme correct)
         proto = request.headers.get("X-Forwarded-Proto", request.scheme)
 
-        # Split current URL
         parts = urlsplit(request.url)
         host = request.host
 
-        # Enforce HTTPS + canonical host
         needs_https = (proto != "https") or (parts.scheme != "https")
         needs_host = (host != CANONICAL_HOST)
 
         if needs_https or needs_host:
             new_scheme = "https"
             new_netloc = CANONICAL_HOST
-            # Keep path + query exactly as-is
             new_url = urlunsplit((new_scheme, new_netloc, parts.path, parts.query, parts.fragment))
             return redirect(new_url, code=301)
 
@@ -130,24 +122,22 @@ def create_app():
     # -------------------------
     SECURITY_HEADERS_ENABLED = os.getenv("SECURITY_HEADERS_ENABLED", "1") == "1"
     HSTS_ENABLED = os.getenv("HSTS_ENABLED", "1") == "1"
-    HSTS_PRELOAD = os.getenv("HSTS_PRELOAD", "0") == "1"  # enable later only when ready
-    CSP_REPORT_ONLY = os.getenv("CSP_REPORT_ONLY", "1") == "1"  # start report-only to avoid breaking pages
+    HSTS_PRELOAD = os.getenv("HSTS_PRELOAD", "0") == "1"
+    CSP_REPORT_ONLY = os.getenv("CSP_REPORT_ONLY", "1") == "1"
 
     def _build_csp() -> str:
-        # Start reasonably strict, but safe for most Flask apps.
-        # If you use external CDNs (fonts, analytics), we’ll add domains later.
         directives = {
             "default-src": ["'self'"],
             "base-uri": ["'self'"],
             "object-src": ["'none'"],
-            "frame-ancestors": ["'none'"],  # prevents clickjacking (better than X-Frame-Options)
+            "frame-ancestors": ["'none'"],
             "form-action": ["'self'"],
             "img-src": ["'self'", "data:"],
             "font-src": ["'self'", "data:"],
-            "style-src": ["'self'", "'unsafe-inline'"],  # many templates need inline styles; tighten later
-            "script-src": ["'self'"],  # if you rely on inline JS, we’ll switch to nonce later
+            "style-src": ["'self'", "'unsafe-inline'"],
+            "script-src": ["'self'"],
             "connect-src": ["'self'"],
-            "upgrade-insecure-requests": [],  # harmless since you already force https
+            "upgrade-insecure-requests": [],
         }
 
         parts = []
@@ -165,27 +155,19 @@ def create_app():
         if not SECURITY_HEADERS_ENABLED:
             return resp
 
-        # Basic hardening
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
-
-        # These help isolate browsing contexts (generally safe)
         resp.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
         resp.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
-
-        # Legacy clickjacking protection (kept as extra, CSP frame-ancestors is primary)
         resp.headers.setdefault("X-Frame-Options", "DENY")
 
-        # HSTS (only meaningful on HTTPS responses)
         if HSTS_ENABLED:
-            # 1 year is standard. Include subdomains when you're sure all subdomains are HTTPS.
             hsts = "max-age=31536000; includeSubDomains"
             if HSTS_PRELOAD:
                 hsts += "; preload"
             resp.headers.setdefault("Strict-Transport-Security", hsts)
 
-        # CSP (start Report-Only, then enforce when confirmed)
         if CSP_REPORT_ONLY:
             resp.headers.setdefault("Content-Security-Policy-Report-Only", CSP_VALUE)
         else:
@@ -203,21 +185,17 @@ def create_app():
     # -------------------------
     # Rate limiting (Phase 4.3)
     # -------------------------
-    # In-memory storage is OK for a single instance.
-    # If you scale to multiple instances, set RATELIMIT_STORAGE_URI to Redis.
-    limiter_storage = os.getenv("RATELIMIT_STORAGE_URI")  # e.g. "redis://:password@host:6379/0"
+    # Configure storage via app.config (works across Flask-Limiter versions)
+    limiter_storage = os.getenv("RATELIMIT_STORAGE_URI")
+    if limiter_storage:
+        app.config["RATELIMIT_STORAGE_URI"] = limiter_storage
 
-    limiter.init_app(
-        app,
-        storage_uri=limiter_storage,  # None => in-memory
-        default_limits=[
-            os.getenv("RATELIMIT_DEFAULT", "200 per day"),
-            os.getenv("RATELIMIT_DEFAULT_MINUTE", "60 per minute"),
-        ],
-        headers_enabled=True,
-    )
+    app.config["RATELIMIT_HEADERS_ENABLED"] = True
 
-    # Friendly 429 response (helps for API + AJAX)
+    # IMPORTANT: no kwargs here (fixes your Render crash)
+    limiter.init_app(app)
+
+    # Friendly 429 response
     try:
         from flask_limiter.errors import RateLimitExceeded
 
@@ -228,7 +206,6 @@ def create_app():
                 "message": "Too many requests. Please slow down and try again shortly."
             }), 429
     except Exception:
-        # If limiter isn't installed yet (local linting), don't crash app import.
         pass
 
     # -------------------------
@@ -236,11 +213,8 @@ def create_app():
     # -------------------------
     @app.before_request
     def ensure_ids():
-        # anonymous id (for anonymous progress)
         if "anon_id" not in session:
             session["anon_id"] = f"anon:{uuid.uuid4().hex}"
-
-        # request id (for logs + tracing)
         g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
 
     # -------------------------
@@ -267,7 +241,6 @@ def create_app():
     app.register_blueprint(cert_bp)
     app.register_blueprint(admin_bp)
 
-    # Test-only blueprint (disabled on production by default)
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp
         app.register_blueprint(test_bp)
