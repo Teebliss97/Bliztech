@@ -37,7 +37,6 @@ def _audit(action: str, target_type: str = None, target_id: str = None, detail: 
         db.session.add(log)
         db.session.commit()
     except Exception:
-        # Never break admin flows because audit logging failed
         db.session.rollback()
 
 
@@ -197,6 +196,28 @@ def certificate_unrevoke(cert_id: str):
 
     flash("Certificate un-revoked ✅", "success")
     return redirect(url_for("admin.certificate_detail", cert_id=cert.cert_id))
+
+
+# ✅ NEW: Admin Audit Logs (read-only)
+@admin_bp.route("/audit")
+@admin_required
+@limiter.limit("30 per minute")
+def audit_logs():
+    q = (request.args.get("q") or "").strip()
+
+    query = AdminAuditLog.query.order_by(AdminAuditLog.created_at.desc())
+
+    if q:
+        # simple multi-field search
+        query = query.filter(
+            (AdminAuditLog.actor_email.ilike(f"%{q}%"))
+            | (AdminAuditLog.action.ilike(f"%{q}%"))
+            | (AdminAuditLog.target_id.ilike(f"%{q}%"))
+            | (AdminAuditLog.target_type.ilike(f"%{q}%"))
+        )
+
+    logs = query.limit(200).all()
+    return render_template("admin/audit.html", logs=logs, q=q)
 
 
 @admin_bp.route("/bootstrap", methods=["GET", "POST"])

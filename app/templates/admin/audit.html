@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 1100px; margin: 20px auto;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div>
+      <h2 style="margin:0;">Admin Audit Logs</h2>
+      <p style="margin:6px 0 0; opacity:0.85;">
+        Shows admin actions like certificate reissue/revoke, and bootstrap attempts.
+      </p>
+    </div>
+
+    <form method="get" action="{{ url_for('admin.audit_logs') }}" style="display:flex; gap:8px; align-items:center;">
+      <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        placeholder="Search (email, action, cert id...)"
+        style="padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.2); color:inherit; min-width: 260px;"
+      />
+      <button class="btn btn-primary" type="submit">Search</button>
+      {% if q %}
+        <a class="btn btn-outline" href="{{ url_for('admin.audit_logs') }}">Clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div style="margin-top:16px; border:1px solid rgba(255,255,255,0.12); border-radius:14px; overflow:hidden;">
+    <div style="overflow:auto;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background: rgba(255,255,255,0.06);">
+            <th style="text-align:left; padding:12px;">Time (UTC)</th>
+            <th style="text-align:left; padding:12px;">Actor</th>
+            <th style="text-align:left; padding:12px;">Action</th>
+            <th style="text-align:left; padding:12px;">Target</th>
+            <th style="text-align:left; padding:12px;">IP</th>
+            <th style="text-align:left; padding:12px;">Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if not logs %}
+            <tr>
+              <td colspan="6" style="padding:14px; opacity:0.9;">
+                No audit logs yet.
+              </td>
+            </tr>
+          {% else %}
+            {% for log in logs %}
+              <tr style="border-top: 1px solid rgba(255,255,255,0.10);">
+                <td style="padding:12px; white-space:nowrap;">
+                  {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') if log.created_at else '' }}
+                </td>
+                <td style="padding:12px;">
+                  <div style="font-weight:600;">
+                    {{ log.actor_email or 'Unknown' }}
+                  </div>
+                  <div style="opacity:0.8; font-size: 12px;">
+                    user_id={{ log.actor_user_id if log.actor_user_id is not none else '-' }}
+                  </div>
+                </td>
+                <td style="padding:12px; font-weight:600;">
+                  {{ log.action }}
+                </td>
+                <td style="padding:12px;">
+                  <div style="opacity:0.9;">
+                    {{ log.target_type or '' }}
+                  </div>
+                  <div style="font-weight:600;">
+                    {{ log.target_id or '' }}
+                  </div>
+                </td>
+                <td style="padding:12px; white-space:nowrap;">
+                  {{ log.ip or '' }}
+                </td>
+                <td style="padding:12px; max-width: 420px; word-break: break-word; opacity:0.9;">
+                  {{ log.detail or '' }}
+                </td>
+              </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top: 12px; opacity:0.8; font-size: 12px;">
+    Showing up to the latest 200 records.
+  </div>
+</div>
+{% endblock %}
