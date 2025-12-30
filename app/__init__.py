@@ -2,8 +2,9 @@ import os
 import uuid
 import logging
 from logging.config import dictConfig
+from urllib.parse import urlsplit, urlunsplit
 
-from flask import Flask, session, jsonify, g, has_request_context, request
+from flask import Flask, session, jsonify, g, has_request_context, request, redirect
 from dotenv import load_dotenv
 
 from app.extensions import db, login_manager, migrate
@@ -93,6 +94,36 @@ def create_app():
     # Only mark secure cookies in production (https)
     if os.getenv("FLASK_ENV") == "production":
         app.config["SESSION_COOKIE_SECURE"] = True
+
+    # -------------------------
+    # Canonical domain enforcement (Phase 4.1)
+    # -------------------------
+    # Recommended canonical: https://bliztechacademy.com (non-www)
+    CANONICAL_HOST = os.getenv("CANONICAL_HOST", "bliztechacademy.com")
+
+    @app.before_request
+    def enforce_canonical_domain():
+        # Avoid breaking local development
+        if request.host.startswith("localhost") or request.host.startswith("127.0.0.1"):
+            return
+
+        # Determine scheme (ProxyFix usually makes request.scheme correct)
+        proto = request.headers.get("X-Forwarded-Proto", request.scheme)
+
+        # Split current URL
+        parts = urlsplit(request.url)
+        host = request.host
+
+        # Enforce HTTPS + canonical host
+        needs_https = (proto != "https") or (parts.scheme != "https")
+        needs_host = (host != CANONICAL_HOST)
+
+        if needs_https or needs_host:
+            new_scheme = "https"
+            new_netloc = CANONICAL_HOST
+            # Keep path + query exactly as-is
+            new_url = urlunsplit((new_scheme, new_netloc, parts.path, parts.query, parts.fragment))
+            return redirect(new_url, code=301)
 
     # -------------------------
     # Init extensions
