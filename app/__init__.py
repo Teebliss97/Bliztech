@@ -4,7 +4,7 @@ import logging
 from logging.config import dictConfig
 from urllib.parse import urlsplit, urlunsplit
 
-from flask import Flask, session, jsonify, g, has_request_context, request, redirect
+from flask import Flask, session, jsonify, g, has_request_context, request, redirect, Response
 from dotenv import load_dotenv
 
 from app.extensions import db, login_manager, migrate
@@ -124,6 +124,74 @@ def create_app():
             # Keep path + query exactly as-is
             new_url = urlunsplit((new_scheme, new_netloc, parts.path, parts.query, parts.fragment))
             return redirect(new_url, code=301)
+
+    # -------------------------
+    # Security headers (Phase 4.2)
+    # -------------------------
+    SECURITY_HEADERS_ENABLED = os.getenv("SECURITY_HEADERS_ENABLED", "1") == "1"
+    HSTS_ENABLED = os.getenv("HSTS_ENABLED", "1") == "1"
+    HSTS_PRELOAD = os.getenv("HSTS_PRELOAD", "0") == "1"  # enable later only when ready
+    CSP_REPORT_ONLY = os.getenv("CSP_REPORT_ONLY", "1") == "1"  # start report-only to avoid breaking pages
+
+    def _build_csp() -> str:
+        # Start reasonably strict, but safe for most Flask apps.
+        # If you use external CDNs (fonts, analytics), we’ll add domains later.
+        directives = {
+            "default-src": ["'self'"],
+            "base-uri": ["'self'"],
+            "object-src": ["'none'"],
+            "frame-ancestors": ["'none'"],  # prevents clickjacking (better than X-Frame-Options)
+            "form-action": ["'self'"],
+            "img-src": ["'self'", "data:"],
+            "font-src": ["'self'", "data:"],
+            "style-src": ["'self'", "'unsafe-inline'"],  # many templates need inline styles; tighten later
+            "script-src": ["'self'"],  # if you rely on inline JS, we’ll switch to nonce later
+            "connect-src": ["'self'"],
+            "upgrade-insecure-requests": [],  # harmless since you already force https
+        }
+
+        parts = []
+        for k, v in directives.items():
+            if v:
+                parts.append(f"{k} {' '.join(v)}")
+            else:
+                parts.append(f"{k}")
+        return "; ".join(parts)
+
+    CSP_VALUE = _build_csp()
+
+    @app.after_request
+    def set_security_headers(resp: Response):
+        if not SECURITY_HEADERS_ENABLED:
+            return resp
+
+        # Basic hardening
+        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+        resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+
+        # These help isolate browsing contexts (generally safe)
+        resp.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        resp.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
+
+        # Legacy clickjacking protection (kept as extra, CSP frame-ancestors is primary)
+        resp.headers.setdefault("X-Frame-Options", "DENY")
+
+        # HSTS (only meaningful on HTTPS responses)
+        if HSTS_ENABLED:
+            # 1 year is standard. Include subdomains when you're sure all subdomains are HTTPS.
+            hsts = "max-age=31536000; includeSubDomains"
+            if HSTS_PRELOAD:
+                hsts += "; preload"
+            resp.headers.setdefault("Strict-Transport-Security", hsts)
+
+        # CSP (start Report-Only, then enforce when confirmed)
+        if CSP_REPORT_ONLY:
+            resp.headers.setdefault("Content-Security-Policy-Report-Only", CSP_VALUE)
+        else:
+            resp.headers.setdefault("Content-Security-Policy", CSP_VALUE)
+
+        return resp
 
     # -------------------------
     # Init extensions
