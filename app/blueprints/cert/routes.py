@@ -19,7 +19,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
 from app.blueprints.cert import cert_bp
-from app.extensions import db
+from app.extensions import db, limiter
 from app.models import Certificate, Progress
 
 
@@ -70,6 +70,7 @@ def get_or_create_certificate(recipient_name: str):
 
 @cert_bp.route("/", methods=["GET"])
 @login_required
+@limiter.limit("30 per minute")
 def certificate_home():
     required = _required_topics()
     passed_count = _passed_topic_count()
@@ -97,6 +98,7 @@ def certificate_home():
 
 @cert_bp.route("/pdf", methods=["POST"])
 @login_required
+@limiter.limit("10 per minute; 30 per hour")
 def certificate_pdf():
     if not user_completed_course():
         abort(403)
@@ -192,6 +194,7 @@ def certificate_pdf():
 
 
 @cert_bp.route("/verify/<cert_id>", methods=["GET"])
+@limiter.limit("30 per minute; 200 per day")
 def verify_certificate(cert_id: str):
     cert_id = (cert_id or "").strip().upper()
     cert = Certificate.query.filter_by(cert_id=cert_id).first()

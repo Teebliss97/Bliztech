@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import Blueprint, abort, render_template, request, redirect, url_for, flash
 from flask_login import current_user
 
-from app.extensions import db
+from app.extensions import db, limiter
 from app.models import User, Progress, Certificate
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -24,6 +24,7 @@ def admin_required(f):
 
 @admin_bp.route("/")
 @admin_required
+@limiter.limit("60 per minute")
 def dashboard():
     total_users = User.query.count()
     total_progress = Progress.query.count()
@@ -39,6 +40,7 @@ def dashboard():
 
 @admin_bp.route("/users")
 @admin_required
+@limiter.limit("60 per minute")
 def users():
     users = User.query.order_by(User.created_at.desc()).all()
     return render_template("admin/users.html", users=users)
@@ -46,6 +48,7 @@ def users():
 
 @admin_bp.route("/progress")
 @admin_required
+@limiter.limit("60 per minute")
 def progress():
     rows = Progress.query.order_by(Progress.updated_at.desc()).limit(200).all()
     return render_template("admin/progress.html", rows=rows)
@@ -53,6 +56,7 @@ def progress():
 
 @admin_bp.route("/certificates")
 @admin_required
+@limiter.limit("30 per minute")
 def certificates():
     q = (request.args.get("q") or "").strip()
     query = Certificate.query.order_by(Certificate.issued_at.desc())
@@ -71,6 +75,7 @@ def certificates():
 
 @admin_bp.route("/certificates/<cert_id>")
 @admin_required
+@limiter.limit("60 per minute")
 def certificate_detail(cert_id: str):
     cert_id = (cert_id or "").strip().upper()
     cert = Certificate.query.filter_by(cert_id=cert_id).first_or_404()
@@ -91,6 +96,7 @@ def certificate_detail(cert_id: str):
 
 @admin_bp.route("/certificates/<cert_id>/reissue", methods=["POST"])
 @admin_required
+@limiter.limit("10 per minute; 30 per hour")
 def certificate_reissue(cert_id: str):
     cert_id = (cert_id or "").strip().upper()
     cert = Certificate.query.filter_by(cert_id=cert_id).first_or_404()
@@ -109,6 +115,7 @@ def certificate_reissue(cert_id: str):
 
 @admin_bp.route("/certificates/<cert_id>/revoke", methods=["POST"])
 @admin_required
+@limiter.limit("10 per minute; 30 per hour")
 def certificate_revoke(cert_id: str):
     cert_id = (cert_id or "").strip().upper()
     cert = Certificate.query.filter_by(cert_id=cert_id).first_or_404()
@@ -125,6 +132,7 @@ def certificate_revoke(cert_id: str):
 
 @admin_bp.route("/certificates/<cert_id>/unrevoke", methods=["POST"])
 @admin_required
+@limiter.limit("10 per minute; 30 per hour")
 def certificate_unrevoke(cert_id: str):
     cert_id = (cert_id or "").strip().upper()
     cert = Certificate.query.filter_by(cert_id=cert_id).first_or_404()
@@ -140,6 +148,7 @@ def certificate_unrevoke(cert_id: str):
 
 # ✅ One-time bootstrap (optional)
 @admin_bp.route("/bootstrap", methods=["GET", "POST"])
+@limiter.limit("5 per minute; 20 per hour")
 def bootstrap_admin():
     token_env = os.getenv("ADMIN_BOOTSTRAP_TOKEN")
     if not token_env:
