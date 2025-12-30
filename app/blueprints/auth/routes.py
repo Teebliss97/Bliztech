@@ -1,5 +1,6 @@
 import os
 import uuid
+import json
 from datetime import datetime, timedelta
 
 from flask import render_template, request, redirect, url_for, flash, session, current_app
@@ -12,18 +13,37 @@ from app.models import User, Progress, LoginSecurityState
 
 
 def _anon_key():
-    return session.get("anon_id")  # "anon:<uuid>"
+    return session.get("anon_id")
 
 
 def _user_key(user_id: int):
     return f"user:{user_id}"
 
 
+def _mask_email(email: str) -> str:
+    """
+    Mask email for logs: to***@domain.com
+    """
+    email = (email or "").strip().lower()
+    if "@" not in email:
+        return "unknown"
+    name, domain = email.split("@", 1)
+    if len(name) <= 2:
+        masked = "*" * len(name)
+    else:
+        masked = name[:2] + "*" * (len(name) - 2)
+    return f"{masked}@{domain}"
+
+
+def _log_auth_event(event: str, **fields):
+    """
+    Writes JSON as a single log line (easy to search in Render).
+    """
+    payload = {"event": event, **fields}
+    current_app.logger.info(json.dumps(payload, default=str, separators=(",", ":")))
+
+
 def _merge_progress(anon_id: str, user_id: str):
-    """
-    Move anon progress rows to logged-in user.
-    If both exist for same slug: keep best (passed wins, else higher score).
-    """
     anon_rows = Progress.query.filter_by(user_id=anon_id).all()
     if not anon_rows:
         return
@@ -68,12 +88,7 @@ def _ensure_admin_if_allowed(user: User) -> bool:
     return False
 
 
-# ---------------------------
-# Phase 4.4: Login lockout (IP + email)
-# ---------------------------
-
 def _client_ip() -> str:
-    # Works well behind Render + ProxyFix
     xff = request.headers.get("X-Forwarded-For", "")
     if xff:
         return xff.split(",")[0].strip()
@@ -99,49 +114,43 @@ def _get_state(email: str, ip: str) -> LoginSecurityState:
 
 
 def _is_locked(state: LoginSecurityState) -> bool:
-    if state.locked_until and state.locked_until > datetime.utcnow():
-        return True
-    return False
+    return bool(state.locked_until and state.locked_until > datetime.utcnow())
 
 
-def _register_failed_login(email: str, ip: str) -> tuple[bool, int]:
+def _register_failed_login(email: str, ip: str) -> tuple[bool, int, int]:
     """
-    Returns (is_now_locked, seconds_remaining_if_locked)
+    Returns (is_now_locked, seconds_remaining_if_locked, attempts_now)
     """
     max_attempts, window_minutes, ban_minutes = _lockout_config()
     now = datetime.utcnow()
 
     state = _get_state(email, ip)
 
-    # If currently locked, just update last_attempt_at and return
     state.last_attempt_at = now
     if _is_locked(state):
         db.session.add(state)
         db.session.commit()
         seconds = int((state.locked_until - now).total_seconds())
-        return True, max(0, seconds)
+        return True, max(0, seconds), state.attempts or 0
 
-    # Reset window if expired
     window = timedelta(minutes=window_minutes)
     if state.first_attempt_at and (now - state.first_attempt_at) > window:
         state.attempts = 0
         state.first_attempt_at = now
 
-    # Increment attempts
     state.attempts = (state.attempts or 0) + 1
     state.last_attempt_at = now
 
-    # Lock if exceeded
     if state.attempts >= max_attempts:
         state.locked_until = now + timedelta(minutes=ban_minutes)
         db.session.add(state)
         db.session.commit()
         seconds = int((state.locked_until - now).total_seconds())
-        return True, max(0, seconds)
+        return True, max(0, seconds), state.attempts or 0
 
     db.session.add(state)
     db.session.commit()
-    return False, 0
+    return False, 0, state.attempts or 0
 
 
 def _clear_login_state(email: str, ip: str) -> None:
@@ -213,26 +222,41 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
         ip = _client_ip()
+        masked = _mask_email(email)
 
-        # Phase 4.4: block early if locked
+        # Early block if locked
         state = LoginSecurityState.query.filter_by(email=email, ip=ip).first()
         if state and state.locked_until and state.locked_until > datetime.utcnow():
             seconds = int((state.locked_until - datetime.utcnow()).total_seconds())
             minutes = max(1, int(round(seconds / 60)))
+            _log_auth_event("auth_login_blocked_locked", email=masked, ip=ip, minutes_remaining=minutes)
             flash(f"Too many failed attempts. Try again in about {minutes} minute(s).", "error")
             return render_template("auth/login.html")
 
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
-            locked, seconds = _register_failed_login(email=email, ip=ip)
+            locked, seconds, attempts = _register_failed_login(email=email, ip=ip)
             if locked:
                 minutes = max(1, int(round(seconds / 60)))
+                _log_auth_event(
+                    "auth_login_locked",
+                    email=masked,
+                    ip=ip,
+                    attempts=attempts,
+                    ban_minutes=minutes,
+                )
                 flash(f"Too many failed attempts. Try again in about {minutes} minute(s).", "error")
             else:
+                _log_auth_event(
+                    "auth_login_failed",
+                    email=masked,
+                    ip=ip,
+                    attempts=attempts,
+                )
                 flash("Invalid email or password.", "error")
             return render_template("auth/login.html")
 
-        # success: clear lockout state
+        # Success: clear lockout state
         _clear_login_state(email=email, ip=ip)
 
         _ensure_admin_if_allowed(user)
@@ -243,6 +267,7 @@ def login():
             _merge_progress(anon_id, _user_key(user.id))
             session["anon_id"] = f"anon:{uuid.uuid4().hex}"
 
+        _log_auth_event("auth_login_success", email=masked, ip=ip, user_id=user.id)
         flash("Welcome back ✅", "success")
         return redirect(url_for("main.home"))
 
@@ -252,6 +277,7 @@ def login():
 @auth_bp.route("/logout")
 def logout():
     if current_user.is_authenticated:
+        _log_auth_event("auth_logout", user_id=current_user.id, email=_mask_email(current_user.email), ip=_client_ip())
         logout_user()
     flash("Logged out.", "success")
     return redirect(url_for("main.home"))
@@ -262,7 +288,9 @@ def logout():
 def forgot_password():
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
+
         flash("If that email exists, a reset link has been sent.", "success")
+        _log_auth_event("auth_forgot_password_requested", email=_mask_email(email), ip=_client_ip())
 
         user = User.query.filter_by(email=email).first()
         if user:
@@ -305,6 +333,8 @@ def reset_password(token):
 
         user.set_password(password)
         db.session.commit()
+
+        _log_auth_event("auth_password_reset_success", email=_mask_email(user.email), user_id=user.id, ip=_client_ip())
 
         flash("Password updated successfully ✅ Please log in.", "success")
         return redirect(url_for("auth.login"))

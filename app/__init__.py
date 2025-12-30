@@ -1,5 +1,7 @@
 import os
 import uuid
+import json
+import time
 import logging
 from logging.config import dictConfig
 from urllib.parse import urlsplit, urlunsplit
@@ -64,7 +66,6 @@ def _configure_logging():
 
 def create_app():
     load_dotenv()
-
     _configure_logging()
 
     app = Flask(__name__)
@@ -104,7 +105,6 @@ def create_app():
             return
 
         proto = request.headers.get("X-Forwarded-Proto", request.scheme)
-
         parts = urlsplit(request.url)
         host = request.host
 
@@ -112,9 +112,7 @@ def create_app():
         needs_host = (host != CANONICAL_HOST)
 
         if needs_https or needs_host:
-            new_scheme = "https"
-            new_netloc = CANONICAL_HOST
-            new_url = urlunsplit((new_scheme, new_netloc, parts.path, parts.query, parts.fragment))
+            new_url = urlunsplit(("https", CANONICAL_HOST, parts.path, parts.query, parts.fragment))
             return redirect(new_url, code=301)
 
     # -------------------------
@@ -139,13 +137,9 @@ def create_app():
             "connect-src": ["'self'"],
             "upgrade-insecure-requests": [],
         }
-
         parts = []
         for k, v in directives.items():
-            if v:
-                parts.append(f"{k} {' '.join(v)}")
-            else:
-                parts.append(f"{k}")
+            parts.append(f"{k} {' '.join(v)}" if v else f"{k}")
         return "; ".join(parts)
 
     CSP_VALUE = _build_csp()
@@ -185,22 +179,90 @@ def create_app():
     # -------------------------
     # Rate limiting (Phase 4.3)
     # -------------------------
-    # Configure storage via app.config (works across Flask-Limiter versions)
     limiter_storage = os.getenv("RATELIMIT_STORAGE_URI")
     if limiter_storage:
         app.config["RATELIMIT_STORAGE_URI"] = limiter_storage
 
     app.config["RATELIMIT_HEADERS_ENABLED"] = True
-
-    # IMPORTANT: no kwargs here (fixes your Render crash)
     limiter.init_app(app)
 
-    # Friendly 429 response
+    # -------------------------
+    # Monitoring helpers (Phase 5.1)
+    # -------------------------
+    LOG_SECURITY_EVENTS = os.getenv("LOG_SECURITY_EVENTS", "1") == "1"
+    SLOW_REQUEST_MS = int(os.getenv("SLOW_REQUEST_MS", "1200"))
+
+    def _client_ip() -> str:
+        xff = request.headers.get("X-Forwarded-For", "")
+        if xff:
+            return xff.split(",")[0].strip()
+        return request.remote_addr or "unknown"
+
+    def _log_event(event: str, level: str = "info", **fields):
+        """
+        Structured log as one-line JSON in the message field.
+        Shows in Render logs and is easy to filter/search.
+        """
+        if not LOG_SECURITY_EVENTS:
+            return
+        payload = {
+            "event": event,
+            "path": request.path if has_request_context() else None,
+            "method": request.method if has_request_context() else None,
+            "ip": _client_ip() if has_request_context() else None,
+            **fields,
+        }
+        msg = json.dumps(payload, default=str, separators=(",", ":"))
+        getattr(app.logger, level, app.logger.info)(msg)
+
+    # -------------------------
+    # Request IDs + timing + anon session ID
+    # -------------------------
+    @app.before_request
+    def ensure_ids_and_timer():
+        g._t0 = time.time()
+
+        if "anon_id" not in session:
+            session["anon_id"] = f"anon:{uuid.uuid4().hex}"
+
+        g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
+
+    @app.after_request
+    def attach_request_id_and_log(resp: Response):
+        # Always return X-Request-ID to client (useful for debugging)
+        try:
+            resp.headers.setdefault("X-Request-ID", getattr(g, "request_id", ""))
+        except Exception:
+            pass
+
+        # Request timing
+        try:
+            dt_ms = int(round((time.time() - getattr(g, "_t0", time.time())) * 1000))
+        except Exception:
+            dt_ms = None
+
+        # Log slow requests
+        if dt_ms is not None and dt_ms >= SLOW_REQUEST_MS:
+            _log_event("slow_request", level="warning", status=resp.status_code, duration_ms=dt_ms)
+
+        # Log 4xx/5xx (excluding common static assets noise)
+        if resp.status_code >= 400 and not request.path.startswith("/static/"):
+            _log_event("http_error", level="warning", status=resp.status_code, duration_ms=dt_ms)
+
+        return resp
+
+    # Log rate limiting (429) nicely
     try:
         from flask_limiter.errors import RateLimitExceeded
 
         @app.errorhandler(RateLimitExceeded)
         def handle_rate_limit(e):
+            _log_event(
+                "rate_limited",
+                level="warning",
+                endpoint=request.endpoint,
+                limit=str(getattr(e, "description", ""))[:200],
+            )
             return jsonify({
                 "error": "rate_limited",
                 "message": "Too many requests. Please slow down and try again shortly."
@@ -209,16 +271,7 @@ def create_app():
         pass
 
     # -------------------------
-    # Request IDs + anon session ID
-    # -------------------------
-    @app.before_request
-    def ensure_ids():
-        if "anon_id" not in session:
-            session["anon_id"] = f"anon:{uuid.uuid4().hex}"
-        g.request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex
-
-    # -------------------------
-    # Health check (Phase 4)
+    # Health check
     # -------------------------
     @app.get("/healthz")
     def healthz():
