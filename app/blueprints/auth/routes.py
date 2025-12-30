@@ -9,7 +9,7 @@ from flask_login import login_user, logout_user, current_user
 from app.blueprints.auth import auth_bp
 from app.email_utils import send_email
 from app.extensions import db, limiter
-from app.models import User, Progress, LoginSecurityState
+from app.models import User, Progress, LoginSecurityState, SecurityEvent
 
 
 def _anon_key():
@@ -37,10 +37,33 @@ def _mask_email(email: str) -> str:
 
 def _log_auth_event(event: str, **fields):
     """
-    Writes JSON as a single log line (easy to search in Render).
+    Phase 5.2:
+    - JSON logs to Render
+    - Persist to DB (SecurityEvent) if DB_MONITORING_ENABLED=1
     """
     payload = {"event": event, **fields}
     current_app.logger.info(json.dumps(payload, default=str, separators=(",", ":")))
+
+    if os.getenv("DB_MONITORING_ENABLED", "1") != "1":
+        return
+
+    try:
+        ev = SecurityEvent(
+            event=event,
+            ip=fields.get("ip"),
+            email_masked=fields.get("email"),
+            endpoint=request.endpoint,
+            path=request.path,
+            method=request.method,
+            status=None,
+            duration_ms=None,
+            detail=str(fields)[:2000],
+            created_at=datetime.utcnow(),
+        )
+        db.session.add(ev)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
 
 
 def _merge_progress(anon_id: str, user_id: str):

@@ -3,6 +3,7 @@ import uuid
 import json
 import time
 import logging
+from datetime import datetime
 from logging.config import dictConfig
 from urllib.parse import urlsplit, urlunsplit
 
@@ -187,10 +188,11 @@ def create_app():
     limiter.init_app(app)
 
     # -------------------------
-    # Monitoring helpers (Phase 5.1)
+    # Monitoring helpers (Phase 5.1 + 5.2)
     # -------------------------
     LOG_SECURITY_EVENTS = os.getenv("LOG_SECURITY_EVENTS", "1") == "1"
     SLOW_REQUEST_MS = int(os.getenv("SLOW_REQUEST_MS", "1200"))
+    DB_MONITORING_ENABLED = os.getenv("DB_MONITORING_ENABLED", "1") == "1"
 
     def _client_ip() -> str:
         xff = request.headers.get("X-Forwarded-For", "")
@@ -200,11 +202,10 @@ def create_app():
 
     def _log_event(event: str, level: str = "info", **fields):
         """
-        Structured log as one-line JSON in the message field.
-        Shows in Render logs and is easy to filter/search.
+        Phase 5.2:
+        - Always logs JSON to Render logs (if LOG_SECURITY_EVENTS=1)
+        - Optionally persists to DB (if DB_MONITORING_ENABLED=1)
         """
-        if not LOG_SECURITY_EVENTS:
-            return
         payload = {
             "event": event,
             "path": request.path if has_request_context() else None,
@@ -212,8 +213,32 @@ def create_app():
             "ip": _client_ip() if has_request_context() else None,
             **fields,
         }
-        msg = json.dumps(payload, default=str, separators=(",", ":"))
-        getattr(app.logger, level, app.logger.info)(msg)
+
+        if LOG_SECURITY_EVENTS:
+            msg = json.dumps(payload, default=str, separators=(",", ":"))
+            getattr(app.logger, level, app.logger.info)(msg)
+
+        if not DB_MONITORING_ENABLED:
+            return
+
+        # Import here to avoid import cycles
+        try:
+            from app.models import SecurityEvent
+            ev = SecurityEvent(
+                event=event,
+                ip=payload.get("ip"),
+                endpoint=payload.get("endpoint"),
+                path=payload.get("path"),
+                method=payload.get("method"),
+                status=payload.get("status"),
+                duration_ms=payload.get("duration_ms"),
+                detail=str(payload.get("detail") or payload.get("limit") or "")[:2000],
+                created_at=datetime.utcnow(),
+            )
+            db.session.add(ev)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
     # -------------------------
     # Request IDs + timing + anon session ID
@@ -243,11 +268,23 @@ def create_app():
 
         # Log slow requests
         if dt_ms is not None and dt_ms >= SLOW_REQUEST_MS:
-            _log_event("slow_request", level="warning", status=resp.status_code, duration_ms=dt_ms)
+            _log_event(
+                "slow_request",
+                level="warning",
+                endpoint=request.endpoint,
+                status=resp.status_code,
+                duration_ms=dt_ms,
+            )
 
         # Log 4xx/5xx (excluding common static assets noise)
         if resp.status_code >= 400 and not request.path.startswith("/static/"):
-            _log_event("http_error", level="warning", status=resp.status_code, duration_ms=dt_ms)
+            _log_event(
+                "http_error",
+                level="warning",
+                endpoint=request.endpoint,
+                status=resp.status_code,
+                duration_ms=dt_ms,
+            )
 
         return resp
 
@@ -261,6 +298,7 @@ def create_app():
                 "rate_limited",
                 level="warning",
                 endpoint=request.endpoint,
+                status=429,
                 limit=str(getattr(e, "description", ""))[:200],
             )
             return jsonify({

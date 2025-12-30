@@ -1,12 +1,12 @@
 import os
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Blueprint, abort, render_template, request, redirect, url_for, flash
 from flask_login import current_user
 
 from app.extensions import db, limiter
-from app.models import User, Progress, Certificate, AdminAuditLog
+from app.models import User, Progress, Certificate, AdminAuditLog, SecurityEvent, LoginSecurityState
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -64,6 +64,54 @@ def dashboard():
         total_users=total_users,
         total_progress=total_progress,
         passed_count=passed_count,
+    )
+
+
+@admin_bp.route("/monitoring")
+@admin_required
+@limiter.limit("30 per minute")
+def monitoring():
+    now = datetime.utcnow()
+    since_24h = now - timedelta(hours=24)
+
+    def _count(name: str) -> int:
+        return (
+            SecurityEvent.query
+            .filter(SecurityEvent.event == name)
+            .filter(SecurityEvent.created_at >= since_24h)
+            .count()
+        )
+
+    counts = {
+        "rate_limited_24h": _count("rate_limited"),
+        "auth_failed_24h": _count("auth_login_failed"),
+        "auth_locked_24h": _count("auth_login_locked"),
+        "http_error_24h": _count("http_error"),
+        "slow_request_24h": _count("slow_request"),
+    }
+
+    events = (
+        SecurityEvent.query
+        .order_by(SecurityEvent.created_at.desc())
+        .limit(200)
+        .all()
+    )
+
+    locked_now = (
+        LoginSecurityState.query
+        .filter(LoginSecurityState.locked_until != None)  # noqa
+        .filter(LoginSecurityState.locked_until > now)
+        .order_by(LoginSecurityState.locked_until.desc())
+        .limit(200)
+        .all()
+    )
+
+    return render_template(
+        "admin/monitoring.html",
+        counts=counts,
+        events=events,
+        locked_now=locked_now,
+        now=now,
     )
 
 
@@ -198,7 +246,6 @@ def certificate_unrevoke(cert_id: str):
     return redirect(url_for("admin.certificate_detail", cert_id=cert.cert_id))
 
 
-# ✅ NEW: Admin Audit Logs (read-only)
 @admin_bp.route("/audit")
 @admin_required
 @limiter.limit("30 per minute")
@@ -208,7 +255,6 @@ def audit_logs():
     query = AdminAuditLog.query.order_by(AdminAuditLog.created_at.desc())
 
     if q:
-        # simple multi-field search
         query = query.filter(
             (AdminAuditLog.actor_email.ilike(f"%{q}%"))
             | (AdminAuditLog.action.ilike(f"%{q}%"))
