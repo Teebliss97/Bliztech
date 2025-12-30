@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from flask_login import current_user
 
-from app.extensions import db
+from app.extensions import db, limiter
 from app.models import Progress
 from app.blueprints.topics.routes import TOPICS
 from app.email_utils import send_course_completion_email
@@ -514,6 +514,7 @@ QUIZZES = {
 
 
 @quizzes_bp.route("/<slug>")
+@limiter.limit("120 per minute")
 def quiz(slug):
     quiz_data = QUIZZES.get(slug)
     if not quiz_data:
@@ -528,6 +529,7 @@ def quiz(slug):
 
 
 @quizzes_bp.route("/<slug>/submit", methods=["POST"])
+@limiter.limit("30 per minute")
 def submit(slug):
     quiz_data = QUIZZES.get(slug)
     if not quiz_data:
@@ -585,6 +587,7 @@ def submit(slug):
 
 
 @quizzes_bp.route("/<slug>/result")
+@limiter.limit("120 per minute")
 def result(slug):
     quiz_data = QUIZZES.get(slug)
     if not quiz_data:
