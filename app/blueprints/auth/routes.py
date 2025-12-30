@@ -6,7 +6,7 @@ from flask_login import login_user, logout_user, current_user
 
 from app.blueprints.auth import auth_bp
 from app.email_utils import send_email
-from app.extensions import db
+from app.extensions import db, limiter
 from app.models import User, Progress
 
 
@@ -76,6 +76,7 @@ def _ensure_admin_if_allowed(user: User) -> bool:
 
 
 @auth_bp.route("/signup", methods=["GET", "POST"])
+@limiter.limit("3 per minute; 10 per hour")
 def signup():
     if current_user.is_authenticated:
         return redirect(url_for("main.home"))
@@ -128,6 +129,7 @@ def signup():
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute; 20 per hour")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("main.home"))
@@ -170,6 +172,7 @@ def logout():
 # ---------------------------
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
+@limiter.limit("3 per minute; 10 per hour")
 def forgot_password():
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
@@ -197,6 +200,7 @@ def forgot_password():
 
 
 @auth_bp.route("/reset/<token>", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
 def reset_password(token):
     user = User.verify_reset_token(token, max_age_seconds=3600)
     if not user:
