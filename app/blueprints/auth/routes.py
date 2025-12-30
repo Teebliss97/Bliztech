@@ -2,6 +2,7 @@ import os
 import uuid
 import json
 from datetime import datetime, timedelta
+from urllib.parse import urlsplit, urlunsplit
 
 from flask import render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, current_user
@@ -185,6 +186,33 @@ def _clear_login_state(email: str, ip: str) -> None:
         db.session.commit()
 
 
+def _safe_next_url(default_endpoint: str = "main.home") -> str:
+    """
+    Prevent open redirects:
+    - only allow relative paths on this site (e.g. /quiz/topic1)
+    - allow empty => go home
+    """
+    nxt = request.args.get("next") or request.form.get("next") or ""
+    nxt = (nxt or "").strip()
+
+    if not nxt:
+        return url_for(default_endpoint)
+
+    parts = urlsplit(nxt)
+
+    # If user tries to pass an absolute URL (netloc set), ignore it.
+    if parts.scheme or parts.netloc:
+        return url_for(default_endpoint)
+
+    # Ensure it starts with /
+    if not parts.path.startswith("/"):
+        return url_for(default_endpoint)
+
+    # Rebuild safe relative URL (path + query only)
+    safe_rel = urlunsplit(("", "", parts.path, parts.query, ""))
+    return safe_rel
+
+
 @auth_bp.route("/signup", methods=["GET", "POST"])
 @limiter.limit("3 per minute; 10 per hour")
 def signup():
@@ -230,9 +258,10 @@ def signup():
             session["anon_id"] = f"anon:{uuid.uuid4().hex}"
 
         flash("Account created successfully ✅", "success")
-        return redirect(url_for("main.home"))
+        return redirect(_safe_next_url(default_endpoint="main.home"))
 
-    return render_template("auth/signup.html")
+    # Pass next through to template (optional)
+    return render_template("auth/signup.html", next=request.args.get("next", ""))
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -254,7 +283,7 @@ def login():
             minutes = max(1, int(round(seconds / 60)))
             _log_auth_event("auth_login_blocked_locked", email=masked, ip=ip, minutes_remaining=minutes)
             flash(f"Too many failed attempts. Try again in about {minutes} minute(s).", "error")
-            return render_template("auth/login.html")
+            return render_template("auth/login.html", next=request.form.get("next", request.args.get("next", "")))
 
         user = User.query.filter_by(email=email).first()
         if not user or not user.check_password(password):
@@ -277,7 +306,7 @@ def login():
                     attempts=attempts,
                 )
                 flash("Invalid email or password.", "error")
-            return render_template("auth/login.html")
+            return render_template("auth/login.html", next=request.form.get("next", request.args.get("next", "")))
 
         # Success: clear lockout state
         _clear_login_state(email=email, ip=ip)
@@ -292,9 +321,9 @@ def login():
 
         _log_auth_event("auth_login_success", email=masked, ip=ip, user_id=user.id)
         flash("Welcome back ✅", "success")
-        return redirect(url_for("main.home"))
+        return redirect(_safe_next_url(default_endpoint="main.home"))
 
-    return render_template("auth/login.html")
+    return render_template("auth/login.html", next=request.args.get("next", ""))
 
 
 @auth_bp.route("/logout")
@@ -343,8 +372,8 @@ def reset_password(token):
         return redirect(url_for("auth.forgot_password"))
 
     if request.method == "POST":
-        password = request.form.get("password") or ""
-        confirm = request.form.get("confirm") or ""
+        password = (request.form.get("password") or "").strip()
+        confirm = (request.form.get("confirm") or "").strip()
 
         if len(password) < 8:
             flash("Password should be at least 8 characters.", "error")

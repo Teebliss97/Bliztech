@@ -1,8 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+  {% set anon = is_anon|default(false) %}
+
   <h1 class="page-title">{{ quiz.title }}</h1>
   <p class="page-subtitle">Pass mark: {{ pass_mark }}%. Answer all questions then submit.</p>
+
+  {% if anon %}
+    <div class="topic-lock-hint" style="margin: 12px 0;">
+      🔐 Please <a href="{{ url_for('auth.login', next=request.path) }}">log in</a> to take quizzes and track your progress.
+    </div>
+  {% endif %}
 
   <div class="quiz-shell">
     <div class="quiz-top">
@@ -30,7 +38,8 @@
                   type="radio"
                   name="q{{ q_index }}"
                   value="{{ loop.index0 }}"
-                  required
+                  {% if not anon %}required{% endif %}
+                  {% if anon %}disabled{% endif %}
                 >
                 <span class="choice-dot"></span>
                 <span class="choice-text">{{ choice }}</span>
@@ -42,7 +51,14 @@
 
       <div class="quiz-actions">
         <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">← Back to Topics</a>
-        <button class="btn" type="submit">Submit Quiz</button>
+
+        {% if anon %}
+          <a class="btn" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=slug)) }}">
+            Log in to submit
+          </a>
+        {% else %}
+          <button class="btn" type="submit">Submit Quiz</button>
+        {% endif %}
       </div>
     </form>
   </div>

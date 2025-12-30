@@ -5,6 +5,15 @@
     <h1 class="page-title">Topics</h1>
     <p class="page-subtitle">Read a topic, take the quiz, and unlock the next one.</p>
 
+    {% if is_anon %}
+      <div class="topic-lock-hint" style="margin-top:10px;">
+        🔐 Create a free account to take quizzes, track progress, unlock topics, and earn a certificate.
+        <a href="{{ url_for('auth.signup', next=request.path) }}">Sign up</a>
+        or
+        <a href="{{ url_for('auth.login', next=request.path) }}">Log in</a>.
+      </div>
+    {% endif %}
+
     <!-- Overall Progress -->
     <div class="course-progress">
       <div class="course-progress-top">
@@ -23,6 +32,12 @@
         <div style="margin-top:14px;">
           <a class="btn" href="{{ url_for('cert.certificate_home') }}">
             🎓 Get Certificate (PDF)
+          </a>
+        </div>
+      {% elif is_anon %}
+        <div style="margin-top:14px;">
+          <a class="btn" href="{{ url_for('auth.signup', next=request.path) }}">
+            🎓 Sign up to earn a Certificate
           </a>
         </div>
       {% endif %}
@@ -57,18 +72,35 @@
         </div>
 
         <div class="topic-actions">
-          {% if t.unlocked %}
+          {# Phase 6:
+             - anon can always READ
+             - quizzes require login
+             - for logged-in users: keep unlock rules exactly as before
+          #}
+
+          {% if is_anon %}
             <a class="btn" href="{{ url_for('topics.topic_detail', slug=t.slug) }}">Read</a>
-            <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=t.slug) }}">Take Quiz</a>
+            <a class="btn btn-outline" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=t.slug)) }}">
+              Log in to take quiz
+            </a>
           {% else %}
-            <button class="btn btn-disabled" disabled>Read</button>
-            <button class="btn btn-outline btn-disabled" disabled>Take Quiz</button>
+            {% if t.unlocked %}
+              <a class="btn" href="{{ url_for('topics.topic_detail', slug=t.slug) }}">Read</a>
+              <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=t.slug) }}">Take Quiz</a>
+            {% else %}
+              <button class="btn btn-disabled" disabled>Read</button>
+              <button class="btn btn-outline btn-disabled" disabled>Take Quiz</button>
+            {% endif %}
           {% endif %}
         </div>
 
-        {% if not t.unlocked %}
+        {% if not is_anon and not t.unlocked %}
           <div class="topic-lock-hint">
             Pass the previous quiz to unlock this topic.
+          </div>
+        {% elif is_anon %}
+          <div class="topic-lock-hint">
+            Log in to take quizzes and unlock topics.
           </div>
         {% endif %}
       </div>

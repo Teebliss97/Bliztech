@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+  {% set anon = is_anon|default(false) %}
+
   <div class="top-actions" style="display:flex; gap:10px; flex-wrap:wrap; margin:14px 0;">
     <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">← Back to Topics</a>
-    {% if passed and next_slug %}
+    {% if not anon and passed and next_slug %}
       <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_slug) }}">Next Topic →</a>
     {% endif %}
   </div>
@@ -11,6 +13,12 @@
   <h1 class="page-title">Quiz Result</h1>
 
   <div class="result-shell">
+
+    {% if anon %}
+      <div class="topic-lock-hint" style="margin: 12px 0;">
+        🔐 Please <a href="{{ url_for('auth.login', next=request.path) }}">log in</a> to track progress, unlock topics, and access your certificate.
+      </div>
+    {% endif %}
 
     {% if passed %}
       <div class="result-banner pass pop-in">
@@ -30,15 +38,20 @@
 
         <div class="result-actions">
 
-          {% if show_certificate_btn %}
+          {% if not anon and show_certificate_btn %}
             <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
           {% endif %}
 
-          {% if next_slug %}
+          {% if not anon and next_slug %}
             <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_slug) }}">Next Topic →</a>
           {% endif %}
+
           <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Back to Topics</a>
           <a class="btn btn-outline" href="{{ url_for('topics.topic_detail', slug=result.slug) }}">Review Lesson</a>
+
+          {% if anon %}
+            <a class="btn" href="{{ url_for('auth.login', next=request.path) }}">Log in to save progress</a>
+          {% endif %}
         </div>
       </div>
     {% else %}
@@ -58,7 +71,11 @@
         </p>
 
         <div class="result-actions">
-          <a class="btn" href="{{ url_for('quizzes.quiz', slug=result.slug) }}">Retry Quiz</a>
+          {% if anon %}
+            <a class="btn" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=result.slug)) }}">Log in to retry</a>
+          {% else %}
+            <a class="btn" href="{{ url_for('quizzes.quiz', slug=result.slug) }}">Retry Quiz</a>
+          {% endif %}
           <a class="btn btn-outline" href="{{ url_for('topics.topic_detail', slug=result.slug) }}">Review Lesson</a>
           <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Back to Topics</a>
         </div>

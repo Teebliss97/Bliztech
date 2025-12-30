@@ -8,11 +8,27 @@
         Read carefully, then take the quiz to unlock the next topic.
         {% if topic.time %}<span class="lesson-time">⏱ {{ topic.time }}</span>{% endif %}
       </p>
+
+      {% if is_anon %}
+        <p class="muted" style="margin-top:8px;">
+          🔐 Create a free account to take quizzes, track progress, unlock topics, and earn a certificate.
+          <a href="{{ url_for('auth.signup', next=request.path) }}">Sign up</a>
+          or
+          <a href="{{ url_for('auth.login', next=request.path) }}">Log in</a>.
+        </p>
+      {% endif %}
     </div>
 
     <div class="lesson-header-actions">
       <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">← Back</a>
-      <a class="btn" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">Take Quiz</a>
+
+      {% if is_anon %}
+        <a class="btn" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=topic.slug)) }}">
+          Log in to take quiz
+        </a>
+      {% else %}
+        <a class="btn" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">Take Quiz</a>
+      {% endif %}
     </div>
   </div>
 
@@ -44,7 +60,16 @@
         <p class="side-text">
           When you’re ready, click <strong>Take Quiz</strong>.
         </p>
-        <a class="btn" style="margin-top:10px; width:100%;" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">Take Quiz</a>
+
+        {% if is_anon %}
+          <a class="btn" style="margin-top:10px; width:100%;" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=topic.slug)) }}">
+            Log in to take quiz
+          </a>
+        {% else %}
+          <a class="btn" style="margin-top:10px; width:100%;" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">
+            Take Quiz
+          </a>
+        {% endif %}
       </div>
     </aside>
   </div>

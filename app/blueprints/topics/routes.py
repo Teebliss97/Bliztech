@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, session, url_for
 from flask_login import current_user
 
 from app.models import Progress
@@ -22,32 +22,30 @@ TOPIC_MAP = {t["slug"]: t for t in TOPICS}
 
 
 # -------------------------
-# IMPORTANT: Progress key
+# Phase 6: Soft gating rules
 # -------------------------
-def _progress_key():
+def _user_progress_key() -> str | None:
     """
-    Use a stable key for progress:
-    - logged in users:  user:<id>
-    - anonymous users:  anon:<uuid>  (stored in session)
+    Phase 6 decision:
+    - Only logged-in users have stored progress.
+    - Anonymous users can READ topics but do NOT track progress / unlock.
     """
     if current_user.is_authenticated:
         return f"user:{current_user.id}"
-    
-    if "anon_id" not in session:
-        import uuid
-        session["anon_id"] = f"anon:{uuid.uuid4().hex}"
-        
-    return session.get("anon_id")
+    return None
 
 
-def _progress_dict(user_id: str) -> dict:
+def _progress_dict(user_id: str | None) -> dict:
     if not user_id:
         return {}
     rows = Progress.query.filter_by(user_id=user_id).all()
     return {r.slug: r.to_dict() for r in rows}
 
 
-def _is_unlocked(slug: str, progress: dict) -> bool:
+def _is_unlocked_for_logged_in(slug: str, progress: dict) -> bool:
+    """
+    Unlock logic applies only to logged-in users (progress-based).
+    """
     if slug == "topic1":
         return True
 
@@ -60,16 +58,12 @@ def _is_unlocked(slug: str, progress: dict) -> bool:
 
 
 def _course_completed(progress: dict) -> bool:
-    """
-    True if all topics are passed in progress dict.
-    (Ignores any special slugs like __course_completion_emailed__)
-    """
     return all(bool(progress.get(t["slug"], {}).get("passed")) for t in TOPICS)
 
 
 @topics_bp.route("/")
 def list_topics():
-    user_id = _progress_key()
+    user_id = _user_progress_key()
     progress = _progress_dict(user_id)
 
     view = []
@@ -77,9 +71,17 @@ def list_topics():
 
     for t in TOPICS:
         slug = t["slug"]
-        unlocked = _is_unlocked(slug, progress)
-        p = progress.get(slug, {})
-        completed = bool(p.get("passed"))
+
+        # Phase 6:
+        # - anon users can view everything, but we do NOT unlock via progress for them.
+        # - logged-in users follow the normal unlocking rules.
+        if current_user.is_authenticated:
+            unlocked = _is_unlocked_for_logged_in(slug, progress)
+        else:
+            unlocked = True  # allow reading lessons freely for anon
+
+        p = progress.get(slug, {}) if current_user.is_authenticated else {}
+        completed = bool(p.get("passed")) if current_user.is_authenticated else False
 
         if completed:
             completed_count += 1
@@ -89,14 +91,17 @@ def list_topics():
             "unlocked": unlocked,
             "completed": completed,
             "score": p.get("score"),
-            "attempts": p.get("attempts", 0),
+            "attempts": p.get("attempts", 0) if current_user.is_authenticated else 0,
         })
 
     total = len(TOPICS)
     progress_pct = int(round((completed_count / total) * 100)) if total else 0
 
-    # ✅ Certificate button only for logged-in users who completed all topics
+    # Certificate only for logged-in users who completed all topics
     can_get_certificate = bool(current_user.is_authenticated and _course_completed(progress))
+
+    # For template UI (nice CTA)
+    login_url = url_for("auth.login", next=url_for("topics.list_topics"))
 
     return render_template(
         "topics/list.html",
@@ -105,6 +110,8 @@ def list_topics():
         total_topics=total,
         progress_pct=progress_pct,
         can_get_certificate=can_get_certificate,
+        is_anon=not current_user.is_authenticated,
+        login_url=login_url,
     )
 
 
@@ -114,14 +121,23 @@ def topic_detail(slug):
     if not topic:
         return "Topic not found", 404
 
-    user_id = _progress_key()
-    progress = _progress_dict(user_id)
+    # Phase 6:
+    # - anon users can read topic content (no 403 locked page)
+    # - unlocking rules apply only to logged-in users
+    if current_user.is_authenticated:
+        user_id = _user_progress_key()
+        progress = _progress_dict(user_id)
 
-    if not _is_unlocked(slug, progress):
-        return render_template("topics/locked.html", topic=topic), 403
+        if not _is_unlocked_for_logged_in(slug, progress):
+            # Keep your existing locked experience for logged-in users
+            return render_template("topics/locked.html", topic=topic), 403
+
+    login_url = url_for("auth.login", next=url_for("topics.topic_detail", slug=slug))
 
     return render_template(
         "topics/detail.html",
         topic=topic,
-        content_template=topic["content"]
+        content_template=topic["content"],
+        is_anon=not current_user.is_authenticated,
+        login_url=login_url,
     )

@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.parse import urlsplit, urlunsplit, urlencode
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from flask_login import current_user
@@ -17,18 +18,36 @@ COURSE_EMAIL_FLAG_SLUG = "__course_completion_emailed__"
 
 
 # -------------------------
-# IMPORTANT: Progress key
+# Phase 6: Soft gating helper
+# -------------------------
+def _login_required_redirect(message: str):
+    """
+    Redirect anon users to login, with ?next=<current_url>.
+    Uses the SAME auth blueprint you already have: auth.login
+    """
+    flash(message, "error")
+
+    # Build next URL safely (absolute URL -> relative path+query)
+    parts = urlsplit(request.url)
+    next_path = urlunsplit(("", "", parts.path, parts.query, ""))
+    return redirect(url_for("auth.login", next=next_path))
+
+
+def _require_account(message: str = "Please log in to take quizzes and track your progress."):
+    if not current_user.is_authenticated:
+        return _login_required_redirect(message)
+    return None
+
+
+# -------------------------
+# Progress (logged-in ONLY)
 # -------------------------
 def _progress_key() -> str:
     """
-    Use a stable key for progress:
-    - logged in users:  user:<id>
-    - anonymous users:  anon:<uuid>  (stored in session)
+    Phase 6:
+    - Only logged-in users can take quizzes / write progress.
     """
-    if current_user.is_authenticated:
-        return f"user:{current_user.id}"
-    # create_app() should already ensure anon_id exists, but keep it safe:
-    return session.get("anon_id") or "anon:missing"
+    return f"user:{current_user.id}"
 
 
 def _progress_map(progress_user_id: str) -> dict:
@@ -38,8 +57,8 @@ def _progress_map(progress_user_id: str) -> dict:
 
 def _is_unlocked(slug: str, progress_user_id: str) -> bool:
     """
-    Topic1 is always unlocked.
-    TopicN is unlocked only if Topic(N-1) is passed.
+    Topic1 quiz is always unlocked.
+    TopicN quiz unlocked only if Topic(N-1) is passed.
     """
     if slug == "topic1":
         return True
@@ -89,7 +108,6 @@ def _mark_completion_email_sent(progress_user_id: str) -> None:
 # -------------------------
 # QUIZZES DATA
 # -------------------------
-
 QUIZZES = {
     "topic1": {
         "title": "Topic 1 Quiz: Introduction to Cybersecurity",
@@ -516,6 +534,11 @@ QUIZZES = {
 @quizzes_bp.route("/<slug>")
 @limiter.limit("120 per minute")
 def quiz(slug):
+    # Phase 6: must be logged in to take quizzes
+    gate = _require_account("Please log in to take quizzes and track your progress.")
+    if gate:
+        return gate
+
     quiz_data = QUIZZES.get(slug)
     if not quiz_data:
         return "Quiz not found", 404
@@ -531,6 +554,11 @@ def quiz(slug):
 @quizzes_bp.route("/<slug>/submit", methods=["POST"])
 @limiter.limit("30 per minute")
 def submit(slug):
+    # Phase 6: must be logged in to submit quizzes / write progress
+    gate = _require_account("Please log in to submit quizzes and save your score.")
+    if gate:
+        return gate
+
     quiz_data = QUIZZES.get(slug)
     if not quiz_data:
         return "Quiz not found", 404
@@ -568,7 +596,7 @@ def submit(slug):
     db.session.commit()
 
     # ✅ Send completion email ONLY when Topic 10 is passed AND course is fully completed (logged-in only)
-    if current_user.is_authenticated and passed and slug == "topic10":
+    if passed and slug == "topic10":
         if not _completion_email_already_sent(progress_user_id):
             if _all_topics_completed(progress_user_id):
                 ok = send_course_completion_email(current_user.email)
@@ -589,6 +617,11 @@ def submit(slug):
 @quizzes_bp.route("/<slug>/result")
 @limiter.limit("120 per minute")
 def result(slug):
+    # Phase 6: results page also requires login (since quiz requires login)
+    gate = _require_account("Please log in to view quiz results and continue the course.")
+    if gate:
+        return gate
+
     quiz_data = QUIZZES.get(slug)
     if not quiz_data:
         return "Quiz not found", 404
@@ -614,7 +647,7 @@ def result(slug):
     # - passed
     # - all topics completed
     show_certificate_btn = False
-    if current_user.is_authenticated and slug == "topic10" and passed:
+    if slug == "topic10" and passed:
         progress_user_id = _progress_key()
         show_certificate_btn = _all_topics_completed(progress_user_id)
 
