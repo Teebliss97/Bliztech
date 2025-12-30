@@ -6,9 +6,39 @@ from flask import Blueprint, abort, render_template, request, redirect, url_for,
 from flask_login import current_user
 
 from app.extensions import db, limiter
-from app.models import User, Progress, Certificate
+from app.models import User, Progress, Certificate, AdminAuditLog
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+
+
+def _client_ip() -> str:
+    xff = request.headers.get("X-Forwarded-For", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def _audit(action: str, target_type: str = None, target_id: str = None, detail: str = None):
+    """
+    Durable admin audit log.
+    """
+    try:
+        log = AdminAuditLog(
+            actor_user_id=getattr(current_user, "id", None) if current_user.is_authenticated else None,
+            actor_email=getattr(current_user, "email", None) if current_user.is_authenticated else None,
+            action=action,
+            target_type=target_type,
+            target_id=target_id,
+            ip=_client_ip(),
+            user_agent=(request.headers.get("User-Agent") or "")[:300],
+            detail=detail,
+            created_at=datetime.utcnow(),
+        )
+        db.session.add(log)
+        db.session.commit()
+    except Exception:
+        # Never break admin flows because audit logging failed
+        db.session.rollback()
 
 
 def admin_required(f):
@@ -102,6 +132,7 @@ def certificate_reissue(cert_id: str):
     cert = Certificate.query.filter_by(cert_id=cert_id).first_or_404()
 
     import uuid
+    old_id = cert.cert_id
     cert.cert_id = uuid.uuid4().hex[:12].upper()
     cert.issued_at = datetime.utcnow()
     cert.revoked = False
@@ -109,6 +140,14 @@ def certificate_reissue(cert_id: str):
     cert.revoked_reason = None
 
     db.session.commit()
+
+    _audit(
+        action="CERT_REISSUE",
+        target_type="certificate",
+        target_id=old_id,
+        detail=f"new_cert_id={cert.cert_id}",
+    )
+
     flash("Certificate re-issued with a new ID ✅", "success")
     return redirect(url_for("admin.certificate_detail", cert_id=cert.cert_id))
 
@@ -126,6 +165,13 @@ def certificate_revoke(cert_id: str):
     cert.revoked_reason = reason
     db.session.commit()
 
+    _audit(
+        action="CERT_REVOKE",
+        target_type="certificate",
+        target_id=cert.cert_id,
+        detail=f"reason={reason or ''}",
+    )
+
     flash("Certificate revoked.", "success")
     return redirect(url_for("admin.certificate_detail", cert_id=cert.cert_id))
 
@@ -142,11 +188,17 @@ def certificate_unrevoke(cert_id: str):
     cert.revoked_reason = None
     db.session.commit()
 
+    _audit(
+        action="CERT_UNREVOKE",
+        target_type="certificate",
+        target_id=cert.cert_id,
+        detail="",
+    )
+
     flash("Certificate un-revoked ✅", "success")
     return redirect(url_for("admin.certificate_detail", cert_id=cert.cert_id))
 
 
-# ✅ One-time bootstrap (optional)
 @admin_bp.route("/bootstrap", methods=["GET", "POST"])
 @limiter.limit("5 per minute; 20 per hour")
 def bootstrap_admin():
@@ -163,17 +215,20 @@ def bootstrap_admin():
         email = (request.form.get("email") or "").strip().lower()
 
         if token != token_env:
+            _audit(action="ADMIN_BOOTSTRAP_FAIL", target_type="user", target_id=email, detail="bad_token")
             flash("Invalid token.", "error")
             return redirect(url_for("admin.bootstrap_admin"))
 
         user = User.query.filter_by(email=email).first()
         if not user:
+            _audit(action="ADMIN_BOOTSTRAP_FAIL", target_type="user", target_id=email, detail="user_not_found")
             flash("User not found. Register first, then try again.", "error")
             return redirect(url_for("admin.bootstrap_admin"))
 
         user.is_admin = True
         db.session.commit()
 
+        _audit(action="ADMIN_BOOTSTRAP_SUCCESS", target_type="user", target_id=email, detail="")
         flash(f"{email} is now an admin ✅", "success")
         return redirect(url_for("auth.login"))
 

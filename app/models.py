@@ -74,3 +74,52 @@ class Certificate(db.Model):
         super().__init__(**kwargs)
         if not getattr(self, "cert_id", None):
             self.cert_id = uuid.uuid4().hex[:12].upper()
+
+
+class LoginSecurityState(db.Model):
+    """
+    Tracks failed login attempts by (ip + email).
+    Used for lockout / temporary bans.
+    """
+    __tablename__ = "login_security_state"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Normalize email to lower-case when saving
+    email = db.Column(db.String(255), nullable=False, index=True)
+    ip = db.Column(db.String(64), nullable=False, index=True)
+
+    attempts = db.Column(db.Integer, nullable=False, default=0)
+    first_attempt_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    locked_until = db.Column(db.DateTime, nullable=True)
+
+    last_attempt_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("email", "ip", name="uq_login_security_email_ip"),
+    )
+
+
+class AdminAuditLog(db.Model):
+    """
+    Durable audit log for admin actions (reissue/revoke/unrevoke/bootstrap).
+    """
+    __tablename__ = "admin_audit_log"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    actor_user_id = db.Column(db.Integer, nullable=True, index=True)
+    actor_email = db.Column(db.String(255), nullable=True, index=True)
+
+    action = db.Column(db.String(100), nullable=False, index=True)  # e.g. "CERT_REISSUE"
+    target_type = db.Column(db.String(50), nullable=True)          # e.g. "certificate"
+    target_id = db.Column(db.String(100), nullable=True, index=True)  # e.g. cert_id
+
+    ip = db.Column(db.String(64), nullable=True)
+    user_agent = db.Column(db.String(300), nullable=True)
+
+    # Small JSON-ish text or summary string (kept simple)
+    detail = db.Column(db.Text, nullable=True)
+
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
