@@ -8,3 +8,4 @@ sendgrid
 Flask-Migrate
 psycopg[binary]
 reportlab
+Flask-Limiter==3.8.0

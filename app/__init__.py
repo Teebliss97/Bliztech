@@ -7,7 +7,7 @@ from urllib.parse import urlsplit, urlunsplit
 from flask import Flask, session, jsonify, g, has_request_context, request, redirect, Response
 from dotenv import load_dotenv
 
-from app.extensions import db, login_manager, migrate
+from app.extensions import db, login_manager, migrate, limiter
 
 
 class RequestIdFilter(logging.Filter):
@@ -199,6 +199,37 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+
+    # -------------------------
+    # Rate limiting (Phase 4.3)
+    # -------------------------
+    # In-memory storage is OK for a single instance.
+    # If you scale to multiple instances, set RATELIMIT_STORAGE_URI to Redis.
+    limiter_storage = os.getenv("RATELIMIT_STORAGE_URI")  # e.g. "redis://:password@host:6379/0"
+
+    limiter.init_app(
+        app,
+        storage_uri=limiter_storage,  # None => in-memory
+        default_limits=[
+            os.getenv("RATELIMIT_DEFAULT", "200 per day"),
+            os.getenv("RATELIMIT_DEFAULT_MINUTE", "60 per minute"),
+        ],
+        headers_enabled=True,
+    )
+
+    # Friendly 429 response (helps for API + AJAX)
+    try:
+        from flask_limiter.errors import RateLimitExceeded
+
+        @app.errorhandler(RateLimitExceeded)
+        def handle_rate_limit(e):
+            return jsonify({
+                "error": "rate_limited",
+                "message": "Too many requests. Please slow down and try again shortly."
+            }), 429
+    except Exception:
+        # If limiter isn't installed yet (local linting), don't crash app import.
+        pass
 
     # -------------------------
     # Request IDs + anon session ID
