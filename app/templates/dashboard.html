@@ -8,6 +8,37 @@
     </p>
   </div>
 
+  <!-- ===================== PROFILE / ACCOUNT CARD ===================== -->
+  <div class="course-progress" style="margin-top:16px;">
+    <div class="course-progress-top">
+      <span class="badge">Your account</span>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
+        {% if current_user.is_admin %}
+          <span class="badge">🛡️ Admin</span>
+        {% else %}
+          <span class="badge">👤 Learner</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <p class="page-subtitle" style="margin:8px 0 0;">
+      Signed in as <strong>{{ current_user.email }}</strong>
+    </p>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <span class="badge">🧾 Total attempts: {{ stats.attempts_total }}</span>
+
+      {% if stats.last_activity %}
+        <span class="badge">
+          🕒 Last activity: {{ stats.last_activity.strftime('%d %b %Y, %H:%M') }}
+        </span>
+      {% else %}
+        <span class="badge">🕒 Last activity: Not yet</span>
+      {% endif %}
+    </div>
+  </div>
+
   <!-- ===================== PRIMARY PROGRESS CARD ===================== -->
   <div class="course-progress" style="margin-top:16px;">
     <div class="course-progress-top">
@@ -21,10 +52,11 @@
       <div class="course-bar-fill" style="width: {{ stats.percent }}%;"></div>
     </div>
 
-    <div style="margin-top:14px;">
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
       {% if stats.course_done %}
-        <p class="muted">🎉 You’ve completed the course!</p>
+        <p class="muted" style="margin:0;">🎉 You’ve completed the course!</p>
         <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
+        <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Review Topics</a>
       {% else %}
         {% if resume %}
           <a class="btn" href="{{ url_for('topics.topic_detail', slug=resume.slug) }}">
@@ -37,18 +69,12 @@
           <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_topic.slug) }}">
             ▶ Continue learning
           </a>
+          <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">
+            View full course →
+          </a>
+        {% else %}
+          <a class="btn" href="{{ url_for('topics.list_topics') }}">Start the course</a>
         {% endif %}
-      {% endif %}
-    </div>
-
-    <div style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
-      <span class="pill pill-dark">🧾 Total attempts: {{ stats.attempts_total }}</span>
-      {% if stats.last_activity %}
-        <span class="pill pill-dark">
-          🕒 Last activity: {{ stats.last_activity.strftime('%d %b %Y, %H:%M') }}
-        </span>
-      {% else %}
-        <span class="pill pill-dark">🕒 Last activity: Not yet</span>
       {% endif %}
     </div>
   </div>
@@ -70,11 +96,11 @@
 
                 <div class="topic-badges">
                   {% if r.passed %}
-                    <span class="pill pill-green">✅ Completed</span>
+                    <span class="tpill tpill-green">✅ Completed</span>
                   {% elif r.unlocked %}
-                    <span class="pill pill-blue">🔓 Ready</span>
+                    <span class="tpill tpill-blue">🔓 Ready</span>
                   {% else %}
-                    <span class="pill pill-gray">🔒 Locked</span>
+                    <span class="tpill tpill-gray">🔒 Locked</span>
                   {% endif %}
                 </div>
               </div>
@@ -100,6 +126,35 @@
         <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">
           View full course →
         </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- ===================== COMPLETED TOPICS ===================== -->
+  {% if stats.completed > 0 %}
+    <div style="margin-top:30px;">
+      <h2 class="section-title">Completed topics</h2>
+      <p class="page-subtitle">Quick review links to reinforce what you’ve learned.</p>
+
+      <div class="topics-grid">
+        {% for r in rows if r.passed %}
+          <div class="topic-card is-completed">
+            <div class="topic-top">
+              <div class="topic-title-wrap">
+                <div class="topic-title">{{ r.title }}</div>
+                <div class="topic-badges">
+                  <span class="tpill tpill-green">✅ Completed</span>
+                  <span class="tpill tpill-dark">Attempts: {{ r.attempts }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="topic-actions" style="margin-top:10px;">
+              <a class="btn btn-outline" href="{{ url_for('topics.topic_detail', slug=r.slug) }}">Review lesson</a>
+              <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=r.slug) }}">Retake quiz</a>
+            </div>
+          </div>
+        {% endfor %}
       </div>
     </div>
   {% endif %}
