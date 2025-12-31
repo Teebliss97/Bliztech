@@ -14,6 +14,9 @@
 <header class="nav">
   <div class="container">
 
+    <!-- Mobile toggle controller (MUST be sibling of nav-panel) -->
+    <input type="checkbox" id="nav-check" />
+
     <div class="nav-inner">
       <!-- Brand -->
       <a class="brand" href="{{ url_for('main.home') }}">
@@ -25,7 +28,7 @@
         <span class="brand-name">BlizTech</span>
       </a>
 
-      <!-- Right area: desktop links + mobile toggle -->
+      <!-- Right area -->
       <div class="nav-right">
         <!-- Desktop navigation links -->
         <nav class="nav-links" aria-label="Primary navigation">
@@ -68,10 +71,8 @@
           {% endif %}
         </nav>
 
-        <!-- Mobile nav toggle (CSS checkbox trick) -->
-        <input type="checkbox" id="nav-check" aria-hidden="true">
+        <!-- Hamburger (mobile only via CSS) -->
         <label class="nav-toggle" for="nav-check" aria-label="Toggle menu">
-          <!-- simple hamburger icon -->
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
@@ -149,7 +150,7 @@
 <!-- ===================== FOOTER ===================== -->
 <footer class="footer">
   <div class="container">
-    <small>© 2025 BlizTech Cybersecurity Awareness • Need help? <span class="muted">support@bliztechacademy.com</span></small>
+    <small>© 2025 BlizTech Cybersecurity Awareness • Need help? <span class="muted">Toheebatinuke@gmail.com</span></small>
   </div>
 </footer>
 
