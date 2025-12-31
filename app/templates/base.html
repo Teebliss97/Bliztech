@@ -12,60 +12,117 @@
 
 <!-- ===================== NAVBAR ===================== -->
 <header class="nav">
-  <div class="container nav-inner">
+  <div class="container">
 
-    <!-- Brand -->
-    <a class="brand" href="{{ url_for('main.home') }}">
-      <img
-        class="brand-logo"
-        src="{{ url_for('static', filename='img/logo-mark.svg') }}"
-        alt="BlizTech logo"
-      >
-      <span class="brand-name">BlizTech</span>
-      <span class="brand-tag">Cyber Awareness</span>
-    </a>
-
-    <!-- Navigation links -->
-    <nav class="nav-links">
-      <a href="{{ url_for('main.home') }}"
-         class="{% if request.endpoint == 'main.home' %}active{% endif %}">
-        Home
+    <div class="nav-inner">
+      <!-- Brand -->
+      <a class="brand" href="{{ url_for('main.home') }}">
+        <img
+          class="brand-logo"
+          src="{{ url_for('static', filename='img/logo-mark.svg') }}"
+          alt="BlizTech logo"
+        >
+        <span class="brand-name">BlizTech</span>
       </a>
 
-      <a href="{{ url_for('topics.list_topics') }}"
-         class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
-        Topics
-      </a>
-
-      <a href="{{ url_for('main.dashboard') }}"
-         class="{% if request.endpoint in ['main.dashboard', 'main.my_progress'] %}active{% endif %}">
-        Dashboard
-      </a>
-
-      {% if current_user.is_authenticated %}
-        <a href="{{ url_for('cert.certificate_home') }}"
-           class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
-          Certificate
-        </a>
-
-        {% if current_user.is_admin %}
-          <a href="{{ url_for('admin.dashboard') }}"
-             class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
-            Admin
+      <!-- Right area: desktop links + mobile toggle -->
+      <div class="nav-right">
+        <!-- Desktop navigation links -->
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="{{ url_for('main.home') }}"
+             class="{% if request.endpoint == 'main.home' %}active{% endif %}">
+            Home
           </a>
-        {% endif %}
 
-        <span class="chip pill-dark">{{ current_user.email }}</span>
-        <a class="btn btn-outline" href="{{ url_for('auth.logout') }}">Logout</a>
+          <a href="{{ url_for('topics.list_topics') }}"
+             class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
+            Topics
+          </a>
 
-      {% else %}
-        <a href="{{ url_for('auth.login') }}"
-           class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
-          Login
-        </a>
-        <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Sign up</a>
-      {% endif %}
-    </nav>
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.dashboard') }}"
+               class="{% if request.endpoint in ['main.dashboard', 'main.my_progress'] %}active{% endif %}">
+              Dashboard
+            </a>
+
+            <a href="{{ url_for('cert.certificate_home') }}"
+               class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
+              Certificate
+            </a>
+
+            {% if current_user.is_admin %}
+              <a href="{{ url_for('admin.dashboard') }}"
+                 class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
+                Admin
+              </a>
+            {% endif %}
+
+            <span class="chip pill-dark">{{ current_user.email }}</span>
+            <a class="btn btn-outline btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}"
+               class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
+              Login
+            </a>
+            <a class="btn btn-outline btn-sm" href="{{ url_for('auth.signup') }}">Sign up</a>
+          {% endif %}
+        </nav>
+
+        <!-- Mobile nav toggle (CSS checkbox trick) -->
+        <input type="checkbox" id="nav-check" aria-hidden="true">
+        <label class="nav-toggle" for="nav-check" aria-label="Toggle menu">
+          <!-- simple hamburger icon -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </label>
+      </div>
+    </div>
+
+    <!-- Mobile dropdown panel -->
+    <div class="nav-panel">
+      <div class="nav-panel-inner">
+        <nav class="nav-panel-links" aria-label="Mobile navigation">
+          <a href="{{ url_for('main.home') }}"
+             class="{% if request.endpoint == 'main.home' %}active{% endif %}">
+            Home
+          </a>
+
+          <a href="{{ url_for('topics.list_topics') }}"
+             class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
+            Topics
+          </a>
+
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.dashboard') }}"
+               class="{% if request.endpoint in ['main.dashboard', 'main.my_progress'] %}active{% endif %}">
+              Dashboard
+            </a>
+
+            <a href="{{ url_for('cert.certificate_home') }}"
+               class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
+              Certificate
+            </a>
+
+            {% if current_user.is_admin %}
+              <a href="{{ url_for('admin.dashboard') }}"
+                 class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
+                Admin
+              </a>
+            {% endif %}
+
+            <a class="btn btn-outline" href="{{ url_for('auth.logout') }}">Logout</a>
+            <div class="chip pill-dark" style="margin-top:10px;">{{ current_user.email }}</div>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}"
+               class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
+              Login
+            </a>
+            <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
+          {% endif %}
+        </nav>
+      </div>
+    </div>
 
   </div>
 </header>
@@ -92,7 +149,7 @@
 <!-- ===================== FOOTER ===================== -->
 <footer class="footer">
   <div class="container">
-    <small>© 2025 BlizTech Cybersecurity Awareness</small>
+    <small>© 2025 BlizTech Cybersecurity Awareness • Need help? <span class="muted">support@bliztechacademy.com</span></small>
   </div>
 </footer>
 

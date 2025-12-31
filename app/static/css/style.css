@@ -27,6 +27,10 @@
 *{ box-sizing: border-box; }
 html, body{ height: 100%; }
 
+/* Prevent iPhone horizontal “wiggle” scroll */
+html{ overflow-x: hidden; }
+body{ overflow-x: hidden; }
+
 body{
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
@@ -39,12 +43,24 @@ body{
 
 a{ color: inherit; }
 
+/* Improve tap + text behaviour on mobile */
+a, button{
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* -----------------------------
    2) Layout helpers
 ------------------------------ */
 .container{
   width: min(1100px, calc(100% - 40px));
   margin: 0 auto;
+}
+
+/* On very small screens, give a bit more breathing room */
+@media (max-width: 420px){
+  .container{
+    width: calc(100% - 28px);
+  }
 }
 
 main.container{
@@ -84,6 +100,7 @@ main.container{
   color: #07111f;
   box-shadow: 0 10px 30px rgba(56,189,248,.14);
   transition: transform .12s ease, filter .2s ease, background .2s ease;
+  min-height: 44px; /* mobile tap target */
 }
 .btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
 
@@ -102,6 +119,7 @@ main.container{
   padding: 8px 10px;
   border-radius: 12px;
   font-size: 13px;
+  min-height: 40px;
 }
 
 /* Disabled button helper */
@@ -116,6 +134,16 @@ main.container{
   display:flex;
   gap: 10px;
   flex-wrap:wrap;
+}
+
+/* On narrow screens, buttons can go full width */
+@media (max-width: 420px){
+  .actions .btn,
+  .hero-actions .btn,
+  .continue-btns .btn,
+  .cta-inner .btn{
+    width: 100%;
+  }
 }
 
 /* -----------------------------
@@ -145,6 +173,7 @@ main.container{
   gap:12px;
   text-decoration:none;
   color: var(--text);
+  min-width: 0; /* avoid overflow */
 }
 
 .logo{
@@ -162,6 +191,9 @@ main.container{
   font-size: 18px;
   font-weight: 900;
   letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Navbar chip */
@@ -183,6 +215,8 @@ main.container{
   display:flex;
   gap: 10px;
   align-items:center;
+  flex-wrap: wrap; /* prevents overflow on medium widths */
+  justify-content: flex-end;
 }
 
 .nav-links a{
@@ -193,6 +227,9 @@ main.container{
   color: var(--muted);
   font-weight: 800;
   font-size: 15px;
+  min-height: 44px; /* tap target */
+  display: inline-flex;
+  align-items: center;
 }
 .nav-links a:hover{
   color: var(--text);
@@ -210,12 +247,97 @@ main.container{
   color: var(--muted);
 }
 
-/* Mobile tweaks */
-@media (max-width: 560px){
+/* -----------------------------
+   5.1) Mobile nav collapse (CSS ready)
+   NOTE: We'll add matching markup in base.html
+------------------------------ */
+
+/* These are NEW helper classes we’ll use in base.html */
+.nav-right{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  justify-content:flex-end;
+}
+
+/* Hamburger button (hidden on desktop) */
+.nav-toggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Dropdown panel container (hidden on desktop) */
+.nav-panel{
+  display:none;
+  padding: 10px 0 14px;
+}
+
+/* Panel inner for mobile dropdown */
+.nav-panel-inner{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.02);
+  border-radius: 18px;
+  padding: 10px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.22);
+}
+
+/* Panel links stacked */
+.nav-panel-links{
+  display:grid;
+  gap: 8px;
+}
+.nav-panel-links a{
+  padding: 12px 12px;
+  border-radius: 14px;
+  text-decoration:none;
+  color: var(--muted);
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.02);
+  min-height: 44px;
+  display:flex;
+  align-items:center;
+}
+.nav-panel-links a:hover{
+  color: var(--text);
+  border-color: rgba(56,189,248,.18);
+  background: rgba(56,189,248,.06);
+}
+.nav-panel-links a.active{
+  color: var(--text);
+  border-color: rgba(56,189,248,.25);
+  background: rgba(56,189,248,.10);
+}
+
+/* This checkbox trick will control open/close */
+#nav-check{ display:none; }
+
+/* Mobile rules */
+@media (max-width: 760px){
   .chip{ display:none; }
+
+  /* hide desktop links and show hamburger */
+  .nav-links{ display:none; }
+  .nav-toggle{ display:inline-flex; }
+
+  /* show dropdown panel when checked */
+  #nav-check:checked ~ .nav-panel{
+    display:block;
+  }
+}
+
+/* Smaller tweaks */
+@media (max-width: 560px){
   .brand-name{ font-size: 16px; }
   .brand-logo{ width: 30px; height: 30px; }
-  .nav-links a{ padding: 8px 10px; }
 }
 
 /* -----------------------------
@@ -256,6 +378,11 @@ main.container{
   box-shadow: var(--shadow);
 }
 
+/* Improve hero breathing room on phones */
+@media (max-width: 540px){
+  .hero{ padding: 14px; }
+}
+
 @media (max-width: 900px){
   .hero{ grid-template-columns: 1fr; }
 }
@@ -286,8 +413,10 @@ main.container{
   font-size: 40px;
   line-height: 1.15;
   margin: 0 0 10px;
+  letter-spacing: -0.3px;
 }
 @media (max-width: 900px){ .hero-title{ font-size: 34px; } }
+@media (max-width: 420px){ .hero-title{ font-size: 30px; } }
 
 .hero-subtitle{
   color: var(--muted);
@@ -397,6 +526,7 @@ main.container{
   font-size: 13px;
 }
 
+/* How it works: make steps easier to scan */
 .how-card{
   margin-top: 18px;
   border: 1px solid var(--border);
@@ -408,6 +538,12 @@ main.container{
 .how-card ol{
   margin: 8px 0 12px 18px;
   color: var(--text);
+  line-height: 1.7;
+}
+@media (max-width: 540px){
+  .how-card ol{
+    margin-left: 18px;
+  }
 }
 
 .cta{
@@ -514,6 +650,7 @@ main.container{
   color: var(--text);
   outline: none;
   transition: border-color .15s ease, background .15s ease;
+  min-height: 44px;
 }
 
 .form input:focus{
@@ -827,6 +964,7 @@ main.container{
   background: rgba(255,255,255,.02);
   cursor: pointer;
   margin-top: 8px;
+  min-height: 44px;
 }
 .choice:hover{
   border-color: rgba(56,189,248,.25);
@@ -982,6 +1120,9 @@ main.container{
   background: rgba(255,255,255,.03);
   color: var(--text);
   font-weight: 800;
+  min-height: 44px;
+  display:inline-flex;
+  align-items:center;
 }
 .nav-pill:hover{
   background: rgba(56,189,248,.10);
