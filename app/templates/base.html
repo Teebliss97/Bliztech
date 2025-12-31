@@ -3,7 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  {# ---------- SEO defaults (override per-page if needed) ---------- #}
+  {% set seo_title = (self.title() | striptags | trim) if self.title() else "BlizTech Cyber Awareness" %}
+  {% set seo_description = (self.meta_description() | striptags | trim) if self.meta_description is defined else
+    "Learn practical cybersecurity awareness in minutes. Read a lesson, take a short quiz, and unlock the next topic — step by step."
+  %}
+  {% set seo_image = url_for('static', filename='img/og-bliztech.png', _external=True) %}
+  {% set seo_url = request.base_url %}
+
   <title>{% block title %}BlizTech Cyber Awareness{% endblock %}</title>
+
+  <meta name="description" content="{{ seo_description }}">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ seo_url }}">
+
+  {# ---------- OpenGraph (WhatsApp / LinkedIn / Facebook) ---------- #}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="BlizTech">
+  <meta property="og:locale" content="en_GB">
+  <meta property="og:title" content="{{ seo_title }}">
+  <meta property="og:description" content="{{ seo_description }}">
+  <meta property="og:url" content="{{ seo_url }}">
+  <meta property="og:image" content="{{ seo_image }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  {# ---------- Twitter / X ---------- #}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ seo_title }}">
+  <meta name="twitter:description" content="{{ seo_description }}">
+  <meta name="twitter:image" content="{{ seo_image }}">
+
+  {# Optional: theme color for mobile browsers #}
+  <meta name="theme-color" content="#070c16">
 
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -150,7 +183,7 @@
 <!-- ===================== FOOTER ===================== -->
 <footer class="footer">
   <div class="container">
-    <small>© 2025 BlizTech Cybersecurity Awareness • Need help? <span class="muted">Toheebatinuke@gmail.com</span></small>
+    <small>© 2025 BlizTech Cybersecurity Awareness • Need help? <span class="muted">Contact: Toheebatinuke@gmail.com</span></small>
   </div>
 </footer>
 
