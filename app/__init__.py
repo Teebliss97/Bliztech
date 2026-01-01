@@ -72,6 +72,13 @@ def create_app():
     app = Flask(__name__)
 
     # -------------------------
+    # Template globals (dynamic footer year)
+    # -------------------------
+    @app.context_processor
+    def inject_current_year():
+        return {"current_year": datetime.utcnow().year}
+
+    # -------------------------
     # Core config
     # -------------------------
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
@@ -201,11 +208,6 @@ def create_app():
         return request.remote_addr or "unknown"
 
     def _log_event(event: str, level: str = "info", **fields):
-        """
-        Phase 5.2:
-        - Always logs JSON to Render logs (if LOG_SECURITY_EVENTS=1)
-        - Optionally persists to DB (if DB_MONITORING_ENABLED=1)
-        """
         payload = {
             "event": event,
             "path": request.path if has_request_context() else None,
@@ -221,7 +223,6 @@ def create_app():
         if not DB_MONITORING_ENABLED:
             return
 
-        # Import here to avoid import cycles
         try:
             from app.models import SecurityEvent
             ev = SecurityEvent(
@@ -254,19 +255,16 @@ def create_app():
 
     @app.after_request
     def attach_request_id_and_log(resp: Response):
-        # Always return X-Request-ID to client (useful for debugging)
         try:
             resp.headers.setdefault("X-Request-ID", getattr(g, "request_id", ""))
         except Exception:
             pass
 
-        # Request timing
         try:
             dt_ms = int(round((time.time() - getattr(g, "_t0", time.time())) * 1000))
         except Exception:
             dt_ms = None
 
-        # Log slow requests
         if dt_ms is not None and dt_ms >= SLOW_REQUEST_MS:
             _log_event(
                 "slow_request",
@@ -276,7 +274,6 @@ def create_app():
                 duration_ms=dt_ms,
             )
 
-        # Log 4xx/5xx (excluding common static assets noise)
         if resp.status_code >= 400 and not request.path.startswith("/static/"):
             _log_event(
                 "http_error",
@@ -288,7 +285,7 @@ def create_app():
 
         return resp
 
-    # Log rate limiting (429) nicely
+    # Log rate limiting (429)
     try:
         from flask_limiter.errors import RateLimitExceeded
 
