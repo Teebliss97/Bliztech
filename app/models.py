@@ -1,10 +1,20 @@
-from datetime import datetime
+import os
 import uuid
+from datetime import datetime
 
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 from app.extensions import db, login_manager
+
+
+def _ts(salt: str) -> URLSafeTimedSerializer:
+    """
+    Timed serializer for email verify + password reset tokens.
+    """
+    secret = os.getenv("SECRET_KEY", "dev-secret-change-me")
+    return URLSafeTimedSerializer(secret, salt=salt)
 
 
 class User(db.Model, UserMixin):
@@ -14,11 +24,57 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
+    # ✅ Email verification fields (NEW)
+    email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    email_verified_at = db.Column(db.DateTime, nullable=True)
+
     def set_password(self, raw_password: str) -> None:
         self.password_hash = generate_password_hash(raw_password)
 
     def check_password(self, raw_password: str) -> bool:
         return check_password_hash(self.password_hash, raw_password)
+
+    # -------------------------
+    # Password reset tokens (USED by your auth routes)
+    # -------------------------
+    def generate_reset_token(self) -> str:
+        s = _ts("bliztech-reset-password")
+        return s.dumps({"user_id": self.id, "email": self.email})
+
+    @staticmethod
+    def verify_reset_token(token: str, max_age_seconds: int = 3600):
+        s = _ts("bliztech-reset-password")
+        try:
+            data = s.loads(token, max_age=max_age_seconds)
+            user_id = data.get("user_id")
+            if not user_id:
+                return None
+            return User.query.get(int(user_id))
+        except (SignatureExpired, BadSignature):
+            return None
+
+    # -------------------------
+    # Email verification tokens (NEW)
+    # -------------------------
+    def generate_email_verify_token(self) -> str:
+        s = _ts("bliztech-email-verify")
+        return s.dumps({"user_id": self.id, "email": self.email})
+
+    @staticmethod
+    def verify_email_verify_token(token: str, max_age_seconds: int = 60 * 60 * 24):
+        """
+        Default expiry: 24 hours.
+        Returns user or None.
+        """
+        s = _ts("bliztech-email-verify")
+        try:
+            data = s.loads(token, max_age=max_age_seconds)
+            user_id = data.get("user_id")
+            if not user_id:
+                return None
+            return User.query.get(int(user_id))
+        except (SignatureExpired, BadSignature):
+            return None
 
 
 @login_manager.user_loader
@@ -124,6 +180,7 @@ class AdminAuditLog(db.Model):
 
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
 
+
 class SecurityEvent(db.Model):
     __tablename__ = "security_event"
 
@@ -143,8 +200,10 @@ class SecurityEvent(db.Model):
     # free-form details (limit, reason, etc.)
     detail = db.Column(db.Text, nullable=True)
 
+    # Optional: masked email for auth-related events
+    email_masked = db.Column(db.String(255), nullable=True, index=True)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
     def __repr__(self):
         return f"<SecurityEvent {self.event} {self.status} {self.ip}>"
-

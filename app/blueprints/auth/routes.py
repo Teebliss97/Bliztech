@@ -1,6 +1,7 @@
 import os
 import uuid
 import json
+import re
 from datetime import datetime, timedelta
 from urllib.parse import urlsplit, urlunsplit
 
@@ -213,6 +214,65 @@ def _safe_next_url(default_endpoint: str = "main.home") -> str:
     return safe_rel
 
 
+# -------------------------
+# Password policy (Option B)
+# -------------------------
+_PASSWORD_POLICY = {
+    "min_len": 8,
+    "upper": re.compile(r"[A-Z]"),
+    "lower": re.compile(r"[a-z]"),
+    "digit": re.compile(r"\d"),
+    "special": re.compile(r"[^A-Za-z0-9]"),
+}
+
+
+def _password_ok(pw: str) -> bool:
+    pw = pw or ""
+    if len(pw) < _PASSWORD_POLICY["min_len"]:
+        return False
+    if not _PASSWORD_POLICY["upper"].search(pw):
+        return False
+    if not _PASSWORD_POLICY["lower"].search(pw):
+        return False
+    if not _PASSWORD_POLICY["digit"].search(pw):
+        return False
+    if not _PASSWORD_POLICY["special"].search(pw):
+        return False
+    return True
+
+
+def _password_help() -> str:
+    return "Password must be 8+ characters and include uppercase, lowercase, a number, and a special character."
+
+
+# -------------------------
+# Email verification helpers
+# -------------------------
+def _external_base_url() -> str:
+    """
+    Use canonical host if available, otherwise fallback to RENDER_EXTERNAL_URL if set.
+    """
+    canonical = os.getenv("CANONICAL_HOST", "").strip()
+    if canonical:
+        return f"https://{canonical}"
+    return (os.getenv("RENDER_EXTERNAL_URL", "") or "").rstrip("/")
+
+
+def _send_verification_email(user: User) -> bool:
+    token = user.generate_email_verify_token()
+
+    base_url = _external_base_url()
+    verify_path = url_for("auth.verify_email", token=token)
+    verify_link = f"{base_url}{verify_path}" if base_url else verify_path
+
+    html = render_template(
+        "emails/verify_email.html",
+        verify_link=verify_link,
+        user_email=user.email,
+    )
+    return send_email(user.email, "Verify your BlizTech email", html)
+
+
 @auth_bp.route("/signup", methods=["GET", "POST"])
 @limiter.limit("3 per minute; 10 per hour")
 def signup():
@@ -226,20 +286,20 @@ def signup():
 
         if not email or not password:
             flash("Email and password are required.", "error")
-            return render_template("auth/signup.html")
+            return render_template("auth/signup.html", next=request.form.get("next", ""))
 
         if password != confirm:
             flash("Passwords do not match.", "error")
-            return render_template("auth/signup.html")
+            return render_template("auth/signup.html", next=request.form.get("next", ""))
 
-        if len(password) < 8:
-            flash("Password should be at least 8 characters.", "error")
-            return render_template("auth/signup.html")
+        if not _password_ok(password):
+            flash(_password_help(), "error")
+            return render_template("auth/signup.html", next=request.form.get("next", ""))
 
         exists = User.query.filter_by(email=email).first()
         if exists:
             flash("That email is already registered. Please log in.", "error")
-            return redirect(url_for("auth.login"))
+            return redirect(url_for("auth.login", next=request.form.get("next", "")))
 
         user = User(email=email)
         user.set_password(password)
@@ -247,21 +307,69 @@ def signup():
         if email in _admin_emails_set():
             user.is_admin = True
 
+        # ✅ New accounts start unverified
+        user.email_verified = False
+        user.email_verified_at = None
+
         db.session.add(user)
         db.session.commit()
 
-        login_user(user)
+        # ✅ Send verification email
+        ok = _send_verification_email(user)
+        if not ok:
+            current_app.logger.error("SendGrid verify email failed for %s", user.email)
 
-        anon_id = _anon_key()
-        if anon_id:
-            _merge_progress(anon_id, _user_key(user.id))
-            session["anon_id"] = f"anon:{uuid.uuid4().hex}"
+        flash("Account created ✅ Please check your email to verify your account before logging in.", "success")
+        return redirect(url_for("auth.login", next=request.form.get("next", "")))
 
-        flash("Account created successfully ✅", "success")
-        return redirect(_safe_next_url(default_endpoint="main.home"))
-
-    # Pass next through to template (optional)
     return render_template("auth/signup.html", next=request.args.get("next", ""))
+
+
+@auth_bp.route("/verify-email/<token>")
+@limiter.limit("10 per minute")
+def verify_email(token):
+    user = User.verify_email_verify_token(token, max_age_seconds=60 * 60 * 24)  # 24h
+    if not user:
+        flash("That verification link is invalid or has expired.", "error")
+        return redirect(url_for("auth.login"))
+
+    if not user.email_verified:
+        user.email_verified = True
+        user.email_verified_at = datetime.utcnow()
+        db.session.commit()
+
+    flash("Email verified ✅ You can now log in.", "success")
+    return redirect(url_for("auth.login"))
+
+
+@auth_bp.route("/resend-verification", methods=["POST"])
+@limiter.limit("3 per minute; 10 per hour")
+def resend_verification():
+    email = (request.form.get("email") or "").strip().lower()
+    ip = _client_ip()
+
+    # Generic response to avoid email enumeration
+    generic_msg = "If that email exists and is not verified, we’ve sent a new verification link."
+
+    if not email:
+        flash(generic_msg, "success")
+        return redirect(url_for("auth.login"))
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        _log_auth_event("auth_resend_verify_unknown_email", email=_mask_email(email), ip=ip)
+        flash(generic_msg, "success")
+        return redirect(url_for("auth.login"))
+
+    if user.email_verified:
+        _log_auth_event("auth_resend_verify_already_verified", email=_mask_email(email), ip=ip, user_id=user.id)
+        flash("That email is already verified. Please log in.", "success")
+        return redirect(url_for("auth.login"))
+
+    ok = _send_verification_email(user)
+    _log_auth_event("auth_resend_verify_sent", email=_mask_email(email), ip=ip, user_id=user.id, ok=bool(ok))
+    flash(generic_msg, "success")
+    return redirect(url_for("auth.login"))
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -308,6 +416,12 @@ def login():
                 flash("Invalid email or password.", "error")
             return render_template("auth/login.html", next=request.form.get("next", request.args.get("next", "")))
 
+        # ✅ Block login if not verified
+        if not getattr(user, "email_verified", False):
+            _log_auth_event("auth_login_blocked_unverified", email=masked, ip=ip, user_id=user.id)
+            flash("Please verify your email before logging in. Use 'Resend verification' below.", "error")
+            return render_template("auth/login.html", next=request.form.get("next", request.args.get("next", "")), email_prefill=email)
+
         # Success: clear lockout state
         _clear_login_state(email=email, ip=ip)
 
@@ -323,7 +437,7 @@ def login():
         flash("Welcome back ✅", "success")
         return redirect(_safe_next_url(default_endpoint="main.home"))
 
-    return render_template("auth/login.html", next=request.args.get("next", ""))
+    return render_template("auth/login.html", next=request.args.get("next", ""), email_prefill="")
 
 
 @auth_bp.route("/logout")
@@ -348,7 +462,7 @@ def forgot_password():
         if user:
             token = user.generate_reset_token()
 
-            base_url = os.getenv("RENDER_EXTERNAL_URL", "").rstrip("/")
+            base_url = _external_base_url()
             reset_path = url_for("auth.reset_password", token=token)
             reset_link = f"{base_url}{reset_path}" if base_url else reset_path
 
@@ -375,8 +489,8 @@ def reset_password(token):
         password = (request.form.get("password") or "").strip()
         confirm = (request.form.get("confirm") or "").strip()
 
-        if len(password) < 8:
-            flash("Password should be at least 8 characters.", "error")
+        if not _password_ok(password):
+            flash(_password_help(), "error")
             return render_template("auth/reset_password.html")
 
         if password != confirm:

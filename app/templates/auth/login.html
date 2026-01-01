@@ -8,13 +8,22 @@
       <input type="hidden" name="next" value="{{ next or '' }}">
 
       <label>Email</label>
-      <input name="email" type="email" required>
+      <input name="email" type="email" value="{{ email_prefill or '' }}" required>
 
       <label>Password</label>
       <input name="password" type="password" required>
 
       <button class="btn" type="submit">Login</button>
     </form>
+
+    <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,.08); padding-top:14px;">
+      <div class="muted" style="font-weight:800; margin-bottom:8px;">Didn’t get the verification email?</div>
+      <form method="POST" action="{{ url_for('auth.resend_verification') }}" class="form" style="gap:10px;">
+        <label style="margin-top:0;">Email</label>
+        <input name="email" type="email" value="{{ email_prefill or '' }}" required>
+        <button class="btn btn-outline" type="submit">Resend verification</button>
+      </form>
+    </div>
 
     <p class="muted" style="margin-top:12px;">
       <a href="{{ url_for('auth.forgot_password', next=next) }}">Forgot password?</a>
