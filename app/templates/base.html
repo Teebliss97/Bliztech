@@ -19,7 +19,7 @@
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="{{ seo_url }}">
 
-  <!-- OpenGraph (WhatsApp / LinkedIn / Facebook) -->
+  <!-- OpenGraph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="BlizTech">
   <meta property="og:locale" content="en_GB">
@@ -42,7 +42,18 @@
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-  <!-- Global layout width override (site-wide) -->
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYN6VFZ64E"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-GYN6VFZ64E', {
+      anonymize_ip: true
+    });
+  </script>
+  <!-- End Google Analytics -->
 </head>
 
 <body>
@@ -50,7 +61,6 @@
   <header class="nav">
     <div class="container">
 
-      <!-- Mobile toggle controller -->
       <input type="checkbox" id="nav-check" />
 
       <div class="nav-inner">
@@ -64,10 +74,8 @@
           <span class="brand-name">BlizTech</span>
         </a>
 
-        <!-- Right area -->
         <div class="nav-right">
-          <!-- Desktop navigation -->
-          <nav class="nav-links" aria-label="Primary navigation">
+          <nav class="nav-links">
             <a href="{{ url_for('main.home') }}"
                class="{% if request.endpoint == 'main.home' %}active{% endif %}">
               Home
@@ -80,7 +88,7 @@
 
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}"
-                 class="{% if request.endpoint in ['main.dashboard', 'main.my_progress'] %}active{% endif %}">
+                 class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
                 Dashboard
               </a>
 
@@ -107,8 +115,7 @@
             {% endif %}
           </nav>
 
-          <!-- Hamburger (mobile) -->
-          <label class="nav-toggle" for="nav-check" aria-label="Toggle menu">
+          <label class="nav-toggle" for="nav-check">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M4 7h16M4 12h16M4 17h16"
                 stroke="currentColor"
@@ -119,7 +126,6 @@
         </div>
       </div>
 
-      <!-- Mobile dropdown -->
       <div class="nav-panel">
         <div class="nav-panel-inner">
           <nav class="nav-panel-links">
@@ -154,12 +160,11 @@
   <!-- ===================== MAIN CONTENT ===================== -->
   <main class="container">
 
-    <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="flash-wrap">
           {% for category, message in messages %}
-            <div class="flash {{ category|e }}">
+            <div class="flash {{ category }}">
               {{ message }}
             </div>
           {% endfor %}
@@ -174,8 +179,8 @@
   <footer class="footer">
     <div class="container">
       <small>
-        © {{ current_year }} BlizTech Cybersecurity Awareness • Need help?
-        <span class="muted"> Contact: Toheebatinuke@gmail.com</span>
+        © {{ current_year }} BlizTech Cybersecurity Awareness •
+        <span class="muted">Contact: Toheebatinuke@gmail.com</span>
       </small>
     </div>
   </footer>
