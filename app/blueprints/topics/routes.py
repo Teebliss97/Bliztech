@@ -6,16 +6,76 @@ from app.models import Progress
 topics_bp = Blueprint("topics", __name__, url_prefix="/topics")
 
 TOPICS = [
-    {"slug": "topic1", "title": "Topic 1: Introduction to Cybersecurity", "content": "topic1_intro.html", "time": "3–5 mins"},
-    {"slug": "topic2", "title": "Topic 2: Phishing & Scam Awareness", "content": "topic2_phishing.html", "time": "3–5 mins"},
-    {"slug": "topic3", "title": "Topic 3: Passwords & Passphrases", "content": "topic3_passwords.html", "time": "3–5 mins"},
-    {"slug": "topic4", "title": "Topic 4: Two-Factor Authentication (2FA)", "content": "topic4_2fa.html", "time": "3–5 mins"},
-    {"slug": "topic5", "title": "Topic 5: Malware & Ransomware Basics", "content": "topic5_malware.html", "time": "4–6 mins"},
-    {"slug": "topic6", "title": "Topic 6: Safe Browsing & Downloads", "content": "topic6_safe_browsing.html", "time": "3–5 mins"},
-    {"slug": "topic7", "title": "Topic 7: Social Media Safety & Privacy", "content": "topic7_social_media.html", "time": "3–5 mins"},
-    {"slug": "topic8", "title": "Topic 8: Public Wi-Fi & Mobile Safety", "content": "topic8_public_wifi.html", "time": "3–5 mins"},
-    {"slug": "topic9", "title": "Topic 9: Online Shopping & Payment Safety", "content": "topic9_payments.html", "time": "3–5 mins"},
-    {"slug": "topic10", "title": "Topic 10: Backups & Device Updates", "content": "topic10_backups_updates.html", "time": "3–5 mins"},
+    {
+        "slug": "topic1",
+        "title": "Topic 1: Introduction to Cybersecurity",
+        "description": "Understand what cybersecurity is, why it matters, and how everyday users are affected by cyber threats.",
+        "content": "topic1_intro.html",
+        "time": "3–5 mins",
+    },
+    {
+        "slug": "topic2",
+        "title": "Topic 2: Phishing & Scam Awareness",
+        "description": "Learn how phishing scams work, common warning signs, and how attackers trick users into giving away information.",
+        "content": "topic2_phishing.html",
+        "time": "3–5 mins",
+    },
+    {
+        "slug": "topic3",
+        "title": "Topic 3: Passwords & Passphrases",
+        "description": "Learn how to create strong passwords and passphrases, and why weak passwords are one of the biggest security risks.",
+        "content": "topic3_passwords.html",
+        "time": "3–5 mins",
+    },
+    {
+        "slug": "topic4",
+        "title": "Topic 4: Two-Factor Authentication (2FA)",
+        "description": "Understand how two-factor authentication works and why it adds an extra layer of protection to your accounts.",
+        "content": "topic4_2fa.html",
+        "time": "3–5 mins",
+    },
+    {
+        "slug": "topic5",
+        "title": "Topic 5: Malware & Ransomware Basics",
+        "description": "Learn what malware and ransomware are, how they infect devices, and the impact they can have on data and systems.",
+        "content": "topic5_malware.html",
+        "time": "4–6 mins",
+    },
+    {
+        "slug": "topic6",
+        "title": "Topic 6: Safe Browsing & Downloads",
+        "description": "Learn how to browse the web safely, avoid malicious downloads, and recognise unsafe websites.",
+        "content": "topic6_safe_browsing.html",
+        "time": "3–5 mins",
+    },
+    {
+        "slug": "topic7",
+        "title": "Topic 7: Social Media Safety & Privacy",
+        "description": "Understand how social media platforms collect data and how to protect your privacy and personal information online.",
+        "content": "topic7_social_media.html",
+        "time": "3–5 mins",
+    },
+    {
+        "slug": "topic8",
+        "title": "Topic 8: Public Wi-Fi & Mobile Safety",
+        "description": "Learn the risks of public Wi-Fi and how to keep your phone and data secure when on the move.",
+        "content": "topic8_public_wifi.html",
+        "time": "3–5 mins",
+    },
+    {
+        "slug": "topic9",
+        "title": "Topic 9: Online Shopping & Payment Safety",
+        "description": "Learn how to shop online safely, recognise secure payment methods, and avoid common online shopping scams.",
+        "content": "topic9_payments.html",
+        "time": "3–5 mins",
+    },
+    {
+        "slug": "topic10",
+        "title": "Topic 10: Backups & Device Updates",
+        "description": "Understand why regular backups and software updates are critical for protecting your devices and data.",
+        "content": "topic10_backups_updates.html",
+        "time": "3–5 mins",
+    },
 ]
 
 TOPIC_MAP = {t["slug"]: t for t in TOPICS}
@@ -72,13 +132,10 @@ def list_topics():
     for t in TOPICS:
         slug = t["slug"]
 
-        # Phase 6:
-        # - anon users can view everything, but we do NOT unlock via progress for them.
-        # - logged-in users follow the normal unlocking rules.
         if current_user.is_authenticated:
             unlocked = _is_unlocked_for_logged_in(slug, progress)
         else:
-            unlocked = True  # allow reading lessons freely for anon
+            unlocked = True  # anon users can read lessons
 
         p = progress.get(slug, {}) if current_user.is_authenticated else {}
         completed = bool(p.get("passed")) if current_user.is_authenticated else False
@@ -97,10 +154,8 @@ def list_topics():
     total = len(TOPICS)
     progress_pct = int(round((completed_count / total) * 100)) if total else 0
 
-    # Certificate only for logged-in users who completed all topics
     can_get_certificate = bool(current_user.is_authenticated and _course_completed(progress))
 
-    # For template UI (nice CTA)
     login_url = url_for("auth.login", next=url_for("topics.list_topics"))
 
     return render_template(
@@ -121,15 +176,11 @@ def topic_detail(slug):
     if not topic:
         return "Topic not found", 404
 
-    # Phase 6:
-    # - anon users can read topic content (no 403 locked page)
-    # - unlocking rules apply only to logged-in users
     if current_user.is_authenticated:
         user_id = _user_progress_key()
         progress = _progress_dict(user_id)
 
         if not _is_unlocked_for_logged_in(slug, progress):
-            # Keep your existing locked experience for logged-in users
             return render_template("topics/locked.html", topic=topic), 403
 
     login_url = url_for("auth.login", next=url_for("topics.topic_detail", slug=slug))
