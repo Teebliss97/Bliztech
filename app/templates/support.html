@@ -1,47 +1,78 @@
 {% extends "base.html" %}
-
 {% block title %}Support BlizTech{% endblock %}
 
 {% block content %}
   <div class="page-head">
     <h1 class="page-title">Support BlizTech</h1>
     <p class="page-subtitle">
-      BlizTech is built to help people stay safe online through simple lessons and quick quizzes.
-      If you find this useful, you can support the project below.
+      If BlizTech has helped you, you can support the platform or grab a practical checklist to improve business security.
     </p>
   </div>
 
-  <section class="how-card">
-    <h2>Buy my Business Security Audit Checklist</h2>
-    <p class="muted" style="margin:0 0 12px; line-height:1.7;">
-      A practical checklist you can use to review security risks in a small business or organisation.
-    </p>
+  <section class="support-grid">
+    <!-- Donate card -->
+    <div class="support-card">
+      <div class="support-badge">Donation</div>
+      <h2 class="support-title">Donate via PayPal</h2>
+      <p class="support-text">
+        Your donation helps keep the platform running, improve lessons, and maintain the certificate system.
+      </p>
 
-    <div class="how-actions">
-      <a class="btn" href="{{ gumroad_url }}" target="_blank" rel="noopener noreferrer">
-        📘 Get it on Gumroad
-      </a>
+      <div class="support-actions">
+        <a class="btn" href="https://www.paypal.me/{{ paypal_email }}" target="_blank" rel="noopener">
+          💙 Donate on PayPal
+        </a>
+
+        <button class="btn btn-outline" type="button" onclick="copyPayPalEmail()">
+          Copy PayPal email
+        </button>
+      </div>
+
+      <p class="muted" style="margin-top:10px;">
+        PayPal email: <strong id="pp-email">{{ paypal_email }}</strong>
+      </p>
+    </div>
+
+    <!-- Gumroad card -->
+    <div class="support-card">
+      <div class="support-badge">Digital product</div>
+      <h2 class="support-title">Business Security Audit Checklist</h2>
+      <p class="support-text">
+        A practical checklist you can use to assess and improve security controls in a small business.
+        Great for IT staff, founders, and anyone managing business devices.
+      </p>
+
+      <div class="support-actions">
+        <a class="btn" href="{{ gumroad_url }}" target="_blank" rel="noopener">
+          🧾 Get the checklist on Gumroad
+        </a>
+        <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">
+          Keep learning (Topics)
+        </a>
+      </div>
+
+      <p class="muted" style="margin-top:10px;">
+        Buying the checklist supports BlizTech and also gives you something useful immediately.
+      </p>
     </div>
   </section>
 
-  <section class="cta" style="margin-top:16px;">
+  <section class="cta" style="margin-top:18px;">
     <div class="cta-inner">
       <div>
-        <h2>Donate via PayPal</h2>
-        <p class="muted">Send a donation to: <strong>{{ paypal_email }}</strong></p>
+        <h2>Want to support without paying?</h2>
+        <p>Share BlizTech with a friend or student who needs cyber awareness training.</p>
       </div>
-      <a class="btn btn-outline"
-         href="mailto:{{ paypal_email }}?subject=Donation%20for%20BlizTech&body=Hi%20Toheeb%2C%20I%27d%20like%20to%20support%20BlizTech.%20Thanks!"
-      >
-        ✉️ Email me
-      </a>
+      <a class="btn btn-outline" href="{{ url_for('main.home') }}">Back to home</a>
     </div>
   </section>
 
-  <div class="callout callout-info" style="margin-top:16px;">
-    <div class="callout-title">Thank you</div>
-    <div class="callout-text">
-      Your support helps keep BlizTech running and improves the learning experience for everyone.
-    </div>
-  </div>
+  <script>
+    function copyPayPalEmail(){
+      const email = document.getElementById("pp-email").innerText.trim();
+      navigator.clipboard.writeText(email).then(() => {
+        alert("PayPal email copied: " + email);
+      });
+    }
+  </script>
 {% endblock %}

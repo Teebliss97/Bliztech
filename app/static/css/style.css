@@ -1195,3 +1195,56 @@ main.container{
 .hero-stats{
   margin-top: 10px;
 }
+
+/* =============================
+   Support page (Donation/Gumroad)
+============================= */
+.support-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+@media (max-width: 900px){
+  .support-grid{ grid-template-columns: 1fr; }
+}
+
+.support-card{
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(255,255,255,.03);
+  box-shadow: 0 16px 48px rgba(0,0,0,.22);
+}
+
+.support-badge{
+  display:inline-flex;
+  align-items:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid rgba(56,189,248,.22);
+  background: rgba(56,189,248,.08);
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.support-title{
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.support-text{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.support-actions{
+  display:flex;
+  gap: 10px;
+  flex-wrap:wrap;
+  margin-top: 12px;
+}
