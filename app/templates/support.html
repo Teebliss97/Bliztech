@@ -1,69 +1,47 @@
 {% extends "base.html" %}
+
 {% block title %}Support BlizTech{% endblock %}
 
 {% block content %}
   <div class="page-head">
     <h1 class="page-title">Support BlizTech</h1>
     <p class="page-subtitle">
-      If BlizTech has helped you learn cybersecurity awareness, you can support the platform or get the premium checklist.
+      BlizTech is built to help people stay safe online through simple lessons and quick quizzes.
+      If you find this useful, you can support the project below.
     </p>
   </div>
 
-  <div class="topics-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-    <!-- Donate -->
-    <div class="topic-card">
-      <div class="topic-title" style="margin-bottom:8px;">💙 Donate to support the platform</div>
-
-      <div class="topic-desc" style="margin-top:0;">
-        Your donation helps cover hosting and supports new improvements to lessons, quizzes, and user experience.
-      </div>
-
-      <div class="topic-actions" style="margin-top:14px;">
-        <a class="btn"
-           id="donateBtn"
-           href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=atinukeadebayo97%40gmail.com&currency_code=GBP&item_name=Support%20BlizTech%20Cyber%20Awareness"
-           target="_blank"
-           rel="noopener"
-           onclick="if(window.gtag){gtag('event','donate_click',{event_category:'engagement',event_label:'paypal_email_donation'});}">
-          Donate via PayPal
-        </a>
-      </div>
-
-      <div class="topic-lock-hint">
-        You’ll be taken to PayPal to complete your donation securely.
-      </div>
-    </div>
-
-    <!-- Gumroad -->
-    <div class="topic-card">
-      <div class="topic-title" style="margin-bottom:8px;">📘 Business Security Audit Checklist</div>
-
-      <div class="topic-desc" style="margin-top:0;">
-        A practical, step-by-step checklist you can use to audit a business and improve real-world security quickly.
-      </div>
-
-      <div class="topic-actions" style="margin-top:14px;">
-        <a class="btn btn-outline"
-           id="gumroadBtn"
-           href="https://atinuke2.gumroad.com/l/business-security"
-           target="_blank"
-           rel="noopener"
-           onclick="if(window.gtag){gtag('event','gumroad_click',{event_category:'engagement',event_label:'business_security_checklist'});}">
-          Get it on Gumroad
-        </a>
-      </div>
-
-      <div class="topic-lock-hint">
-        Opens Gumroad in a new tab.
-      </div>
-    </div>
-  </div>
-
-  <section class="how-card" style="margin-top:18px;">
-    <h2>Thank you</h2>
-    <p class="muted" style="margin:0; line-height:1.7;">
-      Whether you donate or support by sharing the platform, it genuinely helps BlizTech grow.
-      Thank you for being part of the mission.
+  <section class="how-card">
+    <h2>Buy my Business Security Audit Checklist</h2>
+    <p class="muted" style="margin:0 0 12px; line-height:1.7;">
+      A practical checklist you can use to review security risks in a small business or organisation.
     </p>
+
+    <div class="how-actions">
+      <a class="btn" href="{{ gumroad_url }}" target="_blank" rel="noopener noreferrer">
+        📘 Get it on Gumroad
+      </a>
+    </div>
   </section>
+
+  <section class="cta" style="margin-top:16px;">
+    <div class="cta-inner">
+      <div>
+        <h2>Donate via PayPal</h2>
+        <p class="muted">Send a donation to: <strong>{{ paypal_email }}</strong></p>
+      </div>
+      <a class="btn btn-outline"
+         href="mailto:{{ paypal_email }}?subject=Donation%20for%20BlizTech&body=Hi%20Toheeb%2C%20I%27d%20like%20to%20support%20BlizTech.%20Thanks!"
+      >
+        ✉️ Email me
+      </a>
+    </div>
+  </section>
+
+  <div class="callout callout-info" style="margin-top:16px;">
+    <div class="callout-title">Thank you</div>
+    <div class="callout-text">
+      Your support helps keep BlizTech running and improves the learning experience for everyone.
+    </div>
+  </div>
 {% endblock %}

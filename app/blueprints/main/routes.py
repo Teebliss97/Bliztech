@@ -11,6 +11,14 @@ main_bp = Blueprint("main", __name__)
 
 
 # -------------------------
+# Global template helpers
+# -------------------------
+@main_bp.app_context_processor
+def inject_globals():
+    return {"current_year": datetime.utcnow().year}
+
+
+# -------------------------
 # Phase 6 / 6.1.1: Account-based progress only
 # -------------------------
 def _login_required_redirect(message: str):
@@ -120,7 +128,7 @@ def _resume_topic(pmap: dict):
 
 
 # -------------------------
-# HOME — Phase 6.2.2
+# HOME
 # -------------------------
 @main_bp.route("/")
 def home():
@@ -248,6 +256,18 @@ def completion_page():
         return redirect(url_for("topics.list_topics"))
 
     return render_template("complete.html", is_logged_in=True)
+
+
+# -------------------------
+# SUPPORT (Donation / Gumroad)
+# -------------------------
+@main_bp.route("/support")
+def support():
+    return render_template(
+        "support.html",
+        gumroad_url="https://atinuke2.gumroad.com/l/business-security?_gl=1*jf0s6y*_ga*MTc3OTIzMDQ0Mi4xNzY3OTE0ODcx*_ga_6LJN6D94N6*czE3NjgwMDg3NDYkbzQkZzEkdDE3NjgwMDg3NDYkajYwJGwwJGgw",
+        paypal_email="atinukeadebayo97@gmail.com",
+    )
 
 
 # -------------------------
