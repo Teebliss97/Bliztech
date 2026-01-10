@@ -1172,3 +1172,26 @@ main.container{
     display:block;
   }
 }
+
+/* =========================================================
+   HOMEPAGE PATCH: stop welcome card overlapping stats
+   ========================================================= */
+.hero{
+  align-items: flex-start !important;
+}
+
+.hero-left{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.continue-card{
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.hero-stats{
+  margin-top: 10px;
+}

@@ -152,32 +152,20 @@
   <section class="how-card">
     <h2>How it works</h2>
     <ol>
-      <li>Pick a topic (start from Topic 1)</li>
-      <li>Read a short lesson (3–6 minutes)</li>
-      <li>Take the quiz (5 questions)</li>
-      <li>Pass to unlock the next topic</li>
+      <li><strong>Pick a topic</strong> (start from Topic 1)</li>
+      <li><strong>Read a short lesson</strong> (3–6 minutes)</li>
+      <li><strong>Take the quiz</strong> (5 questions)</li>
+      <li><strong>Pass</strong> to unlock the next topic</li>
     </ol>
 
     <div class="how-actions">
       <a class="btn" href="{{ url_for('topics.list_topics') }}">Start with topics</a>
-      {% if not current_user.is_authenticated %}
-        <a class="muted" style="align-self:center; font-weight:700;"
-           href="{{ url_for('auth.signup') }}">
-           or create a free account to track progress
-        </a>
-      {% else %}
-         <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">View progress</a>
-      {% endif %}
-    </div>
-  </section>
 
-  <section class="cta">
-    <div class="cta-inner">
-      <div>
-        <h2>Ready to level up your online safety?</h2>
-        <p>Start with Topic 1 and unlock your way through the course.</p>
-      </div>
-      <a class="btn" href="{{ url_for('topics.list_topics') }}">Start learning</a>
+      {% if current_user.is_authenticated %}
+        <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">View progress</a>
+      {% else %}
+        <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
+      {% endif %}
     </div>
   </section>
 {% endblock %}
