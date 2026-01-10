@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Support BlizTech{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Support BlizTech</h1>
+    <p class="page-subtitle">
+      If BlizTech has helped you learn cybersecurity awareness, you can support the platform or get the premium checklist.
+    </p>
+  </div>
+
+  <div class="topics-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+    <!-- Donate -->
+    <div class="topic-card">
+      <div class="topic-title" style="margin-bottom:8px;">💙 Donate to support the platform</div>
+
+      <div class="topic-desc" style="margin-top:0;">
+        Your donation helps cover hosting and supports new improvements to lessons, quizzes, and user experience.
+      </div>
+
+      <div class="topic-actions" style="margin-top:14px;">
+        <a class="btn"
+           id="donateBtn"
+           href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=atinukeadebayo97%40gmail.com&currency_code=GBP&item_name=Support%20BlizTech%20Cyber%20Awareness"
+           target="_blank"
+           rel="noopener"
+           onclick="if(window.gtag){gtag('event','donate_click',{event_category:'engagement',event_label:'paypal_email_donation'});}">
+          Donate via PayPal
+        </a>
+      </div>
+
+      <div class="topic-lock-hint">
+        You’ll be taken to PayPal to complete your donation securely.
+      </div>
+    </div>
+
+    <!-- Gumroad -->
+    <div class="topic-card">
+      <div class="topic-title" style="margin-bottom:8px;">📘 Business Security Audit Checklist</div>
+
+      <div class="topic-desc" style="margin-top:0;">
+        A practical, step-by-step checklist you can use to audit a business and improve real-world security quickly.
+      </div>
+
+      <div class="topic-actions" style="margin-top:14px;">
+        <a class="btn btn-outline"
+           id="gumroadBtn"
+           href="https://atinuke2.gumroad.com/l/business-security"
+           target="_blank"
+           rel="noopener"
+           onclick="if(window.gtag){gtag('event','gumroad_click',{event_category:'engagement',event_label:'business_security_checklist'});}">
+          Get it on Gumroad
+        </a>
+      </div>
+
+      <div class="topic-lock-hint">
+        Opens Gumroad in a new tab.
+      </div>
+    </div>
+  </div>
+
+  <section class="how-card" style="margin-top:18px;">
+    <h2>Thank you</h2>
+    <p class="muted" style="margin:0; line-height:1.7;">
+      Whether you donate or support by sharing the platform, it genuinely helps BlizTech grow.
+      Thank you for being part of the mission.
+    </p>
+  </section>
+{% endblock %}

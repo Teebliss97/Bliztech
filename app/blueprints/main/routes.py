@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from flask_login import current_user
 
@@ -158,6 +156,14 @@ def home():
         total_topics=stats["total"],
         course_done=stats["course_done"],
     )
+
+
+# -------------------------
+# SUPPORT / DONATE PAGE
+# -------------------------
+@main_bp.route("/support")
+def support():
+    return render_template("support.html")
 
 
 # -------------------------

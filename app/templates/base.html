@@ -85,6 +85,10 @@
                class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
               Topics
             </a>
+            <a href="{{ url_for('main.support') }}"
+               class="{% if request.endpoint == 'main.support' %}active{% endif %}">
+              Support
+            </a>
 
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}"
@@ -131,6 +135,8 @@
           <nav class="nav-panel-links">
             <a href="{{ url_for('main.home') }}">Home</a>
             <a href="{{ url_for('topics.list_topics') }}">Topics</a>
+            <a href="{{ url_for('main.support') }}">Support</a>
+
 
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
@@ -180,6 +186,7 @@
     <div class="container">
       <small>
         © {{ current_year }} BlizTech Cybersecurity Awareness •
+        <a href="{{ url_for('main.support') }}" class="muted" style="text-decoration:underline;">Support BlizTech</a> •
         <span class="muted">Contact: Toheebatinuke@gmail.com</span>
       </small>
     </div>
