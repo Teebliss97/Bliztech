@@ -55,7 +55,7 @@ a, button{
 /* ✅ GLOBAL WIDE CONTAINER (platform-width) */
 .container{
   width: calc(100% - 40px);   /* keeps side padding */
-  max-width: 1440px;          /* wider desktop layout */
+  max-width: 1680px;          /* ✅ increased from 1440px */
   margin: 0 auto;
 }
 
