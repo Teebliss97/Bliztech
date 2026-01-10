@@ -14,9 +14,6 @@
         and unlock the next topic — step by step.
       </p>
 
-      {# ================================
-         Logged-in "Welcome back" nudge
-         ================================ #}
       {% if current_user.is_authenticated and progress %}
         <div class="continue-card pop-in">
           <div class="continue-top">
@@ -78,7 +75,6 @@
         </div>
 
       {% else %}
-        {# Logged-out users #}
         <div class="hero-actions">
           <a class="btn" href="{{ url_for('topics.list_topics') }}">Start Learning</a>
           <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
@@ -166,6 +162,44 @@
       {% else %}
         <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
       {% endif %}
+    </div>
+  </section>
+
+  <!-- =========================
+       SUPPORT / DONATE (Homepage)
+       ========================= -->
+  <section class="cta" style="margin-top:18px;">
+    <div class="cta-inner">
+      <div style="max-width:62ch;">
+        <h2>Support BlizTech 💙</h2>
+        <p>
+          If this platform has helped you, you can support it with a small donation — or get the premium
+          Business Security Audit Checklist on Gumroad.
+        </p>
+      </div>
+
+      <div class="actions">
+        <a class="btn"
+           href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=atinukeadebayo97%40gmail.com&currency_code=GBP&item_name=Support%20BlizTech%20Cyber%20Awareness"
+           target="_blank"
+           rel="noopener"
+           onclick="if(window.gtag){gtag('event','donate_click',{event_category:'engagement',event_label:'paypal_email_donation_home'});}">
+          Donate via PayPal
+        </a>
+
+        <a class="btn btn-outline"
+           href="https://atinuke2.gumroad.com/l/business-security"
+           target="_blank"
+           rel="noopener"
+           onclick="if(window.gtag){gtag('event','gumroad_click',{event_category:'engagement',event_label:'business_security_checklist_home'});}">
+          Get the checklist
+        </a>
+
+        <a class="btn btn-outline"
+           href="{{ url_for('main.support') }}">
+          Support page
+        </a>
+      </div>
     </div>
   </section>
 {% endblock %}
