@@ -7,7 +7,7 @@
 
     {% if is_anon %}
       <div class="topic-lock-hint" style="margin-top:10px;">
-        🔐 Create a free account to take quizzes, track progress, unlock topics, and earn a certificate.
+        Create an account to take quizzes, track progress, unlock topics, and earn a certificate.
         <a href="{{ url_for('auth.signup', next=request.path) }}">Sign up</a>
         or
         <a href="{{ url_for('auth.login', next=request.path) }}">Log in</a>.
@@ -27,17 +27,17 @@
         <div class="course-bar-fill" style="width: {{ progress_pct }}%;"></div>
       </div>
 
-      <!-- ✅ Certificate CTA -->
+      <!-- Certificate CTA -->
       {% if can_get_certificate %}
         <div style="margin-top:14px;">
           <a class="btn" href="{{ url_for('cert.certificate_home') }}">
-            🎓 Get Certificate (PDF)
+            🎓 Download Certificate (PDF)
           </a>
         </div>
       {% elif is_anon %}
         <div style="margin-top:14px;">
           <a class="btn" href="{{ url_for('auth.signup', next=request.path) }}">
-            🎓 Sign up to earn a Certificate
+            Create an account to earn a certificate 🎓
           </a>
         </div>
       {% endif %}
@@ -68,7 +68,7 @@
         </div>
 
         <div class="topic-desc">
-          Learn the key ideas and test yourself with a short quiz.
+          {{ t.description }}
         </div>
 
         <div class="topic-actions">

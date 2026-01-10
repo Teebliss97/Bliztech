@@ -135,7 +135,7 @@ def list_topics():
         if current_user.is_authenticated:
             unlocked = _is_unlocked_for_logged_in(slug, progress)
         else:
-            unlocked = True  # anon users can read lessons
+            unlocked = True  # allow reading lessons freely for anon
 
         p = progress.get(slug, {}) if current_user.is_authenticated else {}
         completed = bool(p.get("passed")) if current_user.is_authenticated else False
@@ -154,8 +154,10 @@ def list_topics():
     total = len(TOPICS)
     progress_pct = int(round((completed_count / total) * 100)) if total else 0
 
+    # Certificate only for logged-in users who completed all topics
     can_get_certificate = bool(current_user.is_authenticated and _course_completed(progress))
 
+    # For template UI (nice CTA)
     login_url = url_for("auth.login", next=url_for("topics.list_topics"))
 
     return render_template(
@@ -176,11 +178,15 @@ def topic_detail(slug):
     if not topic:
         return "Topic not found", 404
 
+    # Phase 6:
+    # - anon users can read topic content (no 403 locked page)
+    # - unlocking rules apply only to logged-in users
     if current_user.is_authenticated:
         user_id = _user_progress_key()
         progress = _progress_dict(user_id)
 
         if not _is_unlocked_for_logged_in(slug, progress):
+            # Keep your existing locked experience for logged-in users
             return render_template("topics/locked.html", topic=topic), 403
 
     login_url = url_for("auth.login", next=url_for("topics.topic_detail", slug=slug))
