@@ -42,140 +42,156 @@
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
+  <!-- Global layout width override (site-wide) -->
+  <style>
+    :root{
+      --container-max: 1360px; /* platform-width; change to 1440px if you want even wider */
+      --container-pad: 18px;
+    }
+    .container{
+      max-width: var(--container-max);
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: var(--container-pad);
+      padding-right: var(--container-pad);
+    }
+  </style>
+</head>
 
-<!-- ===================== NAVBAR ===================== -->
-<header class="nav">
-  <div class="container">
+<body>
+  <!-- ===================== NAVBAR ===================== -->
+  <header class="nav">
+    <div class="container">
 
-    <!-- Mobile toggle controller -->
-    <input type="checkbox" id="nav-check" />
+      <!-- Mobile toggle controller -->
+      <input type="checkbox" id="nav-check" />
 
-    <div class="nav-inner">
-      <!-- Brand -->
-      <a class="brand" href="{{ url_for('main.home') }}">
-        <img
-          class="brand-logo"
-          src="{{ url_for('static', filename='img/logo-mark.svg') }}"
-          alt="BlizTech logo"
-        >
-        <span class="brand-name">BlizTech</span>
-      </a>
+      <div class="nav-inner">
+        <!-- Brand -->
+        <a class="brand" href="{{ url_for('main.home') }}">
+          <img
+            class="brand-logo"
+            src="{{ url_for('static', filename='img/logo-mark.svg') }}"
+            alt="BlizTech logo"
+          >
+          <span class="brand-name">BlizTech</span>
+        </a>
 
-      <!-- Right area -->
-      <div class="nav-right">
-        <!-- Desktop navigation -->
-        <nav class="nav-links" aria-label="Primary navigation">
-          <a href="{{ url_for('main.home') }}"
-             class="{% if request.endpoint == 'main.home' %}active{% endif %}">
-            Home
-          </a>
-
-          <a href="{{ url_for('topics.list_topics') }}"
-             class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
-            Topics
-          </a>
-
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.dashboard') }}"
-               class="{% if request.endpoint in ['main.dashboard', 'main.my_progress'] %}active{% endif %}">
-              Dashboard
+        <!-- Right area -->
+        <div class="nav-right">
+          <!-- Desktop navigation -->
+          <nav class="nav-links" aria-label="Primary navigation">
+            <a href="{{ url_for('main.home') }}"
+               class="{% if request.endpoint == 'main.home' %}active{% endif %}">
+              Home
             </a>
 
-            <a href="{{ url_for('cert.certificate_home') }}"
-               class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
-              Certificate
+            <a href="{{ url_for('topics.list_topics') }}"
+               class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
+              Topics
             </a>
 
-            {% if current_user.is_admin %}
-              <a href="{{ url_for('admin.dashboard') }}"
-                 class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
-                Admin
+            {% if current_user.is_authenticated %}
+              <a href="{{ url_for('main.dashboard') }}"
+                 class="{% if request.endpoint in ['main.dashboard', 'main.my_progress'] %}active{% endif %}">
+                Dashboard
+              </a>
+
+              <a href="{{ url_for('cert.certificate_home') }}"
+                 class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
+                Certificate
+              </a>
+
+              {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}"
+                   class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
+                  Admin
+                </a>
+              {% endif %}
+
+              <span class="chip pill-dark">{{ current_user.email }}</span>
+              <a class="btn btn-outline btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>
+            {% else %}
+              <a href="{{ url_for('auth.login') }}"
+                 class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
+                Login
+              </a>
+              <a class="btn btn-outline btn-sm" href="{{ url_for('auth.signup') }}">Sign up</a>
+            {% endif %}
+          </nav>
+
+          <!-- Hamburger (mobile) -->
+          <label class="nav-toggle" for="nav-check" aria-label="Toggle menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M4 7h16M4 12h16M4 17h16"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+            </svg>
+          </label>
+        </div>
+      </div>
+
+      <!-- Mobile dropdown -->
+      <div class="nav-panel">
+        <div class="nav-panel-inner">
+          <nav class="nav-panel-links">
+            <a href="{{ url_for('main.home') }}">Home</a>
+            <a href="{{ url_for('topics.list_topics') }}">Topics</a>
+
+            {% if current_user.is_authenticated %}
+              <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+              <a href="{{ url_for('cert.certificate_home') }}">Certificate</a>
+
+              {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+              {% endif %}
+
+              <a class="btn btn-outline" href="{{ url_for('auth.logout') }}">Logout</a>
+              <div class="chip pill-dark" style="margin-top:10px;">
+                {{ current_user.email }}
+              </div>
+            {% else %}
+              <a href="{{ url_for('auth.login') }}">Login</a>
+              <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">
+                Create an account
               </a>
             {% endif %}
-
-            <span class="chip pill-dark">{{ current_user.email }}</span>
-            <a class="btn btn-outline btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>
-          {% else %}
-            <a href="{{ url_for('auth.login') }}"
-               class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
-              Login
-            </a>
-            <a class="btn btn-outline btn-sm" href="{{ url_for('auth.signup') }}">Sign up</a>
-          {% endif %}
-        </nav>
-
-        <!-- Hamburger (mobile) -->
-        <label class="nav-toggle" for="nav-check" aria-label="Toggle menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M4 7h16M4 12h16M4 17h16"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"/>
-          </svg>
-        </label>
+          </nav>
+        </div>
       </div>
+
     </div>
+  </header>
 
-    <!-- Mobile dropdown -->
-    <div class="nav-panel">
-      <div class="nav-panel-inner">
-        <nav class="nav-panel-links">
-          <a href="{{ url_for('main.home') }}">Home</a>
-          <a href="{{ url_for('topics.list_topics') }}">Topics</a>
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="container">
 
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('cert.certificate_home') }}">Certificate</a>
-
-            {% if current_user.is_admin %}
-              <a href="{{ url_for('admin.dashboard') }}">Admin</a>
-            {% endif %}
-
-            <a class="btn btn-outline" href="{{ url_for('auth.logout') }}">Logout</a>
-            <div class="chip pill-dark" style="margin-top:10px;">
-              {{ current_user.email }}
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, message in messages %}
+            <div class="flash {{ category|e }}">
+              {{ message }}
             </div>
-          {% else %}
-            <a href="{{ url_for('auth.login') }}">Login</a>
-            <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">
-              Create free account
-            </a>
-          {% endif %}
-        </nav>
-      </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <small>
+        © {{ current_year }} BlizTech Cybersecurity Awareness • Need help?
+        <span class="muted"> Contact: Toheebatinuke@gmail.com</span>
+      </small>
     </div>
-
-  </div>
-</header>
-
-<!-- ===================== MAIN CONTENT ===================== -->
-<main class="container">
-
-  <!-- Flash messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="flash-wrap">
-        {% for category, message in messages %}
-          <div class="flash {{ category|e }}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
-
-  {% block content %}{% endblock %}
-</main>
-
-<!-- ===================== FOOTER ===================== -->
-<footer class="footer">
-  <div class="container">
-    <small>
-      © {{ current_year }} BlizTech Cybersecurity Awareness • Need help?
-      <span class="muted"> Contact: Toheebatinuke@gmail.com</span>
-    </small>
-  </div>
-</footer>
+  </footer>
 
 </body>
 </html>
