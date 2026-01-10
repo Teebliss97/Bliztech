@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy • BlizTech{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Privacy Policy</h1>
+    <p class="page-subtitle">How we handle data on BlizTech.</p>
+  </div>
+
+  <div class="how-card">
+    <h2>What we collect</h2>
+    <ul class="muted" style="line-height:1.9; margin-left:18px;">
+      <li>Account details you provide (e.g., email) when you sign up</li>
+      <li>Course progress (topics completed, quiz scores, attempts)</li>
+      <li>Basic usage analytics (page visits and interactions), to improve the platform</li>
+    </ul>
+
+    <h2 style="margin-top:14px;">How we use it</h2>
+    <ul class="muted" style="line-height:1.9; margin-left:18px;">
+      <li>To provide login, progress tracking, topic unlocking, and certificates</li>
+      <li>To improve performance, content, and user experience</li>
+      <li>To understand what pages are most useful (analytics)</li>
+    </ul>
+
+    <h2 style="margin-top:14px;">Third-party services</h2>
+    <p class="muted" style="line-height:1.8;">
+      We may use third-party tools like Google Analytics to measure website usage. These tools may set cookies or collect device/browser information.
+    </p>
+
+    <h2 style="margin-top:14px;">Your choices</h2>
+    <ul class="muted" style="line-height:1.9; margin-left:18px;">
+      <li>You can choose not to create an account and still read lessons (where available)</li>
+      <li>You can clear cookies in your browser settings</li>
+      <li>You can contact us to request deletion of your account data</li>
+    </ul>
+
+    <h2 style="margin-top:14px;">Contact</h2>
+    <p class="muted" style="line-height:1.8;">
+      Questions? Email: <strong>Toheebatinuke@gmail.com</strong>
+    </p>
+
+    <p class="muted" style="margin-top:14px; font-size:12px;">
+      Last updated: {{ current_year }}
+    </p>
+  </div>
+{% endblock %}

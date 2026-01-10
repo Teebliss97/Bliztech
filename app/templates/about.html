@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}About BlizTech{% endblock %}
+
+{% block content %}
+<section class="auth-card" style="max-width:900px;">
+  <h1 class="page-title">About BlizTech</h1>
+  <p class="page-subtitle">
+    Helping people stay safe online through clear, practical cybersecurity education.
+  </p>
+
+  <hr style="margin:18px 0; border-color:rgba(255,255,255,.08);">
+
+  <h2>Why BlizTech exists</h2>
+  <p class="muted" style="line-height:1.8;">
+    Cybersecurity affects everyone — not just IT professionals.
+    From phishing scams and weak passwords to unsafe downloads and account takeovers,
+    everyday users face real digital risks every day.
+  </p>
+
+  <p class="muted" style="line-height:1.8;">
+    BlizTech was created to make cybersecurity awareness simple, practical, and accessible.
+    The platform breaks down essential security concepts into short lessons and quizzes,
+    helping users build safer online habits step by step.
+  </p>
+
+  <h2 style="margin-top:18px;">What BlizTech offers</h2>
+  <ul class="muted" style="line-height:1.8; margin-left:18px;">
+    <li>Clear, jargon-free cybersecurity lessons</li>
+    <li>Short quizzes to reinforce understanding</li>
+    <li>Structured topic progression</li>
+    <li>Practical advice for real-world online safety</li>
+    <li>A certificate of completion for learners</li>
+  </ul>
+
+  <h2 style="margin-top:18px;">Who BlizTech is for</h2>
+  <p class="muted" style="line-height:1.8;">
+    BlizTech is designed for:
+  </p>
+  <ul class="muted" style="line-height:1.8; margin-left:18px;">
+    <li>Students learning about cybersecurity</li>
+    <li>Professionals improving digital safety awareness</li>
+    <li>Small business owners and entrepreneurs</li>
+    <li>Everyday internet users who want to stay safe online</li>
+  </ul>
+
+  <h2 style="margin-top:18px;">About the founder</h2>
+  <p class="muted" style="line-height:1.8;">
+    BlizTech was created by <strong>Toheeb Adebayo Atinuke</strong>,
+    a cybersecurity professional and digital technologies educator with an MSc in Cybersecurity.
+  </p>
+
+  <p class="muted" style="line-height:1.8;">
+    With experience in cybersecurity awareness, online safety education,
+    and practical security principles, Toheeb built BlizTech to bridge the gap
+    between technical cybersecurity knowledge and everyday users.
+  </p>
+
+  <p class="muted" style="line-height:1.8;">
+    The goal is simple: empower people with the knowledge they need
+    to protect themselves online.
+  </p>
+
+  <div class="actions" style="margin-top:20px;">
+    <a class="btn" href="{{ url_for('topics.list_topics') }}">Start learning</a>
+    <a class="btn btn-outline" href="{{ url_for('main.home') }}">Back to home</a>
+  </div>
+</section>
+{% endblock %}

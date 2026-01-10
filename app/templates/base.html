@@ -49,9 +49,7 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    gtag('config', 'G-GYN6VFZ64E', {
-      anonymize_ip: true
-    });
+    gtag('config', 'G-GYN6VFZ64E', { anonymize_ip: true });
   </script>
   <!-- End Google Analytics -->
 </head>
@@ -85,6 +83,12 @@
                class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
               Topics
             </a>
+
+            <a href="{{ url_for('main.about') }}"
+               class="{% if request.endpoint == 'main.about' %}active{% endif %}">
+              About
+            </a>
+
             <a href="{{ url_for('main.support') }}"
                class="{% if request.endpoint == 'main.support' %}active{% endif %}">
               Support
@@ -135,8 +139,8 @@
           <nav class="nav-panel-links">
             <a href="{{ url_for('main.home') }}">Home</a>
             <a href="{{ url_for('topics.list_topics') }}">Topics</a>
+            <a href="{{ url_for('main.about') }}">About</a>
             <a href="{{ url_for('main.support') }}">Support</a>
-
 
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
@@ -165,7 +169,6 @@
 
   <!-- ===================== MAIN CONTENT ===================== -->
   <main class="container">
-
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="flash-wrap">
@@ -187,6 +190,10 @@
       <small>
         © {{ current_year }} BlizTech Cybersecurity Awareness •
         <a href="{{ url_for('main.support') }}" class="muted" style="text-decoration:underline;">Support BlizTech</a> •
+        <a href="{{ url_for('main.privacy') }}" class="muted" style="text-decoration:underline;">Privacy</a> •
+        <a href="{{ url_for('main.terms') }}" class="muted" style="text-decoration:underline;">Terms</a> •
+        <a href="{{ url_for('main.cookies') }}" class="muted" style="text-decoration:underline;">Cookies</a> •
+        <a href="{{ url_for('main.disclaimer') }}" class="muted" style="text-decoration:underline;">Disclaimer</a> •
         <span class="muted">Contact: Toheebatinuke@gmail.com</span>
       </small>
     </div>

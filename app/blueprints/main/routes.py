@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from flask_login import current_user
 
@@ -159,14 +161,6 @@ def home():
 
 
 # -------------------------
-# SUPPORT / DONATE PAGE
-# -------------------------
-@main_bp.route("/support")
-def support():
-    return render_template("support.html")
-
-
-# -------------------------
 # DASHBOARD
 # -------------------------
 @main_bp.route("/dashboard")
@@ -254,3 +248,31 @@ def completion_page():
         return redirect(url_for("topics.list_topics"))
 
     return render_template("complete.html", is_logged_in=True)
+
+
+# -------------------------
+# TRUST / ABOUT / LEGAL PAGES
+# -------------------------
+@main_bp.route("/about")
+def about():
+    return render_template("about.html")
+
+
+@main_bp.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
+@main_bp.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+
+@main_bp.route("/cookies")
+def cookies():
+    return render_template("cookies.html")
+
+
+@main_bp.route("/disclaimer")
+def disclaimer():
+    return render_template("disclaimer.html")

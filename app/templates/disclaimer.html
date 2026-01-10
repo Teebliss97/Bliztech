@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Disclaimer • BlizTech{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Disclaimer</h1>
+    <p class="page-subtitle">Important information about the content on this platform.</p>
+  </div>
+
+  <div class="how-card">
+    <h2>Educational use only</h2>
+    <p class="muted" style="line-height:1.8;">
+      BlizTech content is provided for cybersecurity awareness and education. It is not legal, financial, or professional consultancy advice.
+    </p>
+
+    <h2 style="margin-top:14px;">No guarantee</h2>
+    <p class="muted" style="line-height:1.8;">
+      While we aim for accurate guidance, cybersecurity changes fast. Always verify critical steps and use professional judgement in real environments.
+    </p>
+
+    <h2 style="margin-top:14px;">Responsible use</h2>
+    <p class="muted" style="line-height:1.8;">
+      Do not use any knowledge from this platform to harm systems or people. Always act ethically and legally.
+    </p>
+
+    <p class="muted" style="margin-top:14px; font-size:12px;">
+      Last updated: {{ current_year }}
+    </p>
+  </div>
+{% endblock %}

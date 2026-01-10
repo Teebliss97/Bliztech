@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Cookie Policy • BlizTech{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Cookie Policy</h1>
+    <p class="page-subtitle">How cookies are used on BlizTech.</p>
+  </div>
+
+  <div class="how-card">
+    <h2>What are cookies?</h2>
+    <p class="muted" style="line-height:1.8;">
+      Cookies are small text files stored on your device. They help websites remember information like login sessions and preferences.
+    </p>
+
+    <h2 style="margin-top:14px;">How we use cookies</h2>
+    <ul class="muted" style="line-height:1.9; margin-left:18px;">
+      <li><strong>Essential cookies:</strong> used to keep you logged in and secure sessions</li>
+      <li><strong>Analytics cookies:</strong> may be used to understand page visits and improve the site</li>
+    </ul>
+
+    <h2 style="margin-top:14px;">Managing cookies</h2>
+    <p class="muted" style="line-height:1.8;">
+      You can control cookies through your browser settings. Disabling cookies may affect login and progress tracking.
+    </p>
+
+    <p class="muted" style="margin-top:14px; font-size:12px;">
+      Last updated: {{ current_year }}
+    </p>
+  </div>
+{% endblock %}

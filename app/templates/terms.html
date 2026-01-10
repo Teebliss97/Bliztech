@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Terms of Use • BlizTech{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1 class="page-title">Terms of Use</h1>
+    <p class="page-subtitle">Rules for using BlizTech.</p>
+  </div>
+
+  <div class="how-card">
+    <h2>Using the platform</h2>
+    <ul class="muted" style="line-height:1.9; margin-left:18px;">
+      <li>Use the site for lawful purposes only</li>
+      <li>Do not attempt to break, probe, or exploit the platform</li>
+      <li>Do not copy or redistribute paid resources without permission</li>
+    </ul>
+
+    <h2 style="margin-top:14px;">Accounts</h2>
+    <p class="muted" style="line-height:1.8;">
+      If you create an account, you are responsible for keeping your login details safe.
+      We may suspend accounts that abuse the service or violate these terms.
+    </p>
+
+    <h2 style="margin-top:14px;">Content</h2>
+    <p class="muted" style="line-height:1.8;">
+      Lessons and quizzes are provided for educational purposes. We continuously improve content, so materials may change over time.
+    </p>
+
+    <h2 style="margin-top:14px;">Limitation of liability</h2>
+    <p class="muted" style="line-height:1.8;">
+      BlizTech is provided “as is”. We do our best, but we can’t guarantee the platform will always be available or error-free.
+    </p>
+
+    <p class="muted" style="margin-top:14px; font-size:12px;">
+      Last updated: {{ current_year }}
+    </p>
+  </div>
+{% endblock %}
