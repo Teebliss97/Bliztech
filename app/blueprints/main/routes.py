@@ -6,6 +6,7 @@ from flask_login import current_user
 from app.models import Progress
 from app.blueprints.topics.routes import TOPICS
 from app.utils.ratelimit import rate_limit
+from flask import make_response
 
 main_bp = Blueprint("main", __name__)
 
@@ -296,3 +297,52 @@ def cookies():
 @main_bp.route("/disclaimer")
 def disclaimer():
     return render_template("disclaimer.html")
+
+# -------------------------
+# SITEMAP
+# -------------------------
+@main_bp.route("/sitemap.xml", methods=["GET"])
+def sitemap():
+    """
+    Dynamic XML sitemap for Google Search Console
+    """
+    pages = []
+    lastmod = datetime.utcnow().date().isoformat()
+
+    # Static pages
+    static_routes = [
+        ("main.home", {}),
+        ("topics.list_topics", {}),
+        ("main.about", {}),
+        ("main.support", {}),
+        ("main.privacy", {}),
+        ("main.terms", {}),
+        ("main.cookies", {}),
+        ("main.disclaimer", {}),
+    ]
+
+    for endpoint, params in static_routes:
+        pages.append({
+            "loc": url_for(endpoint, _external=True, **params),
+            "lastmod": lastmod,
+            "changefreq": "weekly",
+            "priority": "0.8",
+        })
+
+    # Topic detail pages
+    for topic in TOPICS:
+        pages.append({
+            "loc": url_for(
+                "topics.topic_detail",
+                slug=topic["slug"],
+                _external=True
+            ),
+            "lastmod": lastmod,
+            "changefreq": "monthly",
+            "priority": "0.7",
+        })
+
+    xml = render_template("sitemap.xml", pages=pages)
+    response = make_response(xml)
+    response.headers["Content-Type"] = "application/xml"
+    return response
