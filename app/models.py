@@ -39,7 +39,7 @@ class User(db.Model, UserMixin):
         self.password_hash = generate_password_hash(raw_password)
 
     def check_password(self, raw_password: str) -> bool:
-        return check_password_hash(raw_password)
+        return check_password_hash(self.password_hash, raw_password)
 
     # -------------------------
     # Referral helpers
