@@ -39,6 +39,53 @@
     </div>
   </div>
 
+  <!-- ===================== REFERRAL CARD (NEW) ===================== -->
+  <div class="course-progress" style="margin-top:16px;">
+    <div class="course-progress-top">
+      <span class="badge">Your referral link</span>
+      <span class="course-progress-text">Invite people and earn credit</span>
+    </div>
+
+    {% if current_user.referral_code %}
+      <p class="page-subtitle" style="margin:10px 0 0;">
+        Share this link (it automatically tracks referrals):
+      </p>
+
+      <!-- display link -->
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <input
+          id="refLink"
+          type="text"
+          readonly
+          value="{{ url_for('main.home', ref=current_user.referral_code, _external=True) }}"
+          style="flex:1; min-width:260px;"
+        />
+
+        <button class="btn btn-outline" type="button" id="copyRefBtn">
+          Copy link
+        </button>
+
+        <a
+          class="btn btn-outline"
+          target="_blank"
+          rel="noopener"
+          href="https://wa.me/?text={{ (url_for('main.home', ref=current_user.referral_code, _external=True) ~ ' — Learn cybersecurity for free on BlizTech')|urlencode }}"
+        >
+          Share on WhatsApp
+        </a>
+      </div>
+
+      <p class="muted" style="margin:10px 0 0; font-size:13px; line-height:1.6;">
+        Tip: Anyone who signs up after clicking your link will be linked to you as their referrer.
+      </p>
+
+    {% else %}
+      <p class="page-subtitle" style="margin:10px 0 0;">
+        Your referral code is not ready yet. Refresh the page or log out and log in again.
+      </p>
+    {% endif %}
+  </div>
+
   <!-- ===================== PRIMARY PROGRESS CARD ===================== -->
   <div class="course-progress" style="margin-top:16px;">
     <div class="course-progress-top">
@@ -174,4 +221,29 @@
       </form>
     </details>
   </div>
+
+  <!-- ===================== Copy referral JS (NEW) ===================== -->
+  <script>
+    (function () {
+      const input = document.getElementById("refLink");
+      const btn = document.getElementById("copyRefBtn");
+      if (!input || !btn) return;
+
+      btn.addEventListener("click", async function () {
+        const text = input.value || "";
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = "Copied ✅";
+          setTimeout(() => (btn.textContent = "Copy link"), 1400);
+        } catch (e) {
+          // fallback
+          input.focus();
+          input.select();
+          document.execCommand("copy");
+          btn.textContent = "Copied ✅";
+          setTimeout(() => (btn.textContent = "Copy link"), 1400);
+        }
+      });
+    })();
+  </script>
 {% endblock %}
