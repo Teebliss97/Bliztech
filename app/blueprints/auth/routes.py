@@ -11,7 +11,13 @@ from flask_login import login_user, logout_user, current_user
 from app.blueprints.auth import auth_bp
 from app.email_utils import send_email
 from app.extensions import db, limiter
-from app.models import User, Progress, LoginSecurityState, SecurityEvent
+from app.models import (
+    User,
+    Progress,
+    LoginSecurityState,
+    SecurityEvent,
+    Referral,
+)
 
 
 def _anon_key():
@@ -273,6 +279,75 @@ def _send_verification_email(user: User) -> bool:
     return send_email(user.email, "Verify your BlizTech email", html)
 
 
+# -------------------------
+# Referral helpers (signup-based)
+# -------------------------
+_REF_RE = re.compile(r"^[A-Za-z0-9]{4,64}$")
+
+
+def _get_referrer_from_session() -> tuple[User | None, str | None]:
+    """
+    Returns (referrer_user, code_used) or (None, None).
+    """
+    code = (session.get("ref_code") or "").strip()
+    if not code:
+        return None, None
+
+    if not _REF_RE.match(code):
+        # bad code: clear it so it doesn't keep trying
+        session.pop("ref_code", None)
+        return None, None
+
+    referrer = User.query.filter_by(referral_code=code).first()
+    if not referrer:
+        # code not found: clear it
+        session.pop("ref_code", None)
+        return None, None
+
+    return referrer, code
+
+
+def _apply_referral_on_signup(new_user: User) -> None:
+    """
+    If a valid referrer exists in session, record:
+    - new_user.referred_by_id
+    - a row in Referral table
+    """
+    referrer, code_used = _get_referrer_from_session()
+    if not referrer:
+        return
+
+    # Prevent self-referral (defensive)
+    if referrer.id == new_user.id:
+        session.pop("ref_code", None)
+        return
+
+    # If already referred (shouldn't happen due to unique constraint), exit safely
+    existing = Referral.query.filter_by(referred_user_id=new_user.id).first()
+    if existing:
+        session.pop("ref_code", None)
+        return
+
+    try:
+        new_user.referred_by_id = referrer.id
+        db.session.add(new_user)
+
+        row = Referral(
+            referrer_id=referrer.id,
+            referred_user_id=new_user.id,
+            referral_code_used=code_used,
+            source="url_param",
+            status="signup",
+            created_at=datetime.utcnow(),
+        )
+        db.session.add(row)
+
+        db.session.commit()
+        session.pop("ref_code", None)  # ✅ clear once successfully used
+    except Exception:
+        db.session.rollback()
+
+
 @auth_bp.route("/signup", methods=["GET", "POST"])
 @limiter.limit("3 per minute; 10 per hour")
 def signup():
@@ -307,14 +382,21 @@ def signup():
         if email in _admin_emails_set():
             user.is_admin = True
 
-        # ✅ New accounts start unverified
+        # New accounts start unverified
         user.email_verified = False
         user.email_verified_at = None
+
+        # Ensure this user has a referral code (auto-generated)
+        if not getattr(user, "referral_code", None):
+            user.referral_code = User.generate_unique_referral_code()
 
         db.session.add(user)
         db.session.commit()
 
-        # ✅ Send verification email
+        # Apply referral (signup-based)
+        _apply_referral_on_signup(user)
+
+        # Send verification email
         ok = _send_verification_email(user)
         if not ok:
             current_app.logger.error("SendGrid verify email failed for %s", user.email)
@@ -416,7 +498,7 @@ def login():
                 flash("Invalid email or password.", "error")
             return render_template("auth/login.html", next=request.form.get("next", request.args.get("next", "")))
 
-        # ✅ Block login if not verified
+        # Block login if not verified
         if not getattr(user, "email_verified", False):
             _log_auth_event("auth_login_blocked_unverified", email=masked, ip=ip, user_id=user.id)
             flash("Please verify your email before logging in. Use 'Resend verification' below.", "error")

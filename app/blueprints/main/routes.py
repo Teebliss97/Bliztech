@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from flask_login import current_user
@@ -9,6 +10,12 @@ from app.utils.ratelimit import rate_limit
 from flask import make_response
 
 main_bp = Blueprint("main", __name__)
+
+# ✅ YouTube channel (you asked: homepage link to channel)
+YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@Bliz_Tech"
+
+# ✅ Referral code format (safe/clean; matches your token_urlsafe style)
+_REF_RE = re.compile(r"^[A-Za-z0-9]{4,64}$")
 
 
 # -------------------------
@@ -136,10 +143,20 @@ def home():
     """
     Public homepage.
     Logged-in users see 'Welcome back' + resume CTA.
+
+    ✅ Referral capture:
+    - If user visits with ?ref=CODE, store it in session["ref_code"]
+      so signup can credit the correct referrer later.
     """
+    # ✅ Capture ref code if present
+    ref = (request.args.get("ref") or "").strip()
+    if ref and _REF_RE.match(ref):
+        session["ref_code"] = ref
+
     if not current_user.is_authenticated:
         return render_template(
             "home.html",
+            youtube_url=YOUTUBE_CHANNEL_URL,   # ✅ for homepage button/link
             progress=None,
             total_topics=len(TOPICS),
             course_done=False,
@@ -163,6 +180,7 @@ def home():
 
     return render_template(
         "home.html",
+        youtube_url=YOUTUBE_CHANNEL_URL,       # ✅ for homepage button/link
         progress=progress,
         total_topics=stats["total"],
         course_done=stats["course_done"],
@@ -297,6 +315,7 @@ def cookies():
 @main_bp.route("/disclaimer")
 def disclaimer():
     return render_template("disclaimer.html")
+
 
 # -------------------------
 # SITEMAP

@@ -1248,3 +1248,133 @@ main.container{
   flex-wrap:wrap;
   margin-top: 12px;
 }
+
+/* =============================
+   ADMIN (tables + referrals)
+============================= */
+
+/* Make admin headings breathe */
+h2, h3{
+  letter-spacing: -0.2px;
+}
+
+/* Tables (you already use .table in templates but no styles yet) */
+.table{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255,255,255,.02);
+  box-shadow: 0 14px 40px rgba(0,0,0,.18);
+}
+
+.table thead th{
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+}
+
+.table tbody td{
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  vertical-align: top;
+}
+
+.table tbody tr:hover{
+  background: rgba(56,189,248,.05);
+}
+
+.table tbody tr:last-child td{
+  border-bottom: none;
+}
+
+/* Make code snippets consistent */
+code{
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+  color: var(--text);
+}
+
+/* Filter/search row for admin pages */
+.admin-filters{
+  margin: 12px 0;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.admin-filters input[type="text"],
+.admin-filters input[type="number"]{
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+  color: var(--text);
+  outline: none;
+  min-height: 44px;
+}
+
+.admin-filters input[type="text"]:focus,
+.admin-filters input[type="number"]:focus{
+  border-color: rgba(56,189,248,.35);
+  background: rgba(0,0,0,.22);
+}
+
+/* Badge helpers (for status/source if you want later) */
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.badge-good{
+  border-color: rgba(34,197,94,.28);
+  background: rgba(34,197,94,.10);
+  color: var(--text);
+}
+
+.badge-warn{
+  border-color: rgba(245,158,11,.28);
+  background: rgba(245,158,11,.10);
+  color: var(--text);
+}
+
+.badge-blue{
+  border-color: rgba(56,189,248,.28);
+  background: rgba(56,189,248,.10);
+  color: var(--text);
+}
+
+/* Responsive: tables scroll horizontally on small screens */
+.table-wrap{
+  overflow-x: auto;
+  border-radius: 18px;
+}
+
+/* make scrollbar nicer (optional) */
+.table-wrap::-webkit-scrollbar{ height: 10px; }
+.table-wrap::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.12);
+  border-radius: 999px;
+}

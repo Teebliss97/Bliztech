@@ -83,6 +83,12 @@ def create_app():
     # -------------------------
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
+    # ✅ YouTube channel link (used on homepage)
+    app.config["YOUTUBE_CHANNEL_URL"] = os.getenv(
+        "YOUTUBE_CHANNEL_URL",
+        "https://www.youtube.com/@Bliz_Tech"
+    )
+
     db_url = os.getenv("DATABASE_URL", "sqlite:///bliztech.db")
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -122,6 +128,22 @@ def create_app():
         if needs_https or needs_host:
             new_url = urlunsplit(("https", CANONICAL_HOST, parts.path, parts.query, parts.fragment))
             return redirect(new_url, code=301)
+
+    # -------------------------
+    # Referral capture (stores ?ref=CODE in session)
+    # -------------------------
+    @app.before_request
+    def capture_referral_code():
+        """
+        If a user lands anywhere with ?ref=XXXX, store it in session.
+        It will be applied during signup.
+        """
+        ref = request.args.get("ref")
+        if ref:
+            # keep it small + safe
+            ref = (ref or "").strip()
+            if 3 <= len(ref) <= 64:
+                session["ref_code"] = ref
 
     # -------------------------
     # Security headers (Phase 4.2)

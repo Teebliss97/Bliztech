@@ -12,6 +12,7 @@ from app.models import (
     Certificate,
     AdminAuditLog,
     SecurityEvent,
+    Referral,
 )
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -113,6 +114,83 @@ def users():
 def progress():
     rows = Progress.query.order_by(Progress.updated_at.desc()).limit(200).all()
     return render_template("admin/progress.html", rows=rows)
+
+
+# -------------------------
+# Referrals (NEW)
+# -------------------------
+
+@admin_bp.route("/referrals")
+@admin_required
+@limiter.limit("60 per minute")
+def referrals():
+    """
+    Referral analytics:
+    - Top referrers (agents) by number of referred signups
+    - Latest referral events
+    """
+    days = _parse_int("days", 30, 1, 3650)
+    cutoff = datetime.utcnow() - timedelta(days=days)
+
+    q = (request.args.get("q") or "").strip()
+
+    # Base query for latest referrals
+    latest_q = (
+        db.session.query(
+            Referral,
+            User.email.label("referrer_email"),
+            User.referral_code.label("referrer_code"),
+        )
+        .join(User, User.id == Referral.referrer_id)
+        .filter(Referral.created_at >= cutoff)
+        .order_by(Referral.created_at.desc())
+    )
+
+    if q:
+        q_low = q.lower()
+        latest_q = latest_q.filter(
+            (User.email.ilike(f"%{q_low}%"))
+            | (User.referral_code.ilike(f"%{q}%"))
+            | (Referral.referral_code_used.ilike(f"%{q}%"))
+        )
+
+    latest = latest_q.limit(200).all()
+
+    # Aggregate: top referrers
+    # Use LEFT join so we still show users with 0 referrals if searching.
+    agg_q = (
+        db.session.query(
+            User.id,
+            User.email,
+            User.referral_code,
+            db.func.count(Referral.id).label("referrals_count"),
+            db.func.max(Referral.created_at).label("last_referral_at"),
+        )
+        .outerjoin(Referral, Referral.referrer_id == User.id)
+        .group_by(User.id, User.email, User.referral_code)
+        .order_by(db.desc("referrals_count"), db.desc("last_referral_at"))
+    )
+
+    if q:
+        agg_q = agg_q.filter(
+            (User.email.ilike(f"%{q}%"))
+            | (User.referral_code.ilike(f"%{q}%"))
+        )
+
+    top_referrers = agg_q.limit(200).all()
+
+    total_referrals_in_window = (
+        Referral.query.filter(Referral.created_at >= cutoff).count()
+    )
+
+    return render_template(
+        "admin/referrals.html",
+        top_referrers=top_referrers,
+        latest=latest,
+        total_referrals_in_window=total_referrals_in_window,
+        days=days,
+        q=q,
+    )
 
 
 # -------------------------

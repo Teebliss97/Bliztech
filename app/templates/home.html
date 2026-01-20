@@ -1,205 +1,253 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <section class="hero">
-    <div class="hero-left">
-      <div class="hero-pill">
-        <span class="dot"></span>
-        Cybersecurity Awareness • BlizTech
-      </div>
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-pill">
+      <span class="dot"></span>
+      Cybersecurity Awareness • BlizTech
+    </div>
 
-      <h1 class="hero-title">Stay safe online — one topic at a time.</h1>
-      <p class="hero-subtitle">
-        Learn practical cybersecurity skills in minutes. Read a lesson, take a short quiz,
-        and unlock the next topic — step by step.
-      </p>
+    <h1 class="hero-title">Stay safe online — one topic at a time.</h1>
 
-      {% if current_user.is_authenticated and progress %}
-        <div class="continue-card pop-in">
-          <div class="continue-top">
-            <div>
-              <div class="continue-title">Welcome back 👋</div>
-              <div class="continue-sub">
-                You’re <strong>{{ progress.percent }}%</strong> done — {{ progress.completed }}/{{ progress.total }} completed.
-              </div>
+    <p class="hero-subtitle">
+      Learn practical cybersecurity skills in minutes. Read a lesson, take a short quiz,
+      and unlock the next topic — step by step.
+    </p>
+
+    {% if current_user.is_authenticated and progress %}
+      <!-- ================= CONTINUE CARD ================= -->
+      <div class="continue-card pop-in">
+        <div class="continue-top">
+          <div>
+            <div class="continue-title">Welcome back 👋</div>
+            <div class="continue-sub">
+              You’re <strong>{{ progress.percent }}%</strong> done —
+              {{ progress.completed }}/{{ progress.total }} completed.
             </div>
-            <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">
-              Open Dashboard
-            </a>
           </div>
 
-          <div class="bar">
-            <div class="bar-fill" style="width: {{ progress.percent }}%;"></div>
-          </div>
-
-          <div class="continue-body" style="margin-top:10px;">
-            {% if progress.course_done %}
-              <p class="muted">🎉 You’ve completed the full course. Your certificate is ready.</p>
-            {% elif progress.resume %}
-              <p class="muted">
-                Continue where you stopped: <strong>{{ progress.resume.title }}</strong>
-              </p>
-            {% elif progress.next_topic %}
-              <p class="muted">
-                Next step: <strong>{{ progress.next_topic.label }}</strong>
-              </p>
-            {% else %}
-              <p class="muted">Start with Topic 1 and build your way up.</p>
-            {% endif %}
-          </div>
-
-          <div class="hero-actions">
-            {% if progress.course_done %}
-              <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
-              <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Review Topics</a>
-
-            {% elif progress.resume %}
-              <a class="btn" href="{{ url_for('topics.topic_detail', slug=progress.resume.slug) }}">
-                ▶ Continue where you stopped
-              </a>
-              <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=progress.resume.slug) }}">
-                Take Quiz
-              </a>
-
-            {% elif progress.next_topic %}
-              <a class="btn" href="{{ url_for('topics.topic_detail', slug=progress.next_topic.slug) }}">
-                Continue: {{ progress.next_topic.label }}
-              </a>
-              <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">See all topics</a>
-
-            {% else %}
-              <a class="btn" href="{{ url_for('topics.topic_detail', slug='topic1') }}">Start Topic 1</a>
-              <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">See all topics</a>
-            {% endif %}
-          </div>
+          <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">
+            Open Dashboard
+          </a>
         </div>
 
-      {% else %}
+        <div class="bar">
+          <div class="bar-fill" style="width: {{ progress.percent }}%;"></div>
+        </div>
+
+        <div class="continue-body" style="margin-top:10px;">
+          {% if progress.course_done %}
+            <p class="muted">🎉 You’ve completed the full course. Your certificate is ready.</p>
+          {% elif progress.resume %}
+            <p class="muted">
+              Continue where you stopped:
+              <strong>{{ progress.resume.title }}</strong>
+            </p>
+          {% elif progress.next_topic %}
+            <p class="muted">
+              Next step:
+              <strong>{{ progress.next_topic.label }}</strong>
+            </p>
+          {% else %}
+            <p class="muted">Start with Topic 1 and build your way up.</p>
+          {% endif %}
+        </div>
+
         <div class="hero-actions">
-          <a class="btn" href="{{ url_for('topics.list_topics') }}">Start Learning</a>
-          <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
+          {% if progress.course_done %}
+            <a class="btn" href="{{ url_for('cert.certificate_home') }}">
+              🎓 Download Certificate
+            </a>
+            <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">
+              Review Topics
+            </a>
+
+          {% elif progress.resume %}
+            <a class="btn"
+               href="{{ url_for('topics.topic_detail', slug=progress.resume.slug) }}">
+              ▶ Continue Learning
+            </a>
+
+            <a class="btn btn-outline"
+               href="{{ youtube_url }}"
+               target="_blank"
+               rel="noopener">
+              ▶ Watch on YouTube
+            </a>
+
+          {% elif progress.next_topic %}
+            <a class="btn"
+               href="{{ url_for('topics.topic_detail', slug=progress.next_topic.slug) }}">
+              Continue {{ progress.next_topic.label }}
+            </a>
+
+            <a class="btn btn-outline"
+               href="{{ youtube_url }}"
+               target="_blank"
+               rel="noopener">
+              ▶ Watch on YouTube
+            </a>
+
+          {% else %}
+            <a class="btn" href="{{ url_for('topics.topic_detail', slug='topic1') }}">
+              Start Topic 1
+            </a>
+
+            <a class="btn btn-outline"
+               href="{{ youtube_url }}"
+               target="_blank"
+               rel="noopener">
+              ▶ Watch on YouTube
+            </a>
+          {% endif %}
         </div>
-
-        <p class="muted" style="margin:14px 0 0; font-size:16px; line-height:1.6;">
-          Create an account to track progress, unlock topics, and earn a certificate.
-        </p>
-      {% endif %}
-
-      <div class="hero-stats">
-        <div class="stat">
-          <div class="stat-num">10</div>
-          <div class="stat-label">Topics</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">5</div>
-          <div class="stat-label">Questions per quiz</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">3–6 min</div>
-          <div class="stat-label">Per lesson</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero-right">
-      <div class="hero-visual">
-        <img class="hero-img"
-          src="{{ url_for('static', filename='img/hero-bliztech.svg') }}"
-          alt="BlizTech cybersecurity awareness hero"
-        />
-      </div>
-    </div>
-  </section>
-
-  <section class="section-grid">
-    <div class="feature">
-      <div class="feature-icon">
-        <img src="{{ url_for('static', filename='img/icon-lesson.svg') }}" alt="Lessons">
-      </div>
-      <h3>Simple lessons</h3>
-      <p>No jargon. Just clear explanations and real examples.</p>
-    </div>
-
-    <div class="feature">
-      <div class="feature-icon">
-        <img src="{{ url_for('static', filename='img/icon-quiz.svg') }}" alt="Quizzes">
-      </div>
-      <h3>Quick quizzes</h3>
-      <p>Test yourself after each topic and build confidence.</p>
-    </div>
-
-    <div class="feature">
-      <div class="feature-icon">
-        <img src="{{ url_for('static', filename='img/icon-unlock.svg') }}" alt="Progression">
-      </div>
-      <h3>Progression</h3>
-      <p>Pass to unlock the next topic — learn in the right order.</p>
-    </div>
-
-    <div class="feature">
-      <div class="feature-icon">
-        <img src="{{ url_for('static', filename='img/icon-tips.svg') }}" alt="Practical tips">
-      </div>
-      <h3>Practical tips</h3>
-      <p>Spot scams, protect accounts, and stay safer online.</p>
-    </div>
-  </section>
-
-  <section class="how-card">
-    <h2>How it works</h2>
-    <ol>
-      <li><strong>Pick a topic</strong> (start from Topic 1)</li>
-      <li><strong>Read a short lesson</strong> (3–6 minutes)</li>
-      <li><strong>Take the quiz</strong> (5 questions)</li>
-      <li><strong>Pass</strong> to unlock the next topic</li>
-    </ol>
-
-    <div class="how-actions">
-      <a class="btn" href="{{ url_for('topics.list_topics') }}">Start with topics</a>
-
-      {% if current_user.is_authenticated %}
-        <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">View progress</a>
-      {% else %}
-        <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
-      {% endif %}
-    </div>
-  </section>
-
-  <!-- =========================
-       SUPPORT / DONATE (Homepage)
-       ========================= -->
-  <section class="cta" style="margin-top:18px;">
-    <div class="cta-inner">
-      <div style="max-width:62ch;">
-        <h2>Support BlizTech 💙</h2>
-        <p>
-          If this platform has helped you, you can support it with a small donation — or get the premium
-          Business Security Audit Checklist on Gumroad.
-        </p>
       </div>
 
-      <div class="actions">
-        <a class="btn"
-           href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=atinukeadebayo97%40gmail.com&currency_code=GBP&item_name=Support%20BlizTech%20Cyber%20Awareness"
-           target="_blank"
-           rel="noopener"
-           onclick="if(window.gtag){gtag('event','donate_click',{event_category:'engagement',event_label:'paypal_email_donation_home'});}">
-          Donate via PayPal
+    {% else %}
+      <!-- ================= PUBLIC HERO ACTIONS ================= -->
+      <div class="hero-actions">
+        <a class="btn" href="{{ url_for('topics.list_topics') }}">
+          Start Learning
         </a>
 
         <a class="btn btn-outline"
-           href="https://atinuke2.gumroad.com/l/business-security"
+           href="{{ youtube_url }}"
            target="_blank"
-           rel="noopener"
-           onclick="if(window.gtag){gtag('event','gumroad_click',{event_category:'engagement',event_label:'business_security_checklist_home'});}">
-          Get the checklist
-        </a>
-
-        <a class="btn btn-outline"
-           href="{{ url_for('main.support') }}">
-          Support page
+           rel="noopener">
+          ▶ Watch on YouTube
         </a>
       </div>
+
+      <p class="muted" style="margin:14px 0 0; font-size:16px; line-height:1.6;">
+        Create a free account to track progress, unlock topics, and earn a certificate.
+      </p>
+    {% endif %}
+
+    <!-- ================= HERO STATS ================= -->
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">10</div>
+        <div class="stat-label">Topics</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Questions per quiz</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-num">3–6 min</div>
+        <div class="stat-label">Per lesson</div>
+      </div>
     </div>
-  </section>
+  </div>
+
+  <!-- ================= HERO IMAGE ================= -->
+  <div class="hero-right">
+    <div class="hero-visual">
+      <img
+        class="hero-img"
+        src="{{ url_for('static', filename='img/hero-bliztech.svg') }}"
+        alt="BlizTech cybersecurity awareness"
+      />
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="section-grid">
+  <div class="feature">
+    <div class="feature-icon">
+      <img src="{{ url_for('static', filename='img/icon-lesson.svg') }}" alt="">
+    </div>
+    <h3>Simple lessons</h3>
+    <p>No jargon. Just clear explanations and real examples.</p>
+  </div>
+
+  <div class="feature">
+    <div class="feature-icon">
+      <img src="{{ url_for('static', filename='img/icon-quiz.svg') }}" alt="">
+    </div>
+    <h3>Quick quizzes</h3>
+    <p>Test yourself after each topic and build confidence.</p>
+  </div>
+
+  <div class="feature">
+    <div class="feature-icon">
+      <img src="{{ url_for('static', filename='img/icon-unlock.svg') }}" alt="">
+    </div>
+    <h3>Progression</h3>
+    <p>Pass to unlock the next topic — learn in the right order.</p>
+  </div>
+
+  <div class="feature">
+    <div class="feature-icon">
+      <img src="{{ url_for('static', filename='img/icon-tips.svg') }}" alt="">
+    </div>
+    <h3>Practical tips</h3>
+    <p>Spot scams, protect accounts, and stay safer online.</p>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="how-card">
+  <h2>How it works</h2>
+
+  <ol>
+    <li><strong>Pick a topic</strong> (start from Topic 1)</li>
+    <li><strong>Read a short lesson</strong> (3–6 minutes)</li>
+    <li><strong>Take the quiz</strong> (5 questions)</li>
+    <li><strong>Pass</strong> to unlock the next topic</li>
+  </ol>
+
+  <div class="how-actions">
+    <a class="btn" href="{{ url_for('topics.list_topics') }}">
+      Start with topics
+    </a>
+
+    {% if current_user.is_authenticated %}
+      <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">
+        View progress
+      </a>
+    {% else %}
+      <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">
+        Create free account
+      </a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ================= SUPPORT CTA ================= -->
+<section class="cta" style="margin-top:18px;">
+  <div class="cta-inner">
+    <div style="max-width:62ch;">
+      <h2>Support BlizTech 💙</h2>
+      <p>
+        If this platform has helped you, you can support it with a small donation —
+        or get the Business Security Audit Checklist.
+      </p>
+    </div>
+
+    <div class="actions">
+      <a class="btn"
+         href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=atinukeadebayo97%40gmail.com&currency_code=GBP"
+         target="_blank"
+         rel="noopener">
+        Donate via PayPal
+      </a>
+
+      <a class="btn btn-outline"
+         href="https://atinuke2.gumroad.com/l/business-security"
+         target="_blank"
+         rel="noopener">
+        Get the checklist
+      </a>
+
+      <a class="btn btn-outline" href="{{ url_for('main.support') }}">
+        Support page
+      </a>
+    </div>
+  </div>
+</section>
 {% endblock %}
