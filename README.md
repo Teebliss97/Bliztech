@@ -14,14 +14,6 @@ A Flask-based cybersecurity awareness learning platform where users read topics,
 - Flask-Migrate (Alembic)
 - PostgreSQL (Render)
 
-## Local Setup
-1. Create a virtualenv and install requirements:
-   pip install -r requirements.txt
-2. Create a `.env` file:
-   SECRET_KEY=your_secret
-   DATABASE_URL=sqlite:///bliztech.db
-3. Run:
-   flask run
 
 ## Deployment
 Deployed on Render: https://bliztech.onrender.com
