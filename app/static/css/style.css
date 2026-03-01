@@ -67,8 +67,8 @@ img { display: block; max-width: 100%; }
    3) Layout
 ------------------------------ */
 .container {
-  width: calc(100% - 48px);
-  max-width: 1160px;
+  width: calc(100% - 64px);
+  max-width: 1440px;
   margin: 0 auto;
 }
 @media (max-width: 480px) { .container { width: calc(100% - 28px); } }
