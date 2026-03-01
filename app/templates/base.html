@@ -37,7 +37,12 @@
   <meta name="twitter:image" content="{{ seo_image }}">
 
   <!-- Theme color -->
-  <meta name="theme-color" content="#070c16">
+  <meta name="theme-color" content="#080E1A">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -48,10 +53,8 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-GYN6VFZ64E', { anonymize_ip: true });
   </script>
-  <!-- End Google Analytics -->
 </head>
 
 <body>
@@ -75,94 +78,69 @@
         <div class="nav-right">
           <nav class="nav-links">
             <a href="{{ url_for('main.home') }}"
-               class="{% if request.endpoint == 'main.home' %}active{% endif %}">
-              Home
-            </a>
+               class="{% if request.endpoint == 'main.home' %}active{% endif %}">Home</a>
 
             <a href="{{ url_for('topics.list_topics') }}"
-               class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">
-              Topics
-            </a>
-            
-            <a href="https://www.youtube.com/@Bliz_Tech" target="_blank" rel="noopener">
-              YouTube
-            </a>
+               class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">Topics</a>
+
+            <a href="https://www.youtube.com/@Bliz_Tech" target="_blank" rel="noopener">YouTube</a>
 
             <a href="{{ url_for('main.about') }}"
-               class="{% if request.endpoint == 'main.about' %}active{% endif %}">
-              About
-            </a>
+               class="{% if request.endpoint == 'main.about' %}active{% endif %}">About</a>
 
             <a href="{{ url_for('main.support') }}"
-               class="{% if request.endpoint == 'main.support' %}active{% endif %}">
-              Support
-            </a>
+               class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>
 
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}"
-                 class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
-                Dashboard
-              </a>
+                 class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
 
               <a href="{{ url_for('cert.certificate_home') }}"
-                 class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">
-                Certificate
-              </a>
+                 class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">Certificate</a>
 
               {% if current_user.is_admin %}
                 <a href="{{ url_for('admin.dashboard') }}"
-                   class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">
-                  Admin
-                </a>
+                   class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">Admin</a>
               {% endif %}
 
-              <span class="chip pill-dark">{{ current_user.email }}</span>
-              <a class="btn btn-outline btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>
+              <span class="chip">{{ current_user.email }}</span>
+              <a class="btn btn-outline btn-sm" href="{{ url_for('auth.logout') }}">Log out</a>
             {% else %}
               <a href="{{ url_for('auth.login') }}"
-                 class="{% if request.endpoint == 'auth.login' %}active{% endif %}">
-                Login
-              </a>
-              <a class="btn btn-outline btn-sm" href="{{ url_for('auth.signup') }}">Sign up</a>
+                 class="{% if request.endpoint == 'auth.login' %}active{% endif %}">Login</a>
+              <a class="btn btn-sm" href="{{ url_for('auth.signup') }}">Sign up free</a>
             {% endif %}
           </nav>
 
-          <label class="nav-toggle" for="nav-check">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M4 7h16M4 12h16M4 17h16"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"/>
+          <label class="nav-toggle" for="nav-check" aria-label="Open menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </label>
         </div>
       </div>
 
+      <!-- Mobile dropdown -->
       <div class="nav-panel">
         <div class="nav-panel-inner">
           <nav class="nav-panel-links">
             <a href="{{ url_for('main.home') }}">Home</a>
             <a href="{{ url_for('topics.list_topics') }}">Topics</a>
+            <a href="https://www.youtube.com/@Bliz_Tech" target="_blank" rel="noopener">YouTube</a>
             <a href="{{ url_for('main.about') }}">About</a>
             <a href="{{ url_for('main.support') }}">Support</a>
 
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
               <a href="{{ url_for('cert.certificate_home') }}">Certificate</a>
-
               {% if current_user.is_admin %}
                 <a href="{{ url_for('admin.dashboard') }}">Admin</a>
               {% endif %}
-
-              <a class="btn btn-outline" href="{{ url_for('auth.logout') }}">Logout</a>
-              <div class="chip pill-dark" style="margin-top:10px;">
-                {{ current_user.email }}
-              </div>
+              <a class="btn btn-outline" href="{{ url_for('auth.logout') }}" style="margin-top:4px;">Log out</a>
+              <div class="chip" style="margin-top:8px;">{{ current_user.email }}</div>
             {% else %}
               <a href="{{ url_for('auth.login') }}">Login</a>
-              <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">
-                Create an account
-              </a>
+              <a class="btn" href="{{ url_for('auth.signup') }}" style="margin-top:4px;">Sign up free</a>
             {% endif %}
           </nav>
         </div>
@@ -177,9 +155,7 @@
       {% if messages %}
         <div class="flash-wrap">
           {% for category, message in messages %}
-            <div class="flash {{ category }}">
-              {{ message }}
-            </div>
+            <div class="flash {{ category }}">{{ message }}</div>
           {% endfor %}
         </div>
       {% endif %}
@@ -192,13 +168,13 @@
   <footer class="footer">
     <div class="container">
       <small>
-        © {{ current_year }} BlizTech Cybersecurity Awareness •
-        <a href="{{ url_for('main.support') }}" class="muted" style="text-decoration:underline;">Support BlizTech</a> •
-        <a href="{{ url_for('main.privacy') }}" class="muted" style="text-decoration:underline;">Privacy</a> •
-        <a href="{{ url_for('main.terms') }}" class="muted" style="text-decoration:underline;">Terms</a> •
-        <a href="{{ url_for('main.cookies') }}" class="muted" style="text-decoration:underline;">Cookies</a> •
-        <a href="{{ url_for('main.disclaimer') }}" class="muted" style="text-decoration:underline;">Disclaimer</a> •
-        <span class="muted">Contact: Toheebatinuke@gmail.com</span>
+        © {{ current_year }} BlizTech Cybersecurity Awareness ·
+        <a href="{{ url_for('main.support') }}">Support</a> ·
+        <a href="{{ url_for('main.privacy') }}">Privacy</a> ·
+        <a href="{{ url_for('main.terms') }}">Terms</a> ·
+        <a href="{{ url_for('main.cookies') }}">Cookies</a> ·
+        <a href="{{ url_for('main.disclaimer') }}">Disclaimer</a> ·
+        <span>Toheebatinuke@gmail.com</span>
       </small>
     </div>
   </footer>

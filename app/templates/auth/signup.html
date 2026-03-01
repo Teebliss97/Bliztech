@@ -1,30 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="auth-card">
-    <h1 class="page-title">Create account</h1>
-    <p class="page-subtitle">Save your progress across devices.</p>
+<div class="auth-card">
+  <h1>Create account</h1>
+  <p class="page-subtitle">Free to join — track progress and earn a certificate.</p>
 
-    <form method="POST" class="form">
-      <input type="hidden" name="next" value="{{ next or '' }}">
+  <form method="POST" class="form">
+    <input type="hidden" name="next" value="{{ next or '' }}">
 
-      <label>Email</label>
-      <input name="email" type="email" required>
+    <div class="form-group">
+      <label for="signup-email">Email</label>
+      <input id="signup-email" name="email" type="email" required autocomplete="email">
+    </div>
 
-      <label>Password</label>
-      <input name="password" type="password" required>
-      <p class="muted" style="margin-top:-6px; font-size:13px;">
-        Password must be 8+ characters and include uppercase, lowercase, a number, and a special character.
-      </p>
+    <div class="form-group">
+      <label for="signup-password">Password</label>
+      <input id="signup-password" name="password" type="password" required autocomplete="new-password">
+      <span class="hint">8+ characters with uppercase, lowercase, a number and a special character.</span>
+    </div>
 
-      <label>Confirm Password</label>
-      <input name="confirm" type="password" required>
+    <div class="form-group">
+      <label for="signup-confirm">Confirm password</label>
+      <input id="signup-confirm" name="confirm" type="password" required autocomplete="new-password">
+    </div>
 
-      <button class="btn" type="submit">Sign up</button>
-    </form>
+    <button class="btn" type="submit">Create account</button>
+  </form>
 
-    <p class="muted" style="margin-top:12px;">
-      Already have an account?
-      <a href="{{ url_for('auth.login', next=next) }}">Login</a>
-    </p>
-  </div>
+  <p class="muted" style="margin-top:16px; font-size:13.5px;">
+    Already have an account?
+    <a href="{{ url_for('auth.login', next=next) }}" style="color:var(--brand-l);">Login</a>
+  </p>
+</div>
 {% endblock %}

@@ -8,9 +8,9 @@
 {% endmacro %}
 
 {% macro bullets(title, items) %}
-  <div class="bullets">
-    <div class="bullets-title">{{ title }}</div>
-    <ul>
+  <div class="callout callout-info" style="margin:16px 0;">
+    <div class="callout-title">{{ title }}</div>
+    <ul style="margin:6px 0 0 18px; color:var(--muted); line-height:1.7; font-size:14px;">
       {% for i in items %}
         <li>{{ i }}</li>
       {% endfor %}

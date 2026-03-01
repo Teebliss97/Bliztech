@@ -1,76 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="lesson-header">
-    <div>
-      <h1 class="page-title">{{ topic.title }}</h1>
-      <p class="page-subtitle">
-        Read carefully, then take the quiz to unlock the next topic.
-        {% if topic.time %}<span class="lesson-time">⏱ {{ topic.time }}</span>{% endif %}
-      </p>
+<div class="lesson-header">
+  <div>
+    <h1 class="page-title">{{ topic.title }}</h1>
+    <p class="page-subtitle">
+      Read carefully, then take the quiz to unlock the next topic.
+      {% if topic.time %}<span class="lesson-time">⏱ {{ topic.time }}</span>{% endif %}
+    </p>
 
-      {% if is_anon %}
-        <p class="muted" style="margin-top:8px;">
-          🔐 Create a free account to take quizzes, track progress, unlock topics, and earn a certificate.
-          <a href="{{ url_for('auth.signup', next=request.path) }}">Sign up</a>
-          or
-          <a href="{{ url_for('auth.login', next=request.path) }}">Log in</a>.
-        </p>
-      {% endif %}
+    {% if is_anon %}
+      <p class="muted" style="font-size:13.5px; margin-top:6px;">
+        🔐
+        <a href="{{ url_for('auth.signup', next=request.path) }}" style="color:var(--brand-l);">Create a free account</a>
+        or
+        <a href="{{ url_for('auth.login', next=request.path) }}" style="color:var(--brand-l);">log in</a>
+        to take quizzes and track your progress.
+      </p>
+    {% endif %}
+  </div>
+
+  <div class="lesson-header-actions">
+    <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">← All topics</a>
+
+    {% if is_anon %}
+      <a class="btn" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=topic.slug)) }}">
+        Log in to take quiz
+      </a>
+    {% else %}
+      <a class="btn" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">Take quiz →</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="lesson-layout">
+  <article class="lesson-card">
+    {% include "topics/content/" + content_template %}
+  </article>
+
+  <aside class="lesson-side">
+    <div class="side-card">
+      <div class="side-title">Checklist</div>
+      <ul class="side-list">
+        <li>Read the full lesson</li>
+        <li>Note the key warning signs</li>
+        <li>Take the quiz when ready</li>
+        <li>Pass to unlock the next topic</li>
+      </ul>
     </div>
 
-    <div class="lesson-header-actions">
-      <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">← Back</a>
+    <div class="side-card">
+      <div class="side-title">Remember</div>
+      <p class="side-text">Real security comes from habits, not just knowledge. Take your time.</p>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">Ready?</div>
+      <p class="side-text">When you've finished reading, take the quiz below.</p>
 
       {% if is_anon %}
-        <a class="btn" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=topic.slug)) }}">
+        <a class="btn" style="margin-top:12px; width:100%;"
+           href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=topic.slug)) }}">
           Log in to take quiz
         </a>
       {% else %}
-        <a class="btn" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">Take Quiz</a>
+        <a class="btn" style="margin-top:12px; width:100%;"
+           href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">
+          Take quiz →
+        </a>
       {% endif %}
     </div>
-  </div>
-
-  <div class="lesson-layout">
-    <article class="lesson-card">
-      {% include "topics/content/" + content_template %}
-    </article>
-
-    <aside class="lesson-side">
-      <div class="side-card">
-        <div class="side-title">Quick checklist</div>
-        <ul class="side-list">
-          <li>Read the full lesson</li>
-          <li>Note the red flags</li>
-          <li>Take the quiz</li>
-          <li>Pass to unlock next topic</li>
-        </ul>
-      </div>
-
-      <div class="side-card">
-        <div class="side-title">Tip</div>
-        <p class="side-text">
-          Don’t rush. Real safety comes from habits — not just information.
-        </p>
-      </div>
-
-      <div class="side-card">
-        <div class="side-title">Next step</div>
-        <p class="side-text">
-          When you’re ready, click <strong>Take Quiz</strong>.
-        </p>
-
-        {% if is_anon %}
-          <a class="btn" style="margin-top:10px; width:100%;" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=topic.slug)) }}">
-            Log in to take quiz
-          </a>
-        {% else %}
-          <a class="btn" style="margin-top:10px; width:100%;" href="{{ url_for('quizzes.quiz', slug=topic.slug) }}">
-            Take Quiz
-          </a>
-        {% endif %}
-      </div>
-    </aside>
-  </div>
+  </aside>
+</div>
 {% endblock %}

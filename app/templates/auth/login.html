@@ -1,37 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="auth-card">
-    <h1 class="page-title">Login</h1>
-    <p class="page-subtitle">Welcome back. Continue your learning.</p>
+<div class="auth-card">
+  <h1>Login</h1>
+  <p class="page-subtitle">Welcome back. Continue your learning.</p>
 
-    <form method="POST" class="form">
-      <input type="hidden" name="next" value="{{ next or '' }}">
+  <form method="POST" class="form">
+    <input type="hidden" name="next" value="{{ next or '' }}">
 
-      <label>Email</label>
-      <input name="email" type="email" value="{{ email_prefill or '' }}" required>
-
-      <label>Password</label>
-      <input name="password" type="password" required>
-
-      <button class="btn" type="submit">Login</button>
-    </form>
-
-    <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,.08); padding-top:14px;">
-      <div class="muted" style="font-weight:800; margin-bottom:8px;">Didn’t get the verification email?</div>
-      <form method="POST" action="{{ url_for('auth.resend_verification') }}" class="form" style="gap:10px;">
-        <label style="margin-top:0;">Email</label>
-        <input name="email" type="email" value="{{ email_prefill or '' }}" required>
-        <button class="btn btn-outline" type="submit">Resend verification</button>
-      </form>
+    <div class="form-group">
+      <label for="login-email">Email</label>
+      <input id="login-email" name="email" type="email" value="{{ email_prefill or '' }}" required autocomplete="email">
     </div>
 
-    <p class="muted" style="margin-top:12px;">
-      <a href="{{ url_for('auth.forgot_password', next=next) }}">Forgot password?</a>
-    </p>
+    <div class="form-group">
+      <label for="login-password">Password</label>
+      <input id="login-password" name="password" type="password" required autocomplete="current-password">
+    </div>
 
-    <p class="muted" style="margin-top:12px;">
-      Don’t have an account?
-      <a href="{{ url_for('auth.signup', next=next) }}">Sign up</a>
-    </p>
+    <button class="btn" type="submit">Login</button>
+  </form>
+
+  <p class="muted" style="margin-top:14px; font-size:13.5px;">
+    <a href="{{ url_for('auth.forgot_password', next=next) }}" style="color:var(--brand-l);">Forgot password?</a>
+  </p>
+
+  <p class="muted" style="margin-top:8px; font-size:13.5px;">
+    Don't have an account?
+    <a href="{{ url_for('auth.signup', next=next) }}" style="color:var(--brand-l);">Sign up free</a>
+  </p>
+
+  <div class="form-divider">
+    <div class="form-divider-label">Didn't get the verification email?</div>
+    <form method="POST" action="{{ url_for('auth.resend_verification') }}" class="form" style="gap:12px;">
+      <div class="form-group">
+        <label for="resend-email">Email</label>
+        <input id="resend-email" name="email" type="email" value="{{ email_prefill or '' }}" required autocomplete="email">
+      </div>
+      <button class="btn btn-outline" type="submit">Resend verification email</button>
+    </form>
   </div>
+</div>
 {% endblock %}
