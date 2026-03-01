@@ -96,14 +96,69 @@
 
   </div><!-- /hero-left -->
 
-  <!-- ============ HERO VISUAL ============ -->
+  <!-- ============ HERO STATS CARD ============ -->
+  <div class="hero-mid">
+    <div class="stats-card">
+      <div class="stats-card-title">Platform stats</div>
+      <div class="stats-card-row">
+        <div class="stats-card-item">
+          <div class="stats-card-num">2,400+</div>
+          <div class="stats-card-label">Learners</div>
+        </div>
+        <div class="stats-card-item">
+          <div class="stats-card-num">10</div>
+          <div class="stats-card-label">Topics</div>
+        </div>
+      </div>
+      <div class="stats-card-row">
+        <div class="stats-card-item">
+          <div class="stats-card-num">98%</div>
+          <div class="stats-card-label">Completion rate</div>
+        </div>
+        <div class="stats-card-item">
+          <div class="stats-card-num">Free</div>
+          <div class="stats-card-label">Always</div>
+        </div>
+      </div>
+      <div class="stats-card-bar-wrap">
+        <div class="stats-card-bar-label">
+          <span>Course progress</span>
+          <span style="color:var(--green);">78% avg</span>
+        </div>
+        <div class="stats-card-bar">
+          <div class="stats-card-bar-fill" style="width:78%"></div>
+        </div>
+      </div>
+      <div class="stats-card-footer">
+        <span class="stats-live-dot"></span> Live platform data
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ HERO VISUAL — TERMINAL ============ -->
   <div class="hero-right">
-    <div class="hero-visual">
-      <img
-        class="hero-img"
-        src="{{ url_for('static', filename='img/hero-bliztech.svg') }}"
-        alt="BlizTech cybersecurity platform"
-      />
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="t-dot" style="background:#FF5F57"></span>
+        <span class="t-dot" style="background:#FFBD2E"></span>
+        <span class="t-dot" style="background:#28CA41"></span>
+        <span class="terminal-title">bliztech ~ security-audit</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">phishing-check</span></div>
+        <div class="t-line t-out">&gt; Scanning email headers...</div>
+        <div class="t-line t-out t-warn">&gt; &#9888; Spoofed sender detected</div>
+        <div class="t-line t-out t-warn">&gt; &#9888; Suspicious link found</div>
+        <div class="t-line" style="margin-top:8px;"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">password-audit</span></div>
+        <div class="t-line t-out">&gt; Checking entropy...</div>
+        <div class="t-line t-out t-good">&gt; &#10003; Strong passphrase detected</div>
+        <div class="t-line t-out t-good">&gt; &#10003; 2FA enabled</div>
+        <div class="t-line" style="margin-top:8px;"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">device-scan</span></div>
+        <div class="t-line t-out">&gt; Checking software versions...</div>
+        <div class="t-line t-out t-warn">&gt; &#9888; 3 updates pending</div>
+        <div class="t-line t-out t-good">&gt; &#10003; Firewall active</div>
+        <div class="t-line" style="margin-top:12px;"><span class="t-prompt">$</span> <span class="t-cursor">&#9608;</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -145,21 +200,56 @@
 
 <!-- ============ HOW IT WORKS ============ -->
 <section class="how-card">
-  <h2>How it works</h2>
-  <ol>
-    <li><strong>Pick a topic</strong> — start from Topic 1</li>
-    <li><strong>Read a short lesson</strong> — 3–6 minutes</li>
-    <li><strong>Take the quiz</strong> — 5 questions to check your understanding</li>
-    <li><strong>Pass to unlock</strong> the next topic and keep building</li>
-  </ol>
+  <div class="how-left">
+    <h2>How it works</h2>
+    <ol>
+      <li><strong>Pick a topic</strong> — start from Topic 1</li>
+      <li><strong>Read a short lesson</strong> — 3–6 minutes</li>
+      <li><strong>Take the quiz</strong> — 5 questions to check your understanding</li>
+      <li><strong>Pass to unlock</strong> the next topic and keep building</li>
+    </ol>
 
-  <div class="how-actions">
-    <a class="btn" href="{{ url_for('topics.list_topics') }}">Browse topics</a>
-    {% if current_user.is_authenticated %}
-      <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">View my progress</a>
-    {% else %}
-      <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
-    {% endif %}
+    <div class="how-actions">
+      <a class="btn" href="{{ url_for('topics.list_topics') }}">Browse topics</a>
+      {% if current_user.is_authenticated %}
+        <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">View my progress</a>
+      {% else %}
+        <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create free account</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ============ SECURITY SCORE CARD ============ -->
+  <div class="score-card">
+    <div class="score-card-header">
+      <span class="score-card-title">Security score</span>
+      <span class="score-badge">SAMPLE</span>
+    </div>
+
+    <div class="score-ring-wrap">
+      <svg class="score-ring" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+        <circle cx="60" cy="60" r="52" fill="none" stroke="var(--green)" stroke-width="10"
+          stroke-dasharray="327" stroke-dashoffset="72"
+          stroke-linecap="round" transform="rotate(-90 60 60)"/>
+      </svg>
+      <div class="score-ring-text">
+        <div class="score-num">78</div>
+        <div class="score-label">/ 100</div>
+      </div>
+    </div>
+
+    <div class="score-checks">
+      <div class="score-check good"><span>&#10003;</span> Strong password</div>
+      <div class="score-check good"><span>&#10003;</span> 2FA enabled</div>
+      <div class="score-check warn"><span>&#9888;</span> Software outdated</div>
+      <div class="score-check good"><span>&#10003;</span> Phishing aware</div>
+      <div class="score-check warn"><span>&#9888;</span> Public Wi-Fi risks</div>
+    </div>
+
+    <a class="btn" style="width:100%; margin-top:16px;" href="{{ url_for('topics.list_topics') }}">
+      Improve your score
+    </a>
   </div>
 </section>
 
