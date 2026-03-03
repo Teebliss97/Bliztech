@@ -288,7 +288,6 @@ h3 { font-size: 15px; font-weight: 600; }
   .chip { display: none; }
   .nav-links { display: none; }
   .nav-toggle { display: inline-flex; }
-  .nav-panel.open { display: block; }
 }
 
 /* -----------------------------
