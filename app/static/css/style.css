@@ -250,7 +250,7 @@ h3 { font-size: 15px; font-weight: 600; }
 }
 
 .nav-panel { display: none; }
-.nav-panel.open { display: block; position: absolute; left: 0; right: 0; top: 56px; z-index: 999; padding: 0 16px 16px; background: rgba(10,10,10,0.98); border-bottom: 1px solid var(--border); }
+.nav-panel.open { display: block; position: absolute; right: 16px; left: auto; top: 56px; z-index: 999; width: 220px; padding: 0 0 8px; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
 
 .nav-panel-inner {
   border: 1px solid var(--border);
@@ -288,6 +288,7 @@ h3 { font-size: 15px; font-weight: 600; }
   .chip { display: none; }
   .nav-links { display: none; }
   .nav-toggle { display: inline-flex; }
+  .nav-panel.open { display: block; }
 }
 
 /* -----------------------------
