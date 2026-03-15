@@ -73,7 +73,9 @@ img { display: block; max-width: 100%; }
   padding: 0 60px;
 }
 @media (max-width: 480px) { .container { width: calc(100% - 28px); } }
-main { width: 100%; padding-bottom: 80px; }
+main { width: 100%; padding-bottom: 80px; padding-left: 80px; padding-right: 80px; }
+@media (max-width: 900px) { main { padding-left: 24px; padding-right: 24px; } }
+@media (max-width: 480px) { main { padding-left: 16px; padding-right: 16px; } }
 main.container { padding-bottom: 80px; }
 
 /* Inner page content wrapper */
@@ -1321,3 +1323,22 @@ code {
 .score-check.good span { color: var(--green); }
 .score-check.warn { color: var(--text-3); }
 .score-check.warn span { color: var(--warn); }
+
+
+/* Full-width sections break out of main padding */
+.hero, .section-grid, .how-card, .cta {
+  margin-left: -80px;
+  margin-right: -80px;
+}
+@media (max-width: 900px) {
+  .hero, .section-grid, .how-card, .cta {
+    margin-left: -24px;
+    margin-right: -24px;
+  }
+}
+@media (max-width: 480px) {
+  .hero, .section-grid, .how-card, .cta {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+}
