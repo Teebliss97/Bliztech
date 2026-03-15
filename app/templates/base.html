@@ -114,7 +114,7 @@
   <main>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="flash-wrap">
+        <div class="page-wrap" style="padding-bottom:0;">
           {% for category, message in messages %}
             <div class="flash {{ category }}">{{ message }}</div>
           {% endfor %}
@@ -132,8 +132,7 @@
         <a href="{{ url_for('main.privacy') }}">Privacy</a> ·
         <a href="{{ url_for('main.terms') }}">Terms</a> ·
         <a href="{{ url_for('main.cookies') }}">Cookies</a> ·
-        <a href="{{ url_for('main.disclaimer') }}">Disclaimer</a> ·
-        <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4612292e232323b3e37222122356e232f2d">bliztech<wbr>@outlook.com</a></span>
+        <a href="{{ url_for('main.disclaimer') }}">Disclaimer</a>
       </small>
     </div>
   </footer>
