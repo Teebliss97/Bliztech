@@ -8,6 +8,7 @@ from app.models import Progress
 from app.blueprints.topics.routes import TOPICS
 from app.utils.ratelimit import rate_limit
 from flask import make_response
+from app.link_analyzer import analyze_url
 
 main_bp = Blueprint("main", __name__)
 
@@ -365,3 +366,14 @@ def sitemap():
     response = make_response(xml)
     response.headers["Content-Type"] = "application/xml"
     return response
+
+@main_bp.route('/link-analyzer', methods=['GET', 'POST'])
+def link_analyzer():
+    result = None
+    url = None
+    if request.method == 'POST':
+        url = request.form.get('url', '').strip()
+        if url:
+            result = analyze_url(url)
+    return render_template('link_analyzer.html', result=result, url=url)
+ 

@@ -62,6 +62,7 @@
             <a href="https://www.youtube.com/@Bliz_Tech" target="_blank" rel="noopener">YouTube</a>
             <a href="{{ url_for('main.about') }}" class="{% if request.endpoint == 'main.about' %}active{% endif %}">About</a>
             <a href="{{ url_for('main.support') }}" class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>
+            <a href="{{ url_for('main.link_analyzer') }}" class="{% if request.endpoint == 'main.link_analyzer' %}active{% endif %}">Link Checker</a>
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
               <a href="{{ url_for('cert.certificate_home') }}" class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">Certificate</a>
@@ -92,6 +93,7 @@
             <a href="https://www.youtube.com/@Bliz_Tech" target="_blank" rel="noopener">YouTube</a>
             <a href="{{ url_for('main.about') }}">About</a>
             <a href="{{ url_for('main.support') }}">Support</a>
+            <a href="{{ url_for('main.link_analyzer') }}">Link Checker</a>
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
               <a href="{{ url_for('cert.certificate_home') }}">Certificate</a>

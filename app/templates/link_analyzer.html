@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% block title %}Link Analyzer — BlizTech{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div class="la-header">
+    <div class="la-pill">
+      <span class="dot"></span> Free Tool
+    </div>
+    <h1 class="page-title" style="font-size:34px; margin-bottom:8px;">Link Analyzer</h1>
+    <p class="page-subtitle" style="max-width:540px;">
+      Paste any suspicious link below and we'll check it for signs of phishing,
+      scams, or deceptive redirects — and explain exactly what we found.
+    </p>
+  </div>
+
+  <!-- Input form -->
+  <form method="POST" action="{{ url_for('main.link_analyzer') }}" class="la-form">
+    <div class="la-input-wrap">
+      <span class="la-input-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <input
+        type="text"
+        name="url"
+        class="la-input"
+        placeholder="Paste a link here e.g. http://paypa1-login-secure.com"
+        value="{{ url or '' }}"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button type="submit" class="btn la-btn">Analyze</button>
+    </div>
+  </form>
+
+  {% if result %}
+  <!-- Results -->
+  <div class="la-result pop-in">
+
+    <!-- Risk banner -->
+    <div class="la-banner la-banner-{{ result.risk_level }}">
+      <div class="la-risk-left">
+        <div class="la-risk-icon">
+          {% if result.risk_level == 3 %}⛔{% elif result.risk_level == 2 %}⚠️{% else %}✅{% endif %}
+        </div>
+        <div>
+          <div class="la-risk-label">Risk level</div>
+          <div class="la-risk-value">{{ result.risk }}</div>
+        </div>
+      </div>
+      <div class="la-domain">{{ result.domain }}</div>
+    </div>
+
+    <div class="la-grid">
+
+      <!-- Red flags -->
+      <div class="la-card">
+        <div class="side-title">Red flags found</div>
+        <div class="la-flags">
+          {% for flag in result.flags %}
+          <div class="la-flag la-flag-{{ result.risk_level }}">
+            <span class="la-flag-icon">
+              {% if result.risk_level == 1 %}✓{% else %}✗{% endif %}
+            </span>
+            {{ flag }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Explanation + advice -->
+      <div>
+        <div class="la-card" style="margin-bottom:12px;">
+          <div class="side-title">What this means</div>
+          <p style="color:var(--text-2); font-size:13.5px; line-height:1.75; margin:0;">
+            {{ result.explanation }}
+          </p>
+        </div>
+
+        <div class="la-card la-advice-card">
+          <div class="side-title">What to do next</div>
+          <div class="la-advice-list">
+            {% for tip in result.advice %}
+            <div class="la-advice-item">
+              <span class="la-advice-dot"></span>
+              {{ tip }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Learn more CTA -->
+    <div class="la-learn">
+      <span style="color:var(--text-3); font-size:13px;">
+        Want to learn how to spot these threats yourself?
+      </span>
+      <a class="btn btn-outline btn-sm" href="{{ url_for('topics.list_topics') }}">
+        Browse topics →
+      </a>
+    </div>
+
+  </div>
+  {% endif %}
+
+  <!-- Example links section -->
+  {% if not result %}
+  <div class="la-examples">
+    <div class="side-title" style="margin-bottom:14px;">Try an example</div>
+    <div class="la-example-grid">
+      <button class="la-example" onclick="document.querySelector('.la-input').value=this.dataset.url" data-url="http://paypa1-login-security.com/verify">
+        <span class="la-ex-badge bad">High Risk</span>
+        <span class="la-ex-url">paypa1-login-security.com</span>
+      </button>
+      <button class="la-example" onclick="document.querySelector('.la-input').value=this.dataset.url" data-url="https://bit.ly/3xK9mPq">
+        <span class="la-ex-badge warn">Suspicious</span>
+        <span class="la-ex-url">bit.ly/3xK9mPq</span>
+      </button>
+      <button class="la-example" onclick="document.querySelector('.la-input').value=this.dataset.url" data-url="https://google.com">
+        <span class="la-ex-badge safe">Looks Safe</span>
+        <span class="la-ex-url">google.com</span>
+      </button>
+      <button class="la-example" onclick="document.querySelector('.la-input').value=this.dataset.url" data-url="http://192.168.1.1/account/login">
+        <span class="la-ex-badge bad">High Risk</span>
+        <span class="la-ex-url">192.168.1.1/account/login</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="la-how">
+    <div class="side-title" style="margin-bottom:16px;">What we check</div>
+    <div class="la-checks-grid">
+      <div class="la-check-item">
+        <span class="la-check-icon">🔒</span>
+        <strong>HTTPS</strong>
+        <span>Is the connection encrypted?</span>
+      </div>
+      <div class="la-check-item">
+        <span class="la-check-icon">🏷️</span>
+        <strong>Brand spoofing</strong>
+        <span>Does it impersonate a trusted company?</span>
+      </div>
+      <div class="la-check-item">
+        <span class="la-check-icon">🔗</span>
+        <strong>URL shorteners</strong>
+        <span>Is the real destination hidden?</span>
+      </div>
+      <div class="la-check-item">
+        <span class="la-check-icon">⚠️</span>
+        <strong>Suspicious keywords</strong>
+        <span>Urgency or phishing language?</span>
+      </div>
+      <div class="la-check-item">
+        <span class="la-check-icon">🌐</span>
+        <strong>Risky domains</strong>
+        <span>Unusual TLDs or IP-based URLs?</span>
+      </div>
+      <div class="la-check-item">
+        <span class="la-check-icon">🔢</span>
+        <strong>Character tricks</strong>
+        <span>Numbers replacing letters?</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+.la-header { margin-bottom: 28px; }
+.la-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 10px; border-radius: var(--radius-xs);
+  border: 1px solid var(--border-g); background: var(--green-dim);
+  color: var(--green); font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.5px; margin-bottom: 12px;
+}
+.la-form { margin-bottom: 28px; }
+.la-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-2); border: 1px solid var(--border-2);
+  border-radius: var(--radius); padding: 6px 6px 6px 14px;
+  transition: border-color 0.15s;
+}
+.la-input-wrap:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); }
+.la-input-icon { color: var(--text-3); flex-shrink: 0; }
+.la-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text); font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; min-height: 36px;
+}
+.la-input::placeholder { color: var(--text-3); }
+.la-btn { flex-shrink: 0; }
+
+/* Result */
+.la-result { margin-top: 8px; }
+.la-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-radius: var(--radius-lg);
+  border: 1px solid; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
+}
+.la-banner-3 { border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.06); }
+.la-banner-2 { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+.la-banner-1 { border-color: var(--border-g); background: var(--green-dim); }
+
+.la-risk-left { display: flex; align-items: center; gap: 14px; }
+.la-risk-icon { font-size: 28px; line-height: 1; }
+.la-risk-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; margin-bottom: 2px; }
+.la-risk-value { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; }
+.la-banner-3 .la-risk-value { color: #F43F5E; }
+.la-banner-2 .la-risk-value { color: var(--warn); }
+.la-banner-1 .la-risk-value { color: var(--green); }
+
+.la-domain {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--text-3); background: var(--bg-4);
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); word-break: break-all;
+}
+
+.la-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .la-grid { grid-template-columns: 1fr; } }
+
+.la-card {
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 18px 20px; background: var(--bg-2);
+}
+.la-flags { display: grid; gap: 8px; margin-top: 10px; }
+.la-flag {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; padding: 9px 12px;
+  border-radius: var(--radius-sm); border: 1px solid; line-height: 1.5;
+}
+.la-flag-3 { border-color: rgba(244,63,94,0.15); background: rgba(244,63,94,0.04); color: var(--text-2); }
+.la-flag-2 { border-color: rgba(245,158,11,0.15); background: rgba(245,158,11,0.04); color: var(--text-2); }
+.la-flag-1 { border-color: var(--border-g); background: var(--green-dim); color: var(--text-2); }
+.la-flag-icon { flex-shrink: 0; font-weight: 700; margin-top: 1px; }
+.la-flag-3 .la-flag-icon { color: #F43F5E; }
+.la-flag-2 .la-flag-icon { color: var(--warn); }
+.la-flag-1 .la-flag-icon { color: var(--green); }
+
+.la-advice-card { border-color: var(--border-g); background: var(--green-dim); }
+.la-advice-list { display: grid; gap: 8px; margin-top: 10px; }
+.la-advice-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text-2); line-height: 1.6;
+}
+.la-advice-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0; margin-top: 6px;
+}
+
+.la-learn {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 16px; padding: 14px 18px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-2); flex-wrap: wrap; gap: 10px;
+}
+
+/* Examples */
+.la-examples { margin-top: 40px; }
+.la-example-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (max-width: 600px) { .la-example-grid { grid-template-columns: 1fr; } }
+.la-example {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--bg-2);
+  cursor: pointer; text-align: left; transition: background 0.15s;
+  width: 100%;
+}
+.la-example:hover { background: var(--bg-3); border-color: var(--border-2); }
+.la-ex-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  padding: 2px 7px; border-radius: var(--radius-xs);
+  border: 1px solid; flex-shrink: 0; white-space: nowrap;
+}
+.la-ex-badge.bad { border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.06); color: #F43F5E; }
+.la-ex-badge.warn { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); color: var(--warn); }
+.la-ex-badge.safe { border-color: var(--border-g); background: var(--green-dim); color: var(--green); }
+.la-ex-url { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-3); word-break: break-all; }
+
+/* How it works */
+.la-how { margin-top: 36px; }
+.la-checks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 700px) { .la-checks-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px) { .la-checks-grid { grid-template-columns: 1fr; } }
+.la-check-item {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 16px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--bg-2);
+}
+.la-check-icon { font-size: 20px; margin-bottom: 4px; }
+.la-check-item strong { font-size: 13px; color: var(--text); }
+.la-check-item span { font-size: 12px; color: var(--text-3); line-height: 1.5; }
+</style>
+{% endblock %}
