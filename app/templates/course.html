@@ -37,7 +37,7 @@
       </div>
 
       <div class="course-cta-row">
-        <a href="#enrol" class="btn course-btn-primary">Enrol for £11</a>
+        <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="btn course-btn-primary">Enrol for £11</a>
         <span class="course-one-time">One-time payment · Lifetime access</span>
       </div>
     </div>
@@ -313,15 +313,7 @@
         <div class="enrol-price-card">
           <div class="enrol-price">£11</div>
           <div class="enrol-price-sub">one-time · lifetime access</div>
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.course_checkout') }}" class="btn enrol-btn">Enrol now</a>
-          {% else %}
-            <a href="{{ url_for('auth.signup') }}" class="btn enrol-btn">Create account to enrol</a>
-            <p class="enrol-login-note">
-              Already have an account?
-              <a href="{{ url_for('auth.login') }}">Log in</a>
-            </p>
-          {% endif %}
+          <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="btn enrol-btn">Enrol for £11</a>
           <div class="enrol-secure">
             Secure payment via Stripe
           </div>
