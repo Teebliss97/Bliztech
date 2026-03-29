@@ -1,89 +1,102 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="page-head">
-  <h1 class="page-title">Topics</h1>
-  <p class="page-subtitle">Read a lesson, take the quiz, and unlock the next topic — step by step.</p>
+<div class="page-wrap">
+  <div class="page-head">
+    <h1 class="page-title">Topics</h1>
+    <p class="page-subtitle">Read a lesson, take the quiz, and unlock the next topic — step by step.</p>
 
-  {% if is_anon %}
-    <p class="muted" style="font-size:13.5px; margin-bottom:16px;">
-      <a href="{{ url_for('auth.signup', next=request.path) }}" style="color:var(--brand-l);">Create a free account</a>
-      or
-      <a href="{{ url_for('auth.login', next=request.path) }}" style="color:var(--brand-l);">log in</a>
-      to take quizzes, track progress, and earn a certificate.
-    </p>
-  {% endif %}
-
-  <!-- Progress Bar -->
-  <div class="course-progress">
-    <div class="course-progress-top">
-      <span class="badge">Your progress</span>
-      <span class="course-progress-text">
-        <strong>{{ completed_count }}</strong> of {{ total_topics }} completed &nbsp;·&nbsp; {{ progress_pct }}%
-      </span>
-    </div>
-    <div class="course-bar">
-      <div class="course-bar-fill" style="width: {{ progress_pct }}%;"></div>
-    </div>
-
-    {% if can_get_certificate %}
-      <div style="margin-top:16px;">
-        <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
-      </div>
-    {% elif is_anon %}
-      <div style="margin-top:16px;">
-        <a class="btn btn-outline" href="{{ url_for('auth.signup', next=request.path) }}">
-          Sign up to earn a certificate 🎓
-        </a>
-      </div>
+    {% if is_anon %}
+      <p class="muted" style="font-size:13.5px; margin-bottom:16px;">
+        <a href="{{ url_for('auth.signup', next=request.path) }}" style="color:var(--green);">Create a free account</a>
+        or
+        <a href="{{ url_for('auth.login', next=request.path) }}" style="color:var(--green);">log in</a>
+        to take quizzes, track progress, and earn a certificate.
+      </p>
     {% endif %}
-  </div>
-</div>
 
-<!-- Topics Grid -->
-<div class="topics-grid">
-  {% for t in topics %}
-    <div class="topic-card {% if not t.unlocked %}is-locked{% endif %} {% if t.completed %}is-completed{% endif %}">
-
-      <div class="topic-title">{{ t.title }}</div>
-
-      <div class="topic-badges">
-        {% if t.completed %}
-          <span class="tpill tpill-green">✅ Completed{% if t.score is not none %} · {{ t.score }}%{% endif %}</span>
-        {% elif t.unlocked %}
-          <span class="tpill tpill-blue">🔓 Unlocked</span>
-        {% else %}
-          <span class="tpill tpill-gray">🔒 Locked</span>
-        {% endif %}
-
-        {% if t.time %}
-          <span class="tpill">⏱ {{ t.time }}</span>
-        {% endif %}
+    <!-- Progress Bar -->
+    <div class="course-progress">
+      <div class="course-progress-top">
+        <span class="badge">Your progress</span>
+        <span class="course-progress-text">
+          <strong>{{ completed_count }}</strong> of {{ total_topics }} completed &nbsp;·&nbsp; {{ progress_pct }}%
+        </span>
       </div>
-
-      <p class="topic-desc">{{ t.description }}</p>
-
-      <div class="topic-actions">
-        {% if is_anon %}
-          <a class="btn" href="{{ url_for('topics.topic_detail', slug=t.slug) }}">Read</a>
-          <a class="btn btn-outline" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=t.slug)) }}">
-            Log in to take quiz
+      <div class="course-bar">
+        <div class="course-bar-fill" style="width: {{ progress_pct }}%;"></div>
+      </div>
+      {% if can_get_certificate %}
+        <div style="margin-top:16px;">
+          <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
+        </div>
+      {% elif is_anon %}
+        <div style="margin-top:16px;">
+          <a class="btn btn-outline" href="{{ url_for('auth.signup', next=request.path) }}">
+            Sign up to earn a certificate 🎓
           </a>
-        {% else %}
-          {% if t.unlocked %}
-            <a class="btn" href="{{ url_for('topics.topic_detail', slug=t.slug) }}">Read lesson</a>
-            <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=t.slug) }}">Take quiz</a>
-          {% else %}
-            <button class="btn btn-disabled" disabled>Read</button>
-            <button class="btn btn-outline btn-disabled" disabled>Take quiz</button>
-          {% endif %}
-        {% endif %}
-      </div>
-
-      {% if not is_anon and not t.unlocked %}
-        <p class="topic-lock-hint">Complete the previous quiz to unlock this topic.</p>
+        </div>
       {% endif %}
     </div>
-  {% endfor %}
-</div>
+  </div>
+
+  <!-- Topics Grid -->
+  <div class="topics-grid">
+    {% for t in topics %}
+      <div class="topic-card {% if not t.unlocked %}is-locked{% endif %} {% if t.completed %}is-completed{% endif %}">
+        <div class="topic-title">{{ t.title }}</div>
+        <div class="topic-badges">
+          {% if t.completed %}
+            <span class="tpill tpill-green">✅ Completed{% if t.score is not none %} · {{ t.score }}%{% endif %}</span>
+          {% elif t.unlocked %}
+            <span class="tpill tpill-blue">🔓 Unlocked</span>
+          {% else %}
+            <span class="tpill tpill-gray">🔒 Locked</span>
+          {% endif %}
+          {% if t.time %}
+            <span class="tpill">⏱ {{ t.time }}</span>
+          {% endif %}
+        </div>
+        <p class="topic-desc">{{ t.description }}</p>
+        <div class="topic-actions">
+          {% if is_anon %}
+            <a class="btn" href="{{ url_for('topics.topic_detail', slug=t.slug) }}">Read</a>
+            <a class="btn btn-outline" href="{{ url_for('auth.login', next=url_for('quizzes.quiz', slug=t.slug)) }}">
+              Log in to take quiz
+            </a>
+          {% else %}
+            {% if t.unlocked %}
+              <a class="btn" href="{{ url_for('topics.topic_detail', slug=t.slug) }}">Read lesson</a>
+              <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=t.slug) }}">Take quiz</a>
+            {% else %}
+              <button class="btn btn-disabled" disabled>Read</button>
+              <button class="btn btn-outline btn-disabled" disabled>Take quiz</button>
+            {% endif %}
+          {% endif %}
+        </div>
+        {% if not is_anon and not t.unlocked %}
+          <p class="topic-lock-hint">Complete the previous quiz to unlock this topic.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- ===================== COURSE UPSELL BANNER ===================== -->
+  <div class="topics-upsell">
+    <div class="topics-upsell-left">
+      <div class="topics-upsell-tag">Get Into Cybersecurity — Paid Course</div>
+      <h3 class="topics-upsell-title">Go beyond the free course</h3>
+      <p class="topics-upsell-sub">
+        These 10 topics cover awareness. The paid course goes deeper —
+        networking fundamentals, Linux basics, phishing investigation,
+        incident response, and a clear path into a cybersecurity career.
+      </p>
+    </div>
+    <div class="topics-upsell-right">
+      <span class="topics-upsell-price">£11</span>
+      <a class="btn" href="{{ url_for('main.course') }}">View the course</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
 {% endblock %}

@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+  <div class="page-wrap">
   <div class="page-head">
     <h1 class="page-title">Welcome back 👋</h1>
     <p class="page-subtitle">
-      You’re making progress — keep going.
+      You're making progress — keep going.
     </p>
   </div>
 
@@ -12,7 +13,6 @@
   <div class="course-progress" style="margin-top:16px;">
     <div class="course-progress-top">
       <span class="badge">Your account</span>
-
       <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
         {% if current_user.is_admin %}
           <span class="badge">🛡️ Admin</span>
@@ -21,64 +21,42 @@
         {% endif %}
       </div>
     </div>
-
     <p class="page-subtitle" style="margin:8px 0 0;">
       Signed in as <strong>{{ current_user.email }}</strong>
     </p>
-
     <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
       <span class="badge">🧾 Total attempts: {{ stats.attempts_total }}</span>
-
       {% if stats.last_activity %}
-        <span class="badge">
-          🕒 Last activity: {{ stats.last_activity.strftime('%d %b %Y, %H:%M') }}
-        </span>
+        <span class="badge">🕒 Last activity: {{ stats.last_activity.strftime('%d %b %Y, %H:%M') }}</span>
       {% else %}
         <span class="badge">🕒 Last activity: Not yet</span>
       {% endif %}
     </div>
   </div>
 
-  <!-- ===================== REFERRAL CARD (NEW) ===================== -->
+  <!-- ===================== REFERRAL CARD ===================== -->
   <div class="course-progress" style="margin-top:16px;">
     <div class="course-progress-top">
       <span class="badge">Your referral link</span>
       <span class="course-progress-text">Invite people and earn credit</span>
     </div>
-
     {% if current_user.referral_code %}
       <p class="page-subtitle" style="margin:10px 0 0;">
         Share this link (it automatically tracks referrals):
       </p>
-
-      <!-- display link -->
       <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-        <input
-          id="refLink"
-          type="text"
-          readonly
+        <input id="refLink" type="text" readonly
           value="{{ url_for('main.home', ref=current_user.referral_code, _external=True) }}"
-          style="flex:1; min-width:260px;"
-        />
-
-        <button class="btn btn-outline" type="button" id="copyRefBtn">
-          Copy link
-        </button>
-
-        <a
-          class="btn btn-outline"
-          target="_blank"
-          rel="noopener"
-          href="https://wa.me/?text={{ (url_for('main.home', ref=current_user.referral_code, _external=True) ~ ' — Learn cybersecurity for free on BlizTech')|urlencode }}"
-        >
+          style="flex:1; min-width:260px;" />
+        <button class="btn btn-outline" type="button" id="copyRefBtn">Copy link</button>
+        <a class="btn btn-outline" target="_blank" rel="noopener"
+          href="https://wa.me/?text={{ (url_for('main.home', ref=current_user.referral_code, _external=True) ~ ' — Learn cybersecurity for free on BlizTech')|urlencode }}">
           Share on WhatsApp
         </a>
       </div>
-
       <p class="muted" style="margin:10px 0 0; font-size:13px; line-height:1.6;">
         Tip: Anyone who signs up after clicking your link will be linked to you as their referrer.
       </p>
-
     {% else %}
       <p class="page-subtitle" style="margin:10px 0 0;">
         Your referral code is not ready yet. Refresh the page or log out and log in again.
@@ -94,31 +72,21 @@
         <strong>{{ stats.completed }}</strong> / {{ stats.total }} completed • {{ stats.percent }}%
       </span>
     </div>
-
     <div class="course-bar">
       <div class="course-bar-fill" style="width: {{ stats.percent }}%;"></div>
     </div>
-
     <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
       {% if stats.course_done %}
-        <p class="muted" style="margin:0;">🎉 You’ve completed the course!</p>
+        <p class="muted" style="margin:0;">🎉 You've completed the course!</p>
         <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
         <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Review Topics</a>
       {% else %}
         {% if resume %}
-          <a class="btn" href="{{ url_for('topics.topic_detail', slug=resume.slug) }}">
-            ▶ Continue where you stopped
-          </a>
-          <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=resume.slug) }}">
-            Take Quiz
-          </a>
+          <a class="btn" href="{{ url_for('topics.topic_detail', slug=resume.slug) }}">▶ Continue where you stopped</a>
+          <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=resume.slug) }}">Take Quiz</a>
         {% elif next_topic %}
-          <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_topic.slug) }}">
-            ▶ Continue learning
-          </a>
-          <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">
-            View full course →
-          </a>
+          <a class="btn" href="{{ url_for('topics.topic_detail', slug=next_topic.slug) }}">▶ Continue learning</a>
+          <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View full course →</a>
         {% else %}
           <a class="btn" href="{{ url_for('topics.list_topics') }}">Start the course</a>
         {% endif %}
@@ -126,21 +94,43 @@
     </div>
   </div>
 
+  <!-- ===================== COURSE UPSELL — shown after completion ===================== -->
+  {% if stats.course_done %}
+  <div class="dash-upsell">
+    <div class="dash-upsell-left">
+      <div class="dash-upsell-tag">What's next</div>
+      <h2 class="dash-upsell-title">Take your skills further</h2>
+      <p class="dash-upsell-sub">
+        You've completed the free course. The paid course picks up where this left off —
+        technical depth, hands-on labs, and a clear path into a cybersecurity career.
+      </p>
+      <div class="dash-upsell-points">
+        <div class="dup-point">20 structured lessons across 4 sections</div>
+        <div class="dup-point">Practical labs — real tools, real commands</div>
+        <div class="dup-point">Networking, Linux, phishing investigation, incident response</div>
+        <div class="dup-point">Career guidance and your 90-day action plan</div>
+      </div>
+    </div>
+    <div class="dash-upsell-right">
+      <div class="dash-upsell-price">£11</div>
+      <div class="dash-upsell-price-sub">one-time · lifetime access</div>
+      <a class="btn dash-upsell-btn" href="{{ url_for('main.course') }}">View the course</a>
+      <div class="dash-upsell-note">Includes certificate of completion</div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- ===================== WHAT'S NEXT ===================== -->
   {% if not stats.course_done %}
     <div style="margin-top:26px;">
-      <h2 class="section-title">What’s next</h2>
-      <p class="page-subtitle">
-        Focus on your next step — you don’t need to think about everything.
-      </p>
-
+      <h2 class="section-title">What's next</h2>
+      <p class="page-subtitle">Focus on your next step — you don't need to think about everything.</p>
       <div class="topics-grid">
         {% for r in rows[:3] %}
           <div class="topic-card {% if not r.unlocked %}is-locked{% endif %} {% if r.passed %}is-completed{% endif %}">
             <div class="topic-top">
               <div class="topic-title-wrap">
                 <div class="topic-title">{{ r.title }}</div>
-
                 <div class="topic-badges">
                   {% if r.passed %}
                     <span class="tpill tpill-green">✅ Completed</span>
@@ -152,11 +142,7 @@
                 </div>
               </div>
             </div>
-
-            <div class="topic-desc">
-              Attempts: <strong>{{ r.attempts }}</strong>
-            </div>
-
+            <div class="topic-desc">Attempts: <strong>{{ r.attempts }}</strong></div>
             <div class="topic-actions">
               {% if r.unlocked %}
                 <a class="btn" href="{{ url_for('topics.topic_detail', slug=r.slug) }}">Read</a>
@@ -168,11 +154,8 @@
           </div>
         {% endfor %}
       </div>
-
       <div style="margin-top:12px;">
-        <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">
-          View full course →
-        </a>
+        <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">View full course →</a>
       </div>
     </div>
   {% endif %}
@@ -181,8 +164,7 @@
   {% if stats.completed > 0 %}
     <div style="margin-top:30px;">
       <h2 class="section-title">Completed topics</h2>
-      <p class="page-subtitle">Quick review links to reinforce what you’ve learned.</p>
-
+      <p class="page-subtitle">Quick review links to reinforce what you've learned.</p>
       <div class="topics-grid">
         {% for r in rows if r.passed %}
           <div class="topic-card is-completed">
@@ -195,7 +177,6 @@
                 </div>
               </div>
             </div>
-
             <div class="topic-actions" style="margin-top:10px;">
               <a class="btn btn-outline" href="{{ url_for('topics.topic_detail', slug=r.slug) }}">Review lesson</a>
               <a class="btn btn-outline" href="{{ url_for('quizzes.quiz', slug=r.slug) }}">Retake quiz</a>
@@ -206,29 +187,26 @@
     </div>
   {% endif %}
 
-  <!-- ===================== RESET (LOW PRIORITY) ===================== -->
+  <!-- ===================== RESET ===================== -->
   <div style="margin-top:32px;">
     <details>
       <summary class="muted" style="cursor:pointer;">Reset course progress</summary>
       <form method="POST" action="{{ url_for('main.reset_progress') }}" class="form" style="max-width:420px; margin-top:10px;">
-        <p class="page-subtitle">
-          Type <strong>RESET</strong> to clear your progress.
-        </p>
+        <p class="page-subtitle">Type <strong>RESET</strong> to clear your progress.</p>
         <input name="confirm" placeholder="Type RESET to confirm" required>
-        <button class="btn btn-outline" type="submit" style="margin-top:10px;">
-          Reset progress
-        </button>
+        <button class="btn btn-outline" type="submit" style="margin-top:10px;">Reset progress</button>
       </form>
     </details>
   </div>
 
-  <!-- ===================== Copy referral JS (NEW) ===================== -->
+  </div><!-- /page-wrap -->
+
+  <script src="{{ url_for('static', filename='js/nav.js') }}" defer></script>
   <script>
     (function () {
       const input = document.getElementById("refLink");
       const btn = document.getElementById("copyRefBtn");
       if (!input || !btn) return;
-
       btn.addEventListener("click", async function () {
         const text = input.value || "";
         try {
@@ -236,9 +214,7 @@
           btn.textContent = "Copied ✅";
           setTimeout(() => (btn.textContent = "Copy link"), 1400);
         } catch (e) {
-          // fallback
-          input.focus();
-          input.select();
+          input.focus(); input.select();
           document.execCommand("copy");
           btn.textContent = "Copied ✅";
           setTimeout(() => (btn.textContent = "Copy link"), 1400);

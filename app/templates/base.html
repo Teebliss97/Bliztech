@@ -59,6 +59,7 @@
           <nav class="nav-links">
             <a href="{{ url_for('main.home') }}" class="{% if request.endpoint == 'main.home' %}active{% endif %}">Home</a>
             <a href="{{ url_for('topics.list_topics') }}" class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">Topics</a>
+            <a href="{{ url_for('main.course') }}" class="{% if request.endpoint == 'main.course' %}active{% endif %}">Course</a>
             <a href="https://www.youtube.com/@Bliz_Tech" target="_blank" rel="noopener">YouTube</a>
             <a href="{{ url_for('main.about') }}" class="{% if request.endpoint == 'main.about' %}active{% endif %}">About</a>
             <a href="{{ url_for('main.support') }}" class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>
@@ -90,6 +91,7 @@
           <nav class="nav-panel-links">
             <a href="{{ url_for('main.home') }}">Home</a>
             <a href="{{ url_for('topics.list_topics') }}">Topics</a>
+            <a href="{{ url_for('main.course') }}">Course</a>
             <a href="https://www.youtube.com/@Bliz_Tech" target="_blank" rel="noopener">YouTube</a>
             <a href="{{ url_for('main.about') }}">About</a>
             <a href="{{ url_for('main.support') }}">Support</a>

@@ -1342,3 +1342,287 @@ code {
     margin-right: -16px;
   }
 }
+
+/* -----------------------------
+   Course Promo Section (homepage)
+------------------------------ */
+.course-promo {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 64px 80px;
+  margin-left: -80px;
+  margin-right: -80px;
+  position: relative;
+  overflow: hidden;
+}
+.course-promo::before {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,217,126,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .course-promo { padding: 40px 24px; margin-left: -24px; margin-right: -24px; }
+}
+@media (max-width: 480px) {
+  .course-promo { padding: 32px 16px; margin-left: -16px; margin-right: -16px; }
+}
+
+.course-promo-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+@media (max-width: 900px) { .course-promo-inner { grid-template-columns: 1fr; gap: 32px; } }
+
+.course-promo-tag {
+  display: inline-flex;
+  padding: 3px 9px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-g);
+  background: var(--green-dim);
+  color: var(--green);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+
+.course-promo-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  margin: 0 0 14px;
+  color: var(--text);
+}
+
+.course-promo-sub {
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.75;
+  max-width: 44ch;
+  margin: 0 0 20px;
+}
+
+.course-promo-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.course-promo-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text-3);
+}
+
+.course-promo-card {
+  border: 1px solid var(--border-g);
+  border-radius: var(--radius-xl);
+  background: var(--bg-2);
+  overflow: hidden;
+}
+
+.course-promo-sections { padding: 8px 0; }
+
+.cps-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-2);
+  transition: background 0.15s;
+}
+.cps-item:last-child { border-bottom: none; }
+.cps-item:hover { background: var(--bg-3); }
+
+.cps-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-g);
+  background: var(--green-dim);
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.course-promo-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-g);
+  background: var(--bg-3);
+}
+
+.course-promo-price {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+.course-promo-price span {
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* -----------------------------
+   Dashboard course upsell
+------------------------------ */
+.dash-upsell {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: center;
+  margin-top: 24px;
+  padding: 32px 36px;
+  border: 1px solid var(--border-g);
+  border-radius: var(--radius-xl);
+  background: var(--bg-2);
+  position: relative;
+  overflow: hidden;
+}
+.dash-upsell::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(0,217,126,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+@media (max-width: 700px) {
+  .dash-upsell { grid-template-columns: 1fr; gap: 24px; padding: 24px 20px; }
+}
+
+.dash-upsell-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.dash-upsell-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin: 0 0 10px;
+}
+.dash-upsell-sub {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin: 0 0 16px;
+  max-width: 52ch;
+}
+.dash-upsell-points { display: grid; gap: 7px; }
+.dup-point {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.dup-point::before {
+  content: '→';
+  color: var(--green);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.dash-upsell-right { text-align: center; }
+.dash-upsell-price {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.dash-upsell-price-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+.dash-upsell-btn { min-width: 160px; }
+.dash-upsell-note {
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 8px;
+}
+
+/* -----------------------------
+   Topics page upsell banner
+------------------------------ */
+.topics-upsell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin-top: 40px;
+  padding: 28px 32px;
+  border: 1px solid var(--border-g);
+  border-radius: var(--radius-xl);
+  background: var(--bg-2);
+  flex-wrap: wrap;
+}
+
+.topics-upsell-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.topics-upsell-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+.topics-upsell-sub {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 56ch;
+}
+
+.topics-upsell-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.topics-upsell-price {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}

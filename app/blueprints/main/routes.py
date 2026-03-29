@@ -9,6 +9,7 @@ from app.blueprints.topics.routes import TOPICS
 from app.utils.ratelimit import rate_limit
 from flask import make_response
 from app.link_analyzer import analyze_url
+from flask_login import login_required
 
 main_bp = Blueprint("main", __name__)
 
@@ -377,3 +378,12 @@ def link_analyzer():
             result = analyze_url(url)
     return render_template('link_analyzer.html', result=result, url=url)
  
+@main_bp.route('/course')
+def course():
+    return render_template('course.html')
+ 
+@main_bp.route('/course/checkout')
+@login_required
+def course_checkout():
+    # Stripe integration comes next
+    pass
