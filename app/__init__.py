@@ -236,11 +236,6 @@ def create_app():
     def healthz():
         return jsonify({"status": "ok"})
     
-    @app.template_filter('safe')
-    def render_markdown(text):
-        if not text:
-            return ''
-        return md.markdown(text, extensions=['tables', 'fenced_code'])
 
     from app.blueprints.main.routes import main_bp
     from app.blueprints.topics.routes import topics_bp
