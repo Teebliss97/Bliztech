@@ -56,6 +56,21 @@
     </div>
     {% endif %}
     {% endfor %}
+
+    <!-- Certificate banner -->
+    <div class="cl-cert-banner">
+      <div class="cl-cert-left">
+        <div class="cl-cert-icon">
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 8v8c0 7.2 5.2 13.9 12 15.5C23.8 29.9 28 23.2 28 16V8L16 2z" fill="rgba(0,217,126,0.15)" stroke="#00d97e" stroke-width="1.5"/><path d="M11 16l3.5 3.5L21 12" stroke="#00d97e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="cl-cert-title">Certificate of Completion</div>
+          <div class="cl-cert-sub">Available to all enrolled students — download and share on LinkedIn</div>
+        </div>
+      </div>
+      <a href="{{ url_for('cert.paid_certificate_home') }}" class="cl-cert-btn">Get certificate →</a>
+    </div>
+
   </div>
 
 </div>
@@ -180,6 +195,37 @@
 .cl-arrow { color: var(--text-3); font-size: 13px; flex-shrink: 0; transition: transform 0.12s, color 0.12s; }
 .cl-row:hover .cl-arrow { transform: translateX(3px); color: var(--green); }
 .cl-row.done .cl-arrow { display: none; }
+
+/* Certificate banner */
+.cl-cert-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border: 1px solid var(--border-g);
+  border-radius: var(--radius-lg);
+  background: rgba(0,217,126,0.04);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.cl-cert-left { display: flex; align-items: center; gap: 12px; }
+.cl-cert-icon { flex-shrink: 0; }
+.cl-cert-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
+.cl-cert-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.cl-cert-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  text-decoration: none;
+  border: 1px solid var(--border-g);
+  background: var(--green-dim);
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+.cl-cert-btn:hover { background: var(--green); color: #000; }
 </style>
 
 <script>
