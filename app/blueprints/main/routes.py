@@ -3,6 +3,7 @@ import re
 
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from flask_login import current_user
+from markupsafe import Markup
 
 from app.models import Progress
 from app.blueprints.topics.routes import TOPICS
@@ -355,12 +356,12 @@ def course_lesson(slug):
 
     topic = CourseTopic.query.filter_by(slug=slug).first_or_404()
 
-    # Convert Markdown → HTML
+    # Convert Markdown → HTML and mark safe to prevent Jinja escaping
     _md = md_lib.Markdown(extensions=["extra", "nl2br", "sane_lists"])
-    topic.body = _md.convert(topic.body or "")
+    topic.body = Markup(_md.convert(topic.body or ""))
     if topic.lab:
         _md.reset()
-        topic.lab = _md.convert(topic.lab)
+        topic.lab = Markup(_md.convert(topic.lab))
 
     # Get prev/next for navigation
     all_topics = CourseTopic.query.order_by(CourseTopic.order).all()
@@ -369,6 +370,7 @@ def course_lesson(slug):
     next_topic = all_topics[idx + 1] if idx is not None and idx < len(all_topics) - 1 else None
 
     return render_template("course_lesson.html", topic=topic, prev_topic=prev_topic, next_topic=next_topic)
+
 
 # -------------------------
 # PAID COURSE — thank you page
