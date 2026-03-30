@@ -321,12 +321,6 @@ def course_lessons():
 
     topics = CourseTopic.query.order_by(CourseTopic.order).all()
 
-    # Group by section
-    sections = {"A": [], "B": [], "C": [], "D": []}
-    for t in topics:
-        if t.section in sections:
-            sections[t.section].append(t)
-
     section_names = {
         "A": "Foundation",
         "B": "Technical Core",
@@ -334,7 +328,14 @@ def course_lessons():
         "D": "Career Launchpad",
     }
 
-    return render_template("course_lessons.html", sections=sections, section_names=section_names)
+    # Group by section
+    sections = {"A": [], "B": [], "C": [], "D": []}
+    for t in topics:
+        key = t.section.strip().upper() if t.section else ""
+        if key in sections:
+            sections[key].append(t)
+
+    return render_template("course_lessons.html", sections=sections, section_names=section_names, total=len(topics))
 
 
 # -------------------------

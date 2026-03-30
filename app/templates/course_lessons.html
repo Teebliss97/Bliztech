@@ -10,7 +10,8 @@
     <p class="page-subtitle">20 lessons across four sections. Work through them in order.</p>
   </div>
 
-  {% for section_key, section_name in section_names.items() %}
+  {% for section_key in ["A", "B", "C", "D"] %}
+  {% set section_name = section_names[section_key] %}
   {% set topics = sections[section_key] %}
   {% if topics %}
   <div class="cl-section">
