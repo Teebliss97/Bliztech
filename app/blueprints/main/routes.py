@@ -314,7 +314,7 @@ def course():
 def course_lessons():
     from app.models import CourseTopic, CourseAccess
     # Check access
-    has_access = CourseAccess.query.filter_by(user_id=current_user.id).first()
+    has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
     if not has_access:
         flash("You need to purchase the course to access lessons.", "error")
         return redirect(url_for("main.course"))
@@ -345,7 +345,7 @@ def course_lessons():
 def course_lesson(slug):
     from app.models import CourseTopic, CourseAccess
     # Check access
-    has_access = CourseAccess.query.filter_by(user_id=current_user.id).first()
+    has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
     if not has_access:
         flash("You need to purchase the course to access lessons.", "error")
         return redirect(url_for("main.course"))
