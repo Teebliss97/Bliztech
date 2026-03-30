@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}You're enrolled — Get Into Cybersecurity{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="ty-card">
+
+    <div class="ty-icon">✓</div>
+    <div class="ty-tag">Purchase confirmed</div>
+    <h1 class="ty-title">You're enrolled</h1>
+    <p class="ty-sub">
+      Welcome to Get Into Cybersecurity. Your access is being set up —
+      it will be ready within a few hours. You will receive an email
+      confirmation from Gumroad.
+    </p>
+
+    <div class="ty-steps">
+      <div class="ty-step">
+        <span class="ty-step-num">1</span>
+        <div>
+          <div class="ty-step-title">Check your email</div>
+          <div class="ty-step-text">Gumroad will send you a receipt to confirm your purchase.</div>
+        </div>
+      </div>
+      <div class="ty-step">
+        <span class="ty-step-num">2</span>
+        <div>
+          <div class="ty-step-title">Access is granted manually</div>
+          <div class="ty-step-text">
+            We review every purchase and grant access within a few hours.
+            Make sure you are logged in with the same email you used to purchase.
+          </div>
+        </div>
+      </div>
+      <div class="ty-step">
+        <span class="ty-step-num">3</span>
+        <div>
+          <div class="ty-step-title">Start learning</div>
+          <div class="ty-step-text">Once access is granted, your lessons will appear at the link below.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ty-actions">
+      {% if current_user.is_authenticated %}
+        <a class="btn" href="{{ url_for('main.course_lessons') }}">Go to my lessons</a>
+        <a class="btn btn-outline" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('auth.login') }}">Log in to access lessons</a>
+        <a class="btn btn-outline" href="{{ url_for('auth.signup') }}">Create account</a>
+      {% endif %}
+    </div>
+
+    <p class="ty-note">
+      Questions? Email us at
+      <a href="mailto:bliztechacademy@outlook.com">bliztechacademy@outlook.com</a>
+    </p>
+
+  </div>
+</div>
+
+<style>
+.ty-card {
+  max-width: 560px;
+  margin: 40px auto;
+  border: 1px solid var(--border-g);
+  border-radius: var(--radius-xl);
+  background: var(--bg-2);
+  padding: 48px 40px;
+  text-align: center;
+}
+@media (max-width: 600px) { .ty-card { padding: 32px 20px; } }
+
+.ty-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--green-dim);
+  border: 1px solid var(--border-g);
+  color: var(--green);
+  font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.ty-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--green); margin-bottom: 10px;
+}
+.ty-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+  margin: 0 0 12px; color: var(--text);
+}
+.ty-sub {
+  color: var(--text-2); font-size: 14px; line-height: 1.75;
+  margin: 0 0 32px; max-width: 44ch; margin-left: auto; margin-right: auto;
+}
+
+.ty-steps {
+  text-align: left;
+  display: grid; gap: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  background: var(--bg-3);
+  margin-bottom: 28px;
+}
+.ty-step {
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.ty-step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--green-dim); border: 1px solid var(--border-g);
+  color: var(--green); font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.ty-step-title { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.ty-step-text { font-size: 12.5px; color: var(--text-3); line-height: 1.6; }
+
+.ty-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.ty-note { font-size: 12px; color: var(--text-3); }
+.ty-note a { color: var(--green); }
+</style>
+{% endblock %}

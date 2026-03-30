@@ -362,6 +362,14 @@ def course_lesson(slug):
 
 
 # -------------------------
+# PAID COURSE — thank you page
+# -------------------------
+@main_bp.route('/course/thankyou')
+def course_thankyou():
+    return render_template('course_thankyou.html')
+
+
+# -------------------------
 # ADMIN — grant course access
 # -------------------------
 @main_bp.route('/admin/course/grant', methods=['GET', 'POST'])
