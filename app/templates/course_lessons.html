@@ -4,74 +4,55 @@
 {% block content %}
 <div class="page-wrap">
 
-  <div class="cl-header">
-    <div class="cl-header-eyebrow">Get Into Cybersecurity</div>
-    <h1 class="cl-header-title">Your lessons</h1>
-    <p class="cl-header-sub">20 lessons across four sections. Work through them in order.</p>
-    <div class="cl-header-stats">
-      <div class="cl-stat">
-        <span class="cl-stat-num">20</span>
-        <span class="cl-stat-label">Lessons</span>
-      </div>
-      <div class="cl-stat-div"></div>
-      <div class="cl-stat">
-        <span class="cl-stat-num">4</span>
-        <span class="cl-stat-label">Sections</span>
-      </div>
-      <div class="cl-stat-div"></div>
-      <div class="cl-stat">
-        <span class="cl-stat-num">4</span>
-        <span class="cl-stat-label">Labs</span>
-      </div>
-      <div class="cl-stat-div"></div>
-      <div class="cl-stat">
-        <span class="cl-stat-num" id="completed-count">0</span>
-        <span class="cl-stat-label">Completed</span>
-      </div>
+  <div class="cl-head">
+    <div class="cl-eyebrow">Get Into Cybersecurity</div>
+    <h1 class="cl-title">Your lessons</h1>
+    <p class="cl-sub">20 lessons across four sections. Work through them in order.</p>
+
+    <div class="cl-stats">
+      <div class="cl-stat"><span class="cl-snum">20</span><span class="cl-slabel">Lessons</span></div>
+      <div class="cl-sdiv"></div>
+      <div class="cl-stat"><span class="cl-snum">4</span><span class="cl-slabel">Sections</span></div>
+      <div class="cl-sdiv"></div>
+      <div class="cl-stat"><span class="cl-snum">4</span><span class="cl-slabel">Labs</span></div>
+      <div class="cl-sdiv"></div>
+      <div class="cl-stat"><span class="cl-snum" id="cl-done">0</span><span class="cl-slabel">Completed</span></div>
     </div>
 
-    <!-- Overall progress bar -->
-    <div class="cl-overall-progress">
-      <div class="cl-overall-bar">
-        <div class="cl-overall-fill" id="cl-overall-fill" style="width: 0%"></div>
-      </div>
-      <span class="cl-overall-label" id="cl-overall-label">0 of 20 lessons read</span>
+    <div class="cl-prog-row">
+      <div class="cl-prog-track"><div class="cl-prog-fill" id="cl-prog-fill" style="width:0%"></div></div>
+      <span class="cl-prog-label" id="cl-prog-label">0 of 20 read</span>
     </div>
   </div>
 
-  <div class="cl-sections">
+  <div class="cl-body">
     {% for section_key in ["A", "B", "C", "D"] %}
     {% set section_name = section_names[section_key] %}
     {% set topics = sections[section_key] %}
     {% if topics %}
     <div class="cl-section">
-      <div class="cl-section-head">
-        <div class="cl-section-head-left">
-          <span class="cl-section-tag">Section {{ section_key }}</span>
-          <span class="cl-section-name">{{ section_name }}</span>
+      <div class="cl-sec-head">
+        <div class="cl-sec-left">
+          <span class="cl-sec-tag">Section {{ section_key }}</span>
+          <span class="cl-sec-name">{{ section_name }}</span>
         </div>
-        <span class="cl-section-count">{{ topics|length }} lessons</span>
+        <span class="cl-sec-count">{{ topics|length }} lessons</span>
       </div>
-      <div class="cl-lessons">
-        {% for topic in topics %}
-        <a class="cl-lesson" href="{{ url_for('main.course_lesson', slug=topic.slug) }}" data-slug="{{ topic.slug }}">
-          <span class="cl-num">{{ '%02d' % topic.lesson_number }}</span>
-          <div class="cl-lesson-body">
-            <div class="cl-lesson-title">{{ topic.title }}</div>
-            {% if topic.lab %}
-            <div class="cl-lesson-lab">
-              <span class="cl-lab-dot"></span>
-              Includes practical lab
-            </div>
-            {% endif %}
-          </div>
-          <span class="cl-check" style="display:none">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-          </span>
-          <span class="cl-arrow">→</span>
-        </a>
-        {% endfor %}
-      </div>
+      {% for topic in topics %}
+      <a class="cl-row" href="{{ url_for('main.course_lesson', slug=topic.slug) }}" data-slug="{{ topic.slug }}">
+        <span class="cl-num">{{ '%02d' % topic.lesson_number }}</span>
+        <div class="cl-row-body">
+          <div class="cl-row-title">{{ topic.title }}</div>
+          {% if topic.lab %}
+          <div class="cl-row-lab"><span class="cl-lab-dot"></span>Includes practical lab</div>
+          {% endif %}
+        </div>
+        <span class="cl-check" style="display:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <span class="cl-arrow">→</span>
+      </a>
+      {% endfor %}
     </div>
     {% endif %}
     {% endfor %}
@@ -80,251 +61,150 @@
 </div>
 
 <style>
-/* ── Header ─────────────────────────────────────────── */
-.cl-header {
-  padding: 40px 0 44px;
+.cl-head {
+  padding: 32px 0 36px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 36px;
+  margin-bottom: 28px;
 }
-.cl-header-eyebrow {
+.cl-eyebrow {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 9.5px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--green);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
-.cl-header-title {
-  font-family: 'Syne', 'Space Grotesk', sans-serif;
-  font-size: clamp(30px, 4vw, 42px);
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  color: var(--text);
-  margin: 0 0 10px;
-}
-.cl-header-sub {
-  font-size: 14.5px;
-  color: var(--text-3);
-  margin: 0 0 24px;
-}
-.cl-header-stats {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-.cl-stat { display: flex; flex-direction: column; gap: 2px; }
-.cl-stat-num {
-  font-family: 'Syne', 'Space Grotesk', sans-serif;
-  font-size: 20px;
+.cl-title {
+  font-size: clamp(26px, 3.5vw, 36px);
   font-weight: 700;
+  letter-spacing: -0.8px;
   color: var(--text);
-  letter-spacing: -0.5px;
-  line-height: 1;
+  margin: 0 0 8px;
 }
-.cl-stat-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-3);
-}
-.cl-stat-div { width: 1px; height: 28px; background: var(--border); }
+.cl-sub { font-size: 14px; color: var(--text-3); margin: 0 0 20px; }
 
-/* Overall progress */
-.cl-overall-progress {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.cl-overall-bar {
-  flex: 1;
-  max-width: 300px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.cl-overall-fill {
-  height: 100%;
-  background: linear-gradient(to right, var(--green), rgba(0,217,126,0.6));
-  border-radius: 2px;
-  transition: width 0.4s ease;
-}
-.cl-overall-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--text-3);
-}
+.cl-stats { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.cl-stat { display: flex; flex-direction: column; gap: 1px; }
+.cl-snum { font-size: 19px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1; }
+.cl-slabel { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-3); }
+.cl-sdiv { width: 1px; height: 24px; background: var(--border); }
 
-/* ── Sections ─────────────────────────────────────────── */
-.cl-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding-bottom: 60px;
-}
-.cl-section {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: border-color 0.2s;
-}
-.cl-section:hover { border-color: rgba(0,217,126,0.2); }
-.cl-section-head {
+.cl-prog-row { display: flex; align-items: center; gap: 10px; }
+.cl-prog-track { flex: 1; max-width: 260px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.cl-prog-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s ease; }
+.cl-prog-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-3); }
+
+/* Sections */
+.cl-body { display: flex; flex-direction: column; gap: 12px; padding-bottom: 60px; }
+.cl-section { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.15s; }
+.cl-section:hover { border-color: rgba(0,217,126,0.18); }
+
+.cl-sec-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
+  padding: 12px 18px;
   background: var(--bg-3);
   border-bottom: 1px solid var(--border);
 }
-.cl-section-head-left { display: flex; align-items: center; gap: 12px; }
-.cl-section-tag {
+.cl-sec-left { display: flex; align-items: center; gap: 10px; }
+.cl-sec-tag {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  padding: 3px 8px;
+  font-size: 8.5px;
+  padding: 2px 7px;
   border-radius: var(--radius-xs);
   border: 1px solid var(--border-g);
   background: var(--green-dim);
   color: var(--green);
-  letter-spacing: 0.5px;
-}
-.cl-section-name {
-  font-family: 'Syne', 'Space Grotesk', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-}
-.cl-section-count {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  color: var(--text-3);
-  text-transform: uppercase;
   letter-spacing: 0.4px;
 }
+.cl-sec-name { font-size: 13.5px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.cl-sec-count { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.4px; }
 
-/* ── Lessons ─────────────────────────────────────────── */
-.cl-lessons { display: grid; }
-.cl-lesson {
+/* Rows */
+.cl-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 14px;
+  padding: 13px 18px;
   border-bottom: 1px solid var(--border);
   text-decoration: none;
-  transition: background 0.15s;
   background: var(--bg-2);
+  transition: background 0.12s;
   position: relative;
 }
-.cl-lesson:last-child { border-bottom: none; }
-.cl-lesson::after {
+.cl-row:last-child { border-bottom: none; }
+.cl-row::before {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
-  width: 3px;
+  width: 2px;
   background: var(--green);
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 0.12s;
 }
-.cl-lesson:hover { background: var(--bg-3); }
-.cl-lesson:hover::after { opacity: 1; }
-.cl-lesson.completed { background: rgba(0,217,126,0.02); }
-.cl-lesson.completed::after { opacity: 0.4; }
+.cl-row:hover { background: var(--bg-3); }
+.cl-row:hover::before { opacity: 1; }
+.cl-row.done { background: rgba(0,217,126,0.02); }
+.cl-row.done::before { opacity: 0.35; }
 
 .cl-num {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--green);
   flex-shrink: 0;
-  width: 24px;
-  opacity: 0.7;
+  width: 22px;
+  opacity: 0.6;
 }
-.cl-lesson:hover .cl-num { opacity: 1; }
-.cl-lesson.completed .cl-num { opacity: 1; }
+.cl-row:hover .cl-num, .cl-row.done .cl-num { opacity: 1; }
 
-.cl-lesson-body { flex: 1; min-width: 0; }
-.cl-lesson-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.cl-lesson.completed .cl-lesson-title { color: var(--text-2); }
+.cl-row-body { flex: 1; min-width: 0; }
+.cl-row-title { font-size: 13.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-row.done .cl-row-title { color: var(--text-2); }
 
-.cl-lesson-lab {
+.cl-row-lab {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
+  font-size: 9px;
   color: var(--green);
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  opacity: 0.8;
+  margin-top: 2px;
+  opacity: 0.75;
 }
-.cl-lab-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--green);
-  flex-shrink: 0;
-}
+.cl-lab-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
 
-.cl-check {
-  color: var(--green);
-  flex-shrink: 0;
-  opacity: 0.9;
-}
-
-.cl-arrow {
-  color: var(--text-3);
-  font-size: 14px;
-  flex-shrink: 0;
-  transition: transform 0.15s, color 0.15s;
-}
-.cl-lesson:hover .cl-arrow { transform: translateX(3px); color: var(--green); }
-.cl-lesson.completed .cl-arrow { display: none; }
+.cl-check { color: var(--green); flex-shrink: 0; display: flex; align-items: center; }
+.cl-arrow { color: var(--text-3); font-size: 13px; flex-shrink: 0; transition: transform 0.12s, color 0.12s; }
+.cl-row:hover .cl-arrow { transform: translateX(3px); color: var(--green); }
+.cl-row.done .cl-arrow { display: none; }
 </style>
 
 <script>
-var COMPLETED_KEY = 'bliztech_completed';
+var CK = 'bliztech_completed';
+function getC() { try { return JSON.parse(localStorage.getItem(CK)||'{}'); } catch(e) { return {}; } }
 
-function getCompleted() {
-  try { return JSON.parse(localStorage.getItem(COMPLETED_KEY) || '{}'); }
-  catch(e) { return {}; }
-}
-
-function applyCompletionToList() {
-  var completed = getCompleted();
-  var count = 0;
-
-  document.querySelectorAll('.cl-lesson').forEach(function(el) {
-    var slug = el.getAttribute('data-slug');
-    if (completed[slug]) {
-      el.classList.add('completed');
-      var check = el.querySelector('.cl-check');
-      var arrow = el.querySelector('.cl-arrow');
-      if (check) check.style.display = 'flex';
-      if (arrow) arrow.style.display = 'none';
+document.addEventListener('DOMContentLoaded', function() {
+  var c = getC(); var count = 0;
+  document.querySelectorAll('.cl-row').forEach(function(row) {
+    var slug = row.getAttribute('data-slug');
+    if (c[slug]) {
+      row.classList.add('done');
+      var chk = row.querySelector('.cl-check');
+      var arr = row.querySelector('.cl-arrow');
+      if (chk) chk.style.display = 'flex';
+      if (arr) arr.style.display = 'none';
       count++;
     }
   });
-
-  // Update stats
-  var countEl = document.getElementById('completed-count');
-  if (countEl) countEl.textContent = count;
-
-  var fill = document.getElementById('cl-overall-fill');
+  var done = document.getElementById('cl-done');
+  var fill = document.getElementById('cl-prog-fill');
+  var label = document.getElementById('cl-prog-label');
+  if (done) done.textContent = count;
   if (fill) fill.style.width = Math.round(count / 20 * 100) + '%';
-
-  var label = document.getElementById('cl-overall-label');
-  if (label) label.textContent = count + ' of 20 lessons read';
-}
-
-document.addEventListener('DOMContentLoaded', applyCompletionToList);
+  if (label) label.textContent = count + ' of 20 read';
+});
 </script>
 {% endblock %}
