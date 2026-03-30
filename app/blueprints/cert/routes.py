@@ -3,32 +3,25 @@ import os
 from datetime import datetime
 
 from flask import (
-    render_template,
-    request,
-    redirect,
-    url_for,
-    flash,
-    send_file,
-    abort,
-    current_app,
+    render_template, request, redirect, url_for,
+    flash, send_file, abort, current_app,
 )
 from flask_login import login_required, current_user
 
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import landscape, A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
-from reportlab.lib import colors
 
 from app.blueprints.cert import cert_bp
 from app.extensions import db, limiter
 from app.models import Certificate, Progress
 
 
-def _user_progress_key() -> str:
+def _user_progress_key():
     return f"user:{current_user.id}"
 
 
-def _required_topics() -> int:
+def _required_topics():
     v = current_app.config.get("CERT_REQUIRED_TOPICS") or os.getenv("CERT_REQUIRED_TOPICS", "10")
     try:
         return max(1, int(v))
@@ -36,7 +29,7 @@ def _required_topics() -> int:
         return 10
 
 
-def _passed_topic_count() -> int:
+def _passed_topic_count():
     return (
         Progress.query.filter_by(user_id=_user_progress_key(), passed=True)
         .filter(Progress.slug.like("topic%"))
@@ -46,53 +39,23 @@ def _passed_topic_count() -> int:
     )
 
 
-def user_completed_free_course() -> bool:
-    return _passed_topic_count() >= _required_topics()
-
-
-def user_completed_paid_course() -> bool:
-    from app.models import CourseTopic, CourseAccess
-    has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
-    if not has_access:
-        return False
-    # Check all 20 paid course lessons exist — we just verify access for now
-    # In future this can check a PaidProgress model
-    return True
-
-
-def get_or_create_certificate(recipient_name: str, course_type: str = "free"):
-    """Get or create a certificate. course_type: 'free' or 'paid'"""
-    # Use cert_id prefix to distinguish: free certs = standard, paid = 'P' prefix
-    # For simplicity, paid course gets a separate certificate record using user_id + type
-    # We store them in the same table but with different cert_ids
-    if course_type == "paid":
-        # Look for existing paid cert (cert_id starts with 'P')
-        existing = Certificate.query.filter_by(user_id=current_user.id).filter(
-            Certificate.cert_id.like('P%')
-        ).first()
-    else:
-        existing = Certificate.query.filter_by(user_id=current_user.id).filter(
-            ~Certificate.cert_id.like('P%')
-        ).first()
-
+def get_or_create_paid_certificate(recipient_name):
+    existing = Certificate.query.filter_by(user_id=current_user.id).filter(
+        Certificate.cert_id.like('P%')
+    ).first()
     if existing:
         if recipient_name and recipient_name != existing.recipient_name:
             existing.recipient_name = recipient_name
             db.session.commit()
         return existing
-
     import uuid
-    cert_id_val = ('P' + uuid.uuid4().hex[:11].upper()) if course_type == "paid" else None
-
     cert = Certificate(
         user_id=current_user.id,
         user_email=current_user.email,
         recipient_name=recipient_name,
         issued_at=datetime.utcnow(),
     )
-    if cert_id_val:
-        cert.cert_id = cert_id_val
-
+    cert.cert_id = 'P' + uuid.uuid4().hex[:11].upper()
     db.session.add(cert)
     db.session.commit()
     return cert
@@ -127,24 +90,18 @@ def certificate_pdf():
 @limiter.limit("30 per minute")
 def paid_certificate_home():
     from app.models import CourseAccess
-
-    # Check paid course access
     has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
     if not has_access:
         flash("You need to purchase the course to access a certificate.", "error")
         return redirect(url_for("main.course"))
 
     default_name = (current_user.email.split("@")[0] or "Student").replace(".", " ").title()
-
-    # Look for existing paid cert
     existing = Certificate.query.filter_by(user_id=current_user.id).filter(
         Certificate.cert_id.like('P%')
     ).first()
 
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
-    verify_url = None
-    if existing and base_url:
-        verify_url = f"{base_url}/certificate/verify/{existing.cert_id}"
+    verify_url = f"{base_url}/certificate/verify/{existing.cert_id}" if existing and base_url else None
 
     return render_template(
         "cert/paid_certificate.html",
@@ -159,7 +116,6 @@ def paid_certificate_home():
 @limiter.limit("10 per minute; 30 per hour")
 def paid_certificate_pdf():
     from app.models import CourseAccess
-
     has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
     if not has_access:
         abort(403)
@@ -169,146 +125,112 @@ def paid_certificate_pdf():
         flash("Please enter your name for the certificate.", "error")
         return redirect(url_for("cert.paid_certificate_home"))
 
-    cert = get_or_create_certificate(name, course_type="paid")
+    cert = get_or_create_paid_certificate(name)
 
-    # ── PDF generation ──────────────────────────────────────────
+    # ── PDF ─────────────────────────────────────────────────────
+    # Background image is 800×533 portrait-ish, used landscape A4
+    # A4 landscape = 841.9 × 595.3 pts
     pagesize = landscape(A4)
-    width, height = pagesize
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=pagesize)
+    W, H = pagesize
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=pagesize)
     c.setTitle("BlizTech Certificate of Completion")
 
-    # Background image
+    # 1. Draw background full page
     bg_path = os.path.join(current_app.root_path, "static", "img", "certificate-bg.png")
-    try:
-        if os.path.exists(bg_path):
-            bg = ImageReader(bg_path)
-            c.drawImage(bg, 0, 0, width=width, height=height, mask="auto")
-    except Exception:
-        # Fallback: draw a clean dark background
-        c.setFillColorRGB(0.05, 0.05, 0.05)
-        c.rect(0, 0, width, height, fill=1, stroke=0)
+    if os.path.exists(bg_path):
+        try:
+            c.drawImage(ImageReader(bg_path), 0, 0, width=W, height=H, preserveAspectRatio=False)
+        except Exception:
+            pass
 
-    center_x = width / 2
+    # The background already has:
+    #   - BlizTech logo + branding (top left)
+    #   - "CERTIFICATE OF COMPLETION" heading (upper centre)
+    #   - Gold seal (bottom left)
+    #   - Signature / Director of Training (bottom right)
+    #   - Tagline (bottom centre)
+    #   - Watermark
+    #
+    # We ONLY add the dynamic recipient block in the centre white space.
+    # Working from top of page downward:
+    #   ~y=430  heading sits here (approx)
+    #   ~y=370  our content starts
 
-    # Green top border
-    c.setStrokeColorRGB(0, 0.85, 0.49)
-    c.setLineWidth(4)
-    c.line(40, height - 10, width - 40, height - 10)
+    cx = W / 2
 
-    # Green bottom border
-    c.line(40, 10, width - 40, 10)
-
-    # ── Header ──
-    # BlizTech logo text
-    c.setFillColorRGB(0, 0.85, 0.49)
-    c.setFont("Helvetica-Bold", 14)
-    c.drawCentredString(center_x, height - 55, "BLIZTECH ACADEMY")
-
-    c.setFillColorRGB(0.6, 0.6, 0.6)
-    c.setFont("Helvetica", 9)
-    c.drawCentredString(center_x, height - 72, "bliztechacademy.com")
-
-    # Divider line
-    c.setStrokeColorRGB(0.15, 0.15, 0.15)
-    c.setLineWidth(0.5)
-    c.line(60, height - 85, width - 60, height - 85)
-
-    # Certificate title
-    c.setFillColorRGB(0.9, 0.9, 0.9)
-    c.setFont("Helvetica", 11)
-    c.drawCentredString(center_x, height - 115, "CERTIFICATE OF COMPLETION")
-
-    # Decorative line under title
-    c.setStrokeColorRGB(0, 0.85, 0.49)
-    c.setLineWidth(1)
-    line_w = 180
-    c.line(center_x - line_w/2, height - 122, center_x + line_w/2, height - 122)
-
-    # ── Body ──
-    c.setFillColorRGB(0.65, 0.65, 0.65)
+    # "This is to certify that"
+    c.setFillColorRGB(0.30, 0.30, 0.40)
     c.setFont("Helvetica-Oblique", 12)
-    c.drawCentredString(center_x, height - 160, "This is to certify that")
+    c.drawCentredString(cx, H - 200, "This is to certify that")
 
-    # Recipient name
-    c.setFillColorRGB(1, 1, 1)
+    # Recipient name — large dark navy
+    c.setFillColorRGB(0.08, 0.10, 0.22)
     c.setFont("Helvetica-Bold", 36)
-    c.drawCentredString(center_x, height - 210, cert.recipient_name)
+    c.drawCentredString(cx, H - 246, cert.recipient_name)
 
-    # Name underline
-    name_width = c.stringWidth(cert.recipient_name, "Helvetica-Bold", 36)
-    c.setStrokeColorRGB(0, 0.85, 0.49)
-    c.setLineWidth(1)
-    c.line(center_x - name_width/2, height - 218, center_x + name_width/2, height - 218)
+    # Gold underline beneath name
+    nw = c.stringWidth(cert.recipient_name, "Helvetica-Bold", 36)
+    c.setStrokeColorRGB(0.72, 0.58, 0.18)
+    c.setLineWidth(0.8)
+    c.line(cx - nw/2, H - 254, cx + nw/2, H - 254)
 
-    c.setFillColorRGB(0.65, 0.65, 0.65)
-    c.setFont("Helvetica-Oblique", 12)
-    c.drawCentredString(center_x, height - 248, "has successfully completed the paid course")
+    # "has successfully completed"
+    c.setFillColorRGB(0.35, 0.35, 0.45)
+    c.setFont("Helvetica-Oblique", 11)
+    c.drawCentredString(cx, H - 278, "has successfully completed")
 
-    # Course name
-    c.setFillColorRGB(0, 0.85, 0.49)
-    c.setFont("Helvetica-Bold", 22)
-    c.drawCentredString(center_x, height - 285, "Get Into Cybersecurity")
+    # Course name — brand green
+    c.setFillColorRGB(0.0, 0.55, 0.33)
+    c.setFont("Helvetica-Bold", 20)
+    c.drawCentredString(cx, H - 308, "Get Into Cybersecurity")
 
-    # Course detail
-    c.setFillColorRGB(0.55, 0.55, 0.55)
-    c.setFont("Helvetica", 10)
-    c.drawCentredString(center_x, height - 308,
-        "20 structured lessons  ·  4 sections  ·  4 practical labs  ·  Lifetime access")
+    # Detail line
+    c.setFillColorRGB(0.45, 0.45, 0.55)
+    c.setFont("Helvetica", 9)
+    c.drawCentredString(cx, H - 328,
+        "20 structured lessons  \u00b7  4 sections  \u00b7  4 practical labs  \u00b7  Lifetime access")
 
-    # ── Footer ──
-    # Three footer columns
-    footer_y = 80
-    col1_x = width * 0.22
-    col2_x = width * 0.5
-    col3_x = width * 0.78
+    # Footer data — slot into the existing footer area of the background
+    # bg footer labels sit around y=88, values around y=72
+    # columns: issued by ~x=220, cert id ~cx, date ~x=W-200
+    col_l = 220
+    col_c = cx
+    col_r = W - 200
 
-    # Divider line above footer
-    c.setStrokeColorRGB(0.15, 0.15, 0.15)
-    c.setLineWidth(0.5)
-    c.line(60, footer_y + 36, width - 60, footer_y + 36)
+    c.setFillColorRGB(0.40, 0.40, 0.50)
+    c.setFont("Helvetica", 7.5)
+    c.drawCentredString(col_l, 92, "ISSUED BY")
+    c.drawCentredString(col_c, 92, "CERTIFICATE ID")
+    c.drawCentredString(col_r, 92, "DATE ISSUED")
 
-    c.setFillColorRGB(0.45, 0.45, 0.45)
-    c.setFont("Helvetica", 8)
-    c.drawCentredString(col1_x, footer_y + 22, "ISSUED BY")
-    c.drawCentredString(col2_x, footer_y + 22, "CERTIFICATE ID")
-    c.drawCentredString(col3_x, footer_y + 22, "DATE ISSUED")
+    c.setFillColorRGB(0.10, 0.12, 0.24)
+    c.setFont("Helvetica-Bold", 9.5)
+    c.drawCentredString(col_l, 76, "BlizTech Academy")
 
-    c.setFillColorRGB(0.85, 0.85, 0.85)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(col1_x, footer_y + 6, "BlizTech Academy")
+    c.setFillColorRGB(0.0, 0.50, 0.30)
+    c.setFont("Helvetica-Bold", 9.5)
+    c.drawCentredString(col_c, 76, cert.cert_id)
 
-    c.setFillColorRGB(0, 0.85, 0.49)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(col2_x, footer_y + 6, cert.cert_id)
-
-    c.setFillColorRGB(0.85, 0.85, 0.85)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(col3_x, footer_y + 6, cert.issued_at.strftime("%d %B %Y"))
-
-    # Verification URL
-    base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
-    if base_url:
-        verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"
-        c.setFillColorRGB(0.4, 0.4, 0.4)
-        c.setFont("Helvetica", 8)
-        c.drawCentredString(center_x, footer_y - 14, f"Verify at: {verify_url}")
+    c.setFillColorRGB(0.10, 0.12, 0.24)
+    c.setFont("Helvetica-Bold", 9.5)
+    c.drawCentredString(col_r, 76, cert.issued_at.strftime("%d %B %Y"))
 
     c.showPage()
     c.save()
-    buffer.seek(0)
+    buf.seek(0)
 
     filename = f"BlizTech-GIC-Certificate-{cert.cert_id}.pdf"
-    return send_file(buffer, as_attachment=True, download_name=filename, mimetype="application/pdf")
+    return send_file(buf, as_attachment=True, download_name=filename, mimetype="application/pdf")
 
 
 # ─────────────────────────────────────────────
-# CERTIFICATE VERIFICATION (shared)
+# CERTIFICATE VERIFICATION
 # ─────────────────────────────────────────────
 
 @cert_bp.route("/verify/<cert_id>", methods=["GET"])
 @limiter.limit("30 per minute; 200 per day")
-def verify_certificate(cert_id: str):
+def verify_certificate(cert_id):
     cert_id = (cert_id or "").strip().upper()
     cert = Certificate.query.filter_by(cert_id=cert_id).first()
     if not cert:
