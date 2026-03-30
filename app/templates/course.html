@@ -37,8 +37,13 @@
       </div>
 
       <div class="course-cta-row">
+        {% if has_access %}
+        <a href="{{ url_for('main.course_lessons') }}" class="btn course-btn-primary">Go to my lessons →</a>
+        <span class="course-one-time">You have full access · Lifetime</span>
+        {% else %}
         <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="btn course-btn-primary">Enrol for £11</a>
         <span class="course-one-time">One-time payment · Lifetime access</span>
+        {% endif %}
       </div>
     </div>
 
@@ -299,7 +304,7 @@
   <div class="page-wrap">
     <div class="enrol-card">
       <div class="enrol-left">
-        <div class="cs-label">Enrol today</div>
+        <div class="cs-label">{% if has_access %}Your course{% else %}Enrol today{% endif %}</div>
         <h2 class="enrol-title">Get Into Cybersecurity</h2>
         <p class="enrol-sub">20 lessons · 4 practical labs · Certificate of completion · Lifetime access</p>
         <ul class="enrol-list">
@@ -311,12 +316,16 @@
       </div>
       <div class="enrol-right">
         <div class="enrol-price-card">
+          {% if has_access %}
+          <div class="enrol-price" style="font-size: 32px; color: var(--green);">✓ Enrolled</div>
+          <div class="enrol-price-sub">you have lifetime access</div>
+          <a href="{{ url_for('main.course_lessons') }}" class="btn enrol-btn">Go to my lessons →</a>
+          {% else %}
           <div class="enrol-price">£11</div>
           <div class="enrol-price-sub">one-time · lifetime access</div>
           <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="btn enrol-btn">Enrol for £11</a>
-          <div class="enrol-secure">
-            Secure payment via Gumroad
-          </div>
+          <div class="enrol-secure">Secure payment via Gumroad</div>
+          {% endif %}
         </div>
       </div>
     </div>

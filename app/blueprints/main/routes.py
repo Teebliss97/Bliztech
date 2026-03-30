@@ -302,7 +302,13 @@ def link_analyzer():
 # -------------------------
 @main_bp.route('/course')
 def course():
-    return render_template('course.html')
+    from app.models import CourseAccess
+    has_access = False
+    if current_user.is_authenticated:
+        has_access = current_user.is_admin or bool(
+            CourseAccess.query.filter_by(user_id=current_user.id).first()
+        )
+    return render_template('course.html', has_access=has_access)
 
 
 # -------------------------
