@@ -40,7 +40,7 @@
           <span id="ll-rt-text"></span>
         </span>
         <span class="ll-dot" id="ll-dot" style="display:none">·</span>
-        <button class="ll-mark-btn" id="ll-mark-btn" onclick="markRead()">Mark as read</button>
+        <button class="ll-mark-btn" id="ll-mark-btn">Mark as read</button>
         <span class="ll-read-badge" id="ll-read-badge">✓ Read</span>
       </div>
       <div class="ll-rule"></div>
@@ -509,7 +509,12 @@ function autoMark() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  calcRT(); syncUI(); buildTOC(); autoMark();
+  calcRT(); syncUI(); autoMark();
+  var btn = document.getElementById('ll-mark-btn');
+  if (btn) btn.addEventListener('click', markRead);
+});
+window.addEventListener('load', function() {
+  buildTOC();
 });
 </script>
 {% endblock %}
