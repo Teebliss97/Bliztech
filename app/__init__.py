@@ -117,7 +117,7 @@ def create_app():
             "img-src": ["'self'", "data:", "https://www.google-analytics.com"],
             "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
             "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            "script-src": ["'self'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+            "script-src": ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
             "connect-src": ["'self'", "https://www.google-analytics.com", "https://analytics.google.com"],
             "upgrade-insecure-requests": [],
         }
