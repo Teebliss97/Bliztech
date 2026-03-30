@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Grant Course Access — Admin{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+
+  <div class="page-head">
+    <h1 class="page-title">Grant Course Access</h1>
+    <p class="page-subtitle">
+      When someone purchases on Gumroad, enter their email here to unlock the paid course for them.
+    </p>
+  </div>
+
+  {% if message %}
+  <div class="flash {{ message.type }}" style="margin-bottom: 20px;">
+    {{ message.text }}
+  </div>
+  {% endif %}
+
+  <div class="course-progress" style="max-width: 480px;">
+    <form method="POST">
+      <div class="form-group">
+        <label>Customer email address</label>
+        <input type="email" name="email" placeholder="customer@example.com" required
+               style="width:100%; margin-top:6px;" />
+      </div>
+      <div class="form-group" style="margin-top:12px;">
+        <label>Gumroad Sale ID (optional)</label>
+        <input type="text" name="sale_id" placeholder="e.g. ABC123XYZ"
+               style="width:100%; margin-top:6px;" />
+      </div>
+      <button type="submit" class="btn" style="margin-top:16px; width:100%;">
+        Grant access
+      </button>
+    </form>
+  </div>
+
+  <!-- Access list -->
+  {% if access_list %}
+  <div style="margin-top: 40px;">
+    <h2 class="section-title" style="margin-bottom:16px;">Users with course access</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Granted</th>
+            <th>Granted by</th>
+            <th>Gumroad Sale ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in access_list %}
+          <tr>
+            <td>{{ row.email }}</td>
+            <td>{{ row.granted_at.strftime('%d %b %Y') }}</td>
+            <td>{{ row.granted_by or '—' }}</td>
+            <td>{{ row.gumroad_sale_id or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

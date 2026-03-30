@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Get Into Cybersecurity — Lessons{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+
+  <div class="cl-header">
+    <div class="course-tag">Get Into Cybersecurity</div>
+    <h1 class="page-title" style="font-size:30px; margin-bottom:6px;">Your lessons</h1>
+    <p class="page-subtitle">20 lessons across four sections. Work through them in order.</p>
+  </div>
+
+  {% for section_key, section_name in section_names.items() %}
+  {% set topics = sections[section_key] %}
+  {% if topics %}
+  <div class="cl-section">
+    <div class="cl-section-head">
+      <span class="cl-section-tag">Section {{ section_key }}</span>
+      <span class="cl-section-name">{{ section_name }}</span>
+    </div>
+    <div class="cl-lessons">
+      {% for topic in topics %}
+      <a class="cl-lesson" href="{{ url_for('main.course_lesson', slug=topic.slug) }}">
+        <span class="cl-num">{{ '%02d' % topic.lesson_number }}</span>
+        <div class="cl-lesson-body">
+          <div class="cl-lesson-title">{{ topic.title }}</div>
+          {% if topic.lab %}
+          <div class="cl-lesson-lab">Includes practical lab</div>
+          {% endif %}
+        </div>
+        <span class="cl-arrow">→</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+
+</div>
+
+<style>
+.cl-header { margin-bottom: 32px; }
+.cl-section { margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.cl-section-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; background: var(--bg-3);
+  border-bottom: 1px solid var(--border);
+}
+.cl-section-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  padding: 2px 7px; border-radius: var(--radius-xs);
+  border: 1px solid var(--border-g); background: var(--green-dim); color: var(--green);
+}
+.cl-section-name {
+  font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text);
+}
+.cl-lessons { display: grid; }
+.cl-lesson {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  text-decoration: none; transition: background 0.15s; background: var(--bg-2);
+}
+.cl-lesson:last-child { border-bottom: none; }
+.cl-lesson:hover { background: var(--bg-3); }
+.cl-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--green); flex-shrink: 0; width: 22px;
+}
+.cl-lesson-body { flex: 1; }
+.cl-lesson-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.cl-lesson-lab {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+  color: var(--green); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.cl-arrow { color: var(--text-3); font-size: 14px; flex-shrink: 0; }
+</style>
+{% endblock %}
