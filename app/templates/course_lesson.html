@@ -35,11 +35,11 @@
       <h1 class="ll-title">{{ topic.title }}</h1>
 
       <div class="ll-subrow">
-        <span class="ll-readtime" id="ll-readtime">
+        <span class="ll-readtime" id="ll-readtime" style="display:none">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span id="ll-rt-text">—</span>
+          <span id="ll-rt-text"></span>
         </span>
-        <span class="ll-dot">·</span>
+        <span class="ll-dot" id="ll-dot" style="display:none">·</span>
         <button class="ll-mark-btn" id="ll-mark-btn" onclick="markRead()">Mark as read</button>
         <span class="ll-read-badge" id="ll-read-badge">✓ Read</span>
       </div>
@@ -456,10 +456,15 @@ function markRead() {
 function calcRT() {
   var prose = document.getElementById('ll-prose');
   if (!prose) return;
-  var words = (prose.innerText || '').trim().split(/\s+/).length;
+  var text = prose.textContent || prose.innerText || '';
+  var words = text.trim().split(/\s+/).filter(function(w){ return w.length > 0; }).length;
   var mins = Math.max(1, Math.round(words / 200));
   var el = document.getElementById('ll-rt-text');
+  var rt = document.getElementById('ll-readtime');
+  var dot = document.getElementById('ll-dot');
   if (el) el.textContent = mins + ' min read';
+  if (rt) rt.style.display = 'flex';
+  if (dot) dot.style.display = 'inline';
 }
 
 function buildTOC() {

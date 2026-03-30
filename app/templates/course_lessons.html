@@ -62,9 +62,9 @@
 
 <style>
 .cl-head {
-  padding: 32px 0 36px;
+  padding: 32px 0 24px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 .cl-eyebrow {
   font-family: 'JetBrains Mono', monospace;
@@ -90,12 +90,12 @@
 .cl-sdiv { width: 1px; height: 24px; background: var(--border); }
 
 .cl-prog-row { display: flex; align-items: center; gap: 10px; }
-.cl-prog-track { flex: 1; max-width: 260px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.cl-prog-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s ease; }
+.cl-prog-track { flex: 1; max-width: 260px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.cl-prog-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s ease; min-width: 2px; }
 .cl-prog-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-3); }
 
 /* Sections */
-.cl-body { display: flex; flex-direction: column; gap: 12px; padding-bottom: 60px; }
+.cl-body { display: flex; flex-direction: column; gap: 12px; padding-bottom: 60px; margin-top: 4px; }
 .cl-section { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.15s; }
 .cl-section:hover { border-color: rgba(0,217,126,0.18); }
 
