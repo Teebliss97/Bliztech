@@ -5,74 +5,284 @@
 <div class="page-wrap">
 
   <div class="cl-header">
-    <div class="course-tag">Get Into Cybersecurity</div>
-    <h1 class="page-title" style="font-size:30px; margin-bottom:6px;">Your lessons</h1>
-    <p class="page-subtitle">20 lessons across four sections. Work through them in order.</p>
+    <div class="cl-header-eyebrow">Get Into Cybersecurity</div>
+    <h1 class="cl-header-title">Your lessons</h1>
+    <p class="cl-header-sub">20 lessons across four sections. Work through them in order.</p>
+    <div class="cl-header-stats">
+      <div class="cl-stat">
+        <span class="cl-stat-num">20</span>
+        <span class="cl-stat-label">Lessons</span>
+      </div>
+      <div class="cl-stat-div"></div>
+      <div class="cl-stat">
+        <span class="cl-stat-num">4</span>
+        <span class="cl-stat-label">Sections</span>
+      </div>
+      <div class="cl-stat-div"></div>
+      <div class="cl-stat">
+        <span class="cl-stat-num">4</span>
+        <span class="cl-stat-label">Labs</span>
+      </div>
+      <div class="cl-stat-div"></div>
+      <div class="cl-stat">
+        <span class="cl-stat-num">∞</span>
+        <span class="cl-stat-label">Access</span>
+      </div>
+    </div>
   </div>
 
-  {% for section_key in ["A", "B", "C", "D"] %}
-  {% set section_name = section_names[section_key] %}
-  {% set topics = sections[section_key] %}
-  {% if topics %}
-  <div class="cl-section">
-    <div class="cl-section-head">
-      <span class="cl-section-tag">Section {{ section_key }}</span>
-      <span class="cl-section-name">{{ section_name }}</span>
-    </div>
-    <div class="cl-lessons">
-      {% for topic in topics %}
-      <a class="cl-lesson" href="{{ url_for('main.course_lesson', slug=topic.slug) }}">
-        <span class="cl-num">{{ '%02d' % topic.lesson_number }}</span>
-        <div class="cl-lesson-body">
-          <div class="cl-lesson-title">{{ topic.title }}</div>
-          {% if topic.lab %}
-          <div class="cl-lesson-lab">Includes practical lab</div>
-          {% endif %}
+  <div class="cl-sections">
+    {% for section_key in ["A", "B", "C", "D"] %}
+    {% set section_name = section_names[section_key] %}
+    {% set topics = sections[section_key] %}
+    {% if topics %}
+    <div class="cl-section">
+      <div class="cl-section-head">
+        <div class="cl-section-head-left">
+          <span class="cl-section-tag">Section {{ section_key }}</span>
+          <span class="cl-section-name">{{ section_name }}</span>
         </div>
-        <span class="cl-arrow">→</span>
-      </a>
-      {% endfor %}
+        <span class="cl-section-count">{{ topics|length }} lessons</span>
+      </div>
+      <div class="cl-lessons">
+        {% for topic in topics %}
+        <a class="cl-lesson" href="{{ url_for('main.course_lesson', slug=topic.slug) }}">
+          <span class="cl-num">{{ '%02d' % topic.lesson_number }}</span>
+          <div class="cl-lesson-body">
+            <div class="cl-lesson-title">{{ topic.title }}</div>
+            {% if topic.lab %}
+            <div class="cl-lesson-lab">
+              <span class="cl-lab-dot"></span>
+              Includes practical lab
+            </div>
+            {% endif %}
+          </div>
+          <span class="cl-arrow">→</span>
+        </a>
+        {% endfor %}
+      </div>
     </div>
+    {% endif %}
+    {% endfor %}
   </div>
-  {% endif %}
-  {% endfor %}
 
 </div>
 
 <style>
-.cl-header { margin-bottom: 32px; }
-.cl-section { margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+/* ── Header ──────────────────────────────────────────── */
+.cl-header {
+  padding: 40px 0 44px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 36px;
+}
+
+.cl-header-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+
+.cl-header-title {
+  font-family: 'Syne', 'Space Grotesk', sans-serif;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+
+.cl-header-sub {
+  font-size: 14.5px;
+  color: var(--text-3);
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+.cl-header-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cl-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cl-stat-num {
+  font-family: 'Syne', 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.cl-stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+}
+
+.cl-stat-div {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+}
+
+/* ── Sections ──────────────────────────────────────────── */
+.cl-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 60px;
+}
+
+.cl-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.cl-section:hover {
+  border-color: rgba(0,217,126,0.2);
+}
+
 .cl-section-head {
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px 20px; background: var(--bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--bg-3);
   border-bottom: 1px solid var(--border);
 }
+
+.cl-section-head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .cl-section-tag {
-  font-family: 'JetBrains Mono', monospace; font-size: 9px;
-  padding: 2px 7px; border-radius: var(--radius-xs);
-  border: 1px solid var(--border-g); background: var(--green-dim); color: var(--green);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-g);
+  background: var(--green-dim);
+  color: var(--green);
+  letter-spacing: 0.5px;
 }
+
 .cl-section-name {
-  font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text);
+  font-family: 'Syne', 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
 }
+
+.cl-section-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ── Lessons ──────────────────────────────────────────── */
 .cl-lessons { display: grid; }
+
 .cl-lesson {
-  display: flex; align-items: center; gap: 16px;
-  padding: 14px 20px; border-bottom: 1px solid var(--border);
-  text-decoration: none; transition: background 0.15s; background: var(--bg-2);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  transition: background 0.15s;
+  background: var(--bg-2);
+  position: relative;
 }
+
 .cl-lesson:last-child { border-bottom: none; }
+
+.cl-lesson::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--green);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
 .cl-lesson:hover { background: var(--bg-3); }
+.cl-lesson:hover::after { opacity: 1; }
+
 .cl-num {
-  font-family: 'JetBrains Mono', monospace; font-size: 11px;
-  color: var(--green); flex-shrink: 0; width: 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  flex-shrink: 0;
+  width: 24px;
+  opacity: 0.7;
 }
-.cl-lesson-body { flex: 1; }
-.cl-lesson-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+
+.cl-lesson:hover .cl-num { opacity: 1; }
+
+.cl-lesson-body { flex: 1; min-width: 0; }
+
+.cl-lesson-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .cl-lesson-lab {
-  font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
-  color: var(--green); text-transform: uppercase; letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  opacity: 0.8;
 }
-.cl-arrow { color: var(--text-3); font-size: 14px; flex-shrink: 0; }
+
+.cl-lab-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+
+.cl-arrow {
+  color: var(--text-3);
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: transform 0.15s, color 0.15s;
+}
+
+.cl-lesson:hover .cl-arrow {
+  transform: translateX(3px);
+  color: var(--green);
+}
 </style>
 {% endblock %}
