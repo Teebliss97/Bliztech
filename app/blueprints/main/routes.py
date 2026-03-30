@@ -344,7 +344,9 @@ def course_lessons():
 @main_bp.route('/course/lessons/<slug>')
 @login_required
 def course_lesson(slug):
+    import markdown as md_lib
     from app.models import CourseTopic, CourseAccess
+
     # Check access
     has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
     if not has_access:
@@ -353,6 +355,13 @@ def course_lesson(slug):
 
     topic = CourseTopic.query.filter_by(slug=slug).first_or_404()
 
+    # Convert Markdown → HTML
+    _md = md_lib.Markdown(extensions=["extra", "nl2br", "sane_lists"])
+    topic.body = _md.convert(topic.body or "")
+    if topic.lab:
+        _md.reset()
+        topic.lab = _md.convert(topic.lab)
+
     # Get prev/next for navigation
     all_topics = CourseTopic.query.order_by(CourseTopic.order).all()
     idx = next((i for i, t in enumerate(all_topics) if t.slug == slug), None)
@@ -360,7 +369,6 @@ def course_lesson(slug):
     next_topic = all_topics[idx + 1] if idx is not None and idx < len(all_topics) - 1 else None
 
     return render_template("course_lesson.html", topic=topic, prev_topic=prev_topic, next_topic=next_topic)
-
 
 # -------------------------
 # PAID COURSE — thank you page
