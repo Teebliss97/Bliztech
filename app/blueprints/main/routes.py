@@ -3,8 +3,6 @@ import re
 
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request
 from flask_login import current_user
-from markupsafe import Markup
-
 from app.models import Progress
 from app.blueprints.topics.routes import TOPICS
 from app.utils.ratelimit import rate_limit
@@ -355,13 +353,6 @@ def course_lesson(slug):
         return redirect(url_for("main.course"))
 
     topic = CourseTopic.query.filter_by(slug=slug).first_or_404()
-
-    # Convert Markdown → HTML and mark safe to prevent Jinja escaping
-    _md = md_lib.Markdown(extensions=["extra", "nl2br", "sane_lists"])
-    topic.body = Markup(_md.convert(topic.body or ""))
-    if topic.lab:
-        _md.reset()
-        topic.lab = Markup(_md.convert(topic.lab))
 
     # Get prev/next for navigation
     all_topics = CourseTopic.query.order_by(CourseTopic.order).all()
