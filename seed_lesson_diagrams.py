@@ -1,763 +1,406 @@
 """
-seed_lesson_diagrams.py
------------------------
-Embeds SVG diagrams into lesson content at the appropriate points.
-Run from project root:
-    PYTHONPATH=/opt/render/project/src .venv/bin/python seed_lesson_diagrams.py
+seed_lesson_diagrams.py  (v2)
+------------------------------
+PYTHONPATH=/opt/render/project/src .venv/bin/python seed_lesson_diagrams.py
+
+IMPORTANT: Run this AFTER the expanded content seeds so the h2 markers exist.
+This script is safe to re-run — it checks for markers before inserting.
+To reset diagrams, re-run the expanded content seeds first, then this script.
 """
 
-# ── SVG Diagrams ────────────────────────────────────────────────────────────
+ARROW_DEFS = '<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>'
 
-# Shared style for all diagrams
-SVG_STYLE = """
-<style>
-.diagram-wrap {
-  margin: 28px 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--bg-3);
-}
-.diagram-caption {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--text-3);
-  padding: 8px 16px;
-  border-top: 1px solid var(--border);
-  background: var(--bg-2);
-}
-</style>
-"""
+def d(inner, h, caption):
+    return (
+        '<div style="margin:28px 0;border:1px solid rgba(255,255,255,0.07);'
+        'border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.02)">'
+        f'<svg width="100%" viewBox="0 0 680 {h}" xmlns="http://www.w3.org/2000/svg" '
+        'style="display:block;font-family:ui-monospace,JetBrains Mono,monospace">'
+        f'{ARROW_DEFS}{inner}</svg>'
+        '<div style="font-family:ui-monospace,monospace;font-size:10px;text-transform:uppercase;'
+        'letter-spacing:0.6px;color:#555;padding:7px 14px;border-top:1px solid rgba(255,255,255,0.05)">'
+        f'{caption}</div></div>'
+    )
 
-def diagram(svg_content, caption):
-    return f"""
-{SVG_STYLE}
-<div class="diagram-wrap">
-{svg_content}
-<div class="diagram-caption">{caption}</div>
-</div>
-"""
+# ── Risk formula ─────────────────────────────────────────────────────────────
+RISK_FORMULA = d(
+    '<text x="340" y="26" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">RISK FORMULA</text>'
+    '<rect x="30" y="40" width="96" height="50" rx="5" fill="none" stroke="#00d97e" stroke-width="1.5"/>'
+    '<text x="78" y="60" text-anchor="middle" font-size="13" font-weight="600" fill="#00d97e">RISK</text>'
+    '<text x="78" y="78" text-anchor="middle" font-size="9" fill="#555">total exposure</text>'
+    '<text x="146" y="69" text-anchor="middle" font-size="18" fill="#333">=</text>'
+    '<rect x="162" y="40" width="130" height="50" rx="5" fill="none" stroke="#333" stroke-width="1"/>'
+    '<text x="227" y="60" text-anchor="middle" font-size="12" font-weight="500" fill="#bbb">Threat</text>'
+    '<text x="227" y="78" text-anchor="middle" font-size="9" fill="#555">who might attack</text>'
+    '<text x="312" y="69" text-anchor="middle" font-size="18" fill="#333">x</text>'
+    '<rect x="328" y="40" width="148" height="50" rx="5" fill="none" stroke="#333" stroke-width="1"/>'
+    '<text x="402" y="60" text-anchor="middle" font-size="12" font-weight="500" fill="#bbb">Vulnerability</text>'
+    '<text x="402" y="78" text-anchor="middle" font-size="9" fill="#555">what weakness exists</text>'
+    '<text x="496" y="69" text-anchor="middle" font-size="18" fill="#333">x</text>'
+    '<rect x="512" y="40" width="130" height="50" rx="5" fill="none" stroke="#333" stroke-width="1"/>'
+    '<text x="577" y="60" text-anchor="middle" font-size="12" font-weight="500" fill="#bbb">Impact</text>'
+    '<text x="577" y="78" text-anchor="middle" font-size="9" fill="#555">consequence if it happens</text>'
+    '<text x="340" y="116" text-anchor="middle" font-size="10" fill="#444">'
+    'If any single factor equals zero, the total risk is zero — use this to prioritise controls</text>',
+    130, 'Risk = Threat x Vulnerability x Impact')
 
-# ── Attack Lifecycle (Lesson A2) ─────────────────────────────────────────────
-ATTACK_LIFECYCLE_SVG = diagram("""
-<svg viewBox="0 0 760 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#00d97e" opacity="0.7"/>
-    </marker>
-  </defs>
-  <!-- Steps -->
-  <g font-family="JetBrains Mono, monospace" font-size="9" fill="#aaa" text-anchor="middle">
-    <!-- 1 Recon -->
-    <rect x="10" y="30" width="88" height="60" rx="6" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-    <text x="54" y="55" fill="#00d97e" font-size="16">🔍</text>
-    <text x="54" y="72" fill="#fff" font-size="9" font-weight="600">Recon</text>
-    <text x="54" y="84">Gather info</text>
-    <!-- arrow -->
-    <line x1="100" y1="60" x2="112" y2="60" stroke="#00d97e" stroke-width="1.5" opacity="0.5" marker-end="url(#arr)"/>
-    <!-- 2 Weaponise -->
-    <rect x="114" y="30" width="88" height="60" rx="6" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-    <text x="158" y="55" fill="#00d97e" font-size="16">⚙️</text>
-    <text x="158" y="72" fill="#fff" font-size="9" font-weight="600">Weaponise</text>
-    <text x="158" y="84">Build payload</text>
-    <!-- arrow -->
-    <line x1="204" y1="60" x2="216" y2="60" stroke="#00d97e" stroke-width="1.5" opacity="0.5" marker-end="url(#arr)"/>
-    <!-- 3 Delivery -->
-    <rect x="218" y="30" width="88" height="60" rx="6" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-    <text x="262" y="55" fill="#00d97e" font-size="16">📧</text>
-    <text x="262" y="72" fill="#fff" font-size="9" font-weight="600">Delivery</text>
-    <text x="262" y="84">Send attack</text>
-    <!-- arrow -->
-    <line x1="308" y1="60" x2="320" y2="60" stroke="#00d97e" stroke-width="1.5" opacity="0.5" marker-end="url(#arr)"/>
-    <!-- 4 Exploit -->
-    <rect x="322" y="30" width="88" height="60" rx="6" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-    <text x="366" y="55" fill="#00d97e" font-size="16">💥</text>
-    <text x="366" y="72" fill="#fff" font-size="9" font-weight="600">Exploit</text>
-    <text x="366" y="84">Trigger flaw</text>
-    <!-- arrow -->
-    <line x1="412" y1="60" x2="424" y2="60" stroke="#00d97e" stroke-width="1.5" opacity="0.5" marker-end="url(#arr)"/>
-    <!-- 5 Install -->
-    <rect x="426" y="30" width="88" height="60" rx="6" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-    <text x="470" y="55" fill="#00d97e" font-size="16">🔧</text>
-    <text x="470" y="72" fill="#fff" font-size="9" font-weight="600">Install</text>
-    <text x="470" y="84">Persistence</text>
-    <!-- arrow -->
-    <line x1="516" y1="60" x2="528" y2="60" stroke="#00d97e" stroke-width="1.5" opacity="0.5" marker-end="url(#arr)"/>
-    <!-- 6 C2 -->
-    <rect x="530" y="30" width="88" height="60" rx="6" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-    <text x="574" y="55" fill="#00d97e" font-size="16">📡</text>
-    <text x="574" y="72" fill="#fff" font-size="9" font-weight="600">C2</text>
-    <text x="574" y="84">Take control</text>
-    <!-- arrow -->
-    <line x1="620" y1="60" x2="632" y2="60" stroke="#00d97e" stroke-width="1.5" opacity="0.5" marker-end="url(#arr)"/>
-    <!-- 7 Actions -->
-    <rect x="634" y="30" width="116" height="60" rx="6" fill="#1a1a1a" stroke="#00d97e" stroke-width="1.5"/>
-    <text x="692" y="55" fill="#00d97e" font-size="16">🎯</text>
-    <text x="692" y="72" fill="#fff" font-size="9" font-weight="600">Objectives</text>
-    <text x="692" y="84">Data theft / damage</text>
-  </g>
-</svg>
-""", "The Cyber Kill Chain — 7 stages of a typical attack")
+# ── CIA Triad ─────────────────────────────────────────────────────────────────
+CIA_TRIAD = d(
+    '<text x="340" y="26" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">CIA TRIAD</text>'
+    '<rect x="230" y="36" width="220" height="66" rx="5" fill="rgba(0,217,126,0.05)" stroke="#00d97e" stroke-width="1.5"/>'
+    '<text x="340" y="60" text-anchor="middle" font-size="13" font-weight="600" fill="#00d97e">Confidentiality</text>'
+    '<text x="340" y="78" text-anchor="middle" font-size="10" fill="#888">Authorised access only</text>'
+    '<text x="340" y="94" text-anchor="middle" font-size="9" fill="#555">Encryption · Access controls · Classification</text>'
+    '<rect x="50" y="142" width="220" height="66" rx="5" fill="rgba(255,255,255,0.02)" stroke="#333" stroke-width="1"/>'
+    '<text x="160" y="166" text-anchor="middle" font-size="13" font-weight="600" fill="#ccc">Integrity</text>'
+    '<text x="160" y="184" text-anchor="middle" font-size="10" fill="#888">Data is accurate and unmodified</text>'
+    '<text x="160" y="200" text-anchor="middle" font-size="9" fill="#555">Hashing · Digital signatures · Audit logs</text>'
+    '<rect x="410" y="142" width="220" height="66" rx="5" fill="rgba(255,255,255,0.02)" stroke="#333" stroke-width="1"/>'
+    '<text x="520" y="166" text-anchor="middle" font-size="13" font-weight="600" fill="#ccc">Availability</text>'
+    '<text x="520" y="184" text-anchor="middle" font-size="10" fill="#888">Systems accessible when needed</text>'
+    '<text x="520" y="200" text-anchor="middle" font-size="9" fill="#555">Redundancy · Backups · DDoS mitigation</text>'
+    '<line x1="290" y1="102" x2="200" y2="142" stroke="#2a2a2a" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<line x1="390" y1="102" x2="460" y2="142" stroke="#2a2a2a" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<line x1="270" y1="175" x2="409" y2="175" stroke="#2a2a2a" stroke-width="1" marker-end="url(#arrow)"/>',
+    232, 'The three core properties of information security — every security decision balances these three')
 
-# ── CIA Triad (Lesson A3) ────────────────────────────────────────────────────
-CIA_TRIAD_SVG = diagram("""
-<svg viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <!-- Triangle -->
-  <polygon points="300,30 80,220 520,220" fill="none" stroke="#333" stroke-width="1.5"/>
-  <!-- C -->
-  <rect x="60" y="228" width="170" height="70" rx="8" fill="#111" stroke="#00d97e" stroke-width="1.5"/>
-  <text x="145" y="252" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e" text-transform="uppercase" letter-spacing="2">CONFIDENTIALITY</text>
-  <text x="145" y="272" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">Only authorised access</text>
-  <text x="145" y="289" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">Encryption · Access controls</text>
-  <!-- I -->
-  <rect x="370" y="228" width="170" height="70" rx="8" fill="#111" stroke="#00d97e" stroke-width="1.5"/>
-  <text x="455" y="252" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e" letter-spacing="2">INTEGRITY</text>
-  <text x="455" y="272" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">Data is accurate &amp; unmodified</text>
-  <text x="455" y="289" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">Hashing · Digital signatures</text>
-  <!-- A -->
-  <rect x="215" y="5" width="170" height="70" rx="8" fill="#111" stroke="#00d97e" stroke-width="1.5"/>
-  <text x="300" y="29" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e" letter-spacing="2">AVAILABILITY</text>
-  <text x="300" y="49" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">Systems accessible when needed</text>
-  <text x="300" y="66" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">Redundancy · Backups · DDoS mitigation</text>
-  <!-- Centre label -->
-  <text x="300" y="168" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#444" font-weight="600">CIA TRIAD</text>
-</svg>
-""", "The CIA Triad — the three core properties of information security")
+# ── Kill Chain ────────────────────────────────────────────────────────────────
+KILL_CHAIN = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">CYBER KILL CHAIN — 7 STAGES</text>'
+    + ''.join([
+        f'<rect x="{10+i*95}" y="36" width="84" height="64" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2d2d2d" stroke-width="1"/>'
+        f'<text x="{52+i*95}" y="57" text-anchor="middle" font-size="10" font-weight="600" fill="{["#888","#888","#888","#888","#888","#888","#00d97e"][i]}">{["Recon","Weaponise","Deliver","Exploit","Install","C2","Objectives"][i]}</text>'
+        f'<text x="{52+i*95}" y="73" text-anchor="middle" font-size="9" fill="#555">{["Gather info","Build payload","Email or USB","Trigger flaw","Persistence","Remote control","Data theft"][i]}</text>'
+        f'<text x="{52+i*95}" y="88" text-anchor="middle" font-size="9" fill="#444">{["on target","or purchase","or exploit","in software","reg key/task","or ransom","or disruption"][i]}</text>'
+        + (f'<line x1="{96+i*95}" y1="68" x2="{103+i*95}" y2="68" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>' if i < 6 else '')
+        for i in range(7)
+    ])
+    + '<text x="340" y="124" text-anchor="middle" font-size="10" fill="#444">'
+      'Defenders can interrupt the chain at any stage — email filtering stops Deliver, EDR stops Install, monitoring detects C2</text>',
+    138, 'The 7-stage cyber kill chain — interrupting any stage stops or limits the attack')
 
-# ── Man-in-the-Middle / Sniffing (Lesson B1 / B2) ───────────────────────────
-MITM_SVG = diagram("""
-<svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#00d97e" opacity="0.8"/>
-    </marker>
-    <marker id="arr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#e05c5c" opacity="0.9"/>
-    </marker>
-  </defs>
-  <!-- User -->
-  <rect x="20" y="50" width="110" height="60" rx="8" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-  <text x="75" y="76" text-anchor="middle" font-size="20">👤</text>
-  <text x="75" y="96" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#fff">User</text>
-  <text x="75" y="110" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#666">Sends data</text>
-  <!-- Server -->
-  <rect x="550" y="50" width="110" height="60" rx="8" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-  <text x="605" y="76" text-anchor="middle" font-size="20">🖥</text>
-  <text x="605" y="96" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#fff">Server</text>
-  <text x="605" y="110" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#666">Receives data</text>
-  <!-- Attacker in middle -->
-  <rect x="275" y="30" width="130" height="100" rx="8" fill="#1a1a1a" stroke="#e05c5c" stroke-width="1.5"/>
-  <text x="340" y="62" text-anchor="middle" font-size="20">🕵️</text>
-  <text x="340" y="84" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#e05c5c">Attacker</text>
-  <text x="340" y="100" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#888">Intercepts &amp;</text>
-  <text x="340" y="113" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#888">reads all traffic</text>
-  <!-- Normal path (top, greyed) -->
-  <line x1="130" y1="58" x2="275" y2="68" stroke="#e05c5c" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr3)"/>
-  <line x1="405" y1="68" x2="550" y2="58" stroke="#e05c5c" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr3)"/>
-  <!-- Labels -->
-  <text x="200" y="52" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#e05c5c">intercepted</text>
-  <text x="480" y="52" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#e05c5c">forwarded</text>
-  <!-- What user thinks -->
-  <line x1="130" y1="132" x2="550" y2="132" stroke="#00d97e" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr2)"/>
-  <text x="340" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">What the user thinks is happening (direct connection)</text>
-</svg>
-""", "Man-in-the-middle attack — attacker intercepts and reads all traffic between user and server")
+# ── Defence in depth ─────────────────────────────────────────────────────────
+DEFENCE_DEPTH = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">DEFENCE IN DEPTH — LAYERED CONTROLS</text>'
+    '<rect x="30" y="36" width="620" height="48" rx="5" fill="rgba(255,255,255,0.015)" stroke="#222" stroke-width="1"/>'
+    '<text x="340" y="56" text-anchor="middle" font-size="11" font-weight="500" fill="#555">Perimeter</text>'
+    '<text x="340" y="74" text-anchor="middle" font-size="9" fill="#3a3a3a">Firewall · IDS/IPS · Email filtering · Web application firewall · DDoS mitigation</text>'
+    '<rect x="70" y="94" width="540" height="46" rx="5" fill="rgba(255,255,255,0.015)" stroke="#252525" stroke-width="1"/>'
+    '<text x="340" y="113" text-anchor="middle" font-size="11" font-weight="500" fill="#555">Network</text>'
+    '<text x="340" y="129" text-anchor="middle" font-size="9" fill="#3a3a3a">Segmentation · DMZ · VPN · Traffic monitoring · Network access control</text>'
+    '<rect x="110" y="150" width="460" height="46" rx="5" fill="rgba(255,255,255,0.015)" stroke="#2a2a2a" stroke-width="1"/>'
+    '<text x="340" y="169" text-anchor="middle" font-size="11" font-weight="500" fill="#666">Endpoint</text>'
+    '<text x="340" y="185" text-anchor="middle" font-size="9" fill="#3a3a3a">EDR · Antivirus · Patch management · Device encryption · Application control</text>'
+    '<rect x="150" y="206" width="380" height="46" rx="5" fill="rgba(255,255,255,0.015)" stroke="#2f2f2f" stroke-width="1"/>'
+    '<text x="340" y="225" text-anchor="middle" font-size="11" font-weight="500" fill="#777">Application</text>'
+    '<text x="340" y="241" text-anchor="middle" font-size="9" fill="#3a3a3a">Authentication · Authorisation · Input validation · Logging</text>'
+    '<rect x="190" y="262" width="300" height="46" rx="5" fill="rgba(0,217,126,0.04)" stroke="#00d97e" stroke-width="1.5"/>'
+    '<text x="340" y="281" text-anchor="middle" font-size="11" font-weight="600" fill="#00d97e">Data</text>'
+    '<text x="340" y="297" text-anchor="middle" font-size="9" fill="#888">Encryption at rest and in transit · DLP · Access controls</text>'
+    '<text x="340" y="334" text-anchor="middle" font-size="10" fill="#444">'
+    'Each layer operates independently — a breach at the perimeter is contained by the layers inside</text>',
+    348, 'Defence in depth — independent layers so one failure does not expose everything')
 
-# ── DNS Resolution (Lesson B3) ───────────────────────────────────────────────
-DNS_RESOLUTION_SVG = diagram("""
-<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="da" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#00d97e" opacity="0.8"/>
-    </marker>
-  </defs>
-  <!-- Browser -->
-  <rect x="10" y="70" width="110" height="60" rx="7" fill="#1a1a1a" stroke="#333"/>
-  <text x="65" y="96" text-anchor="middle" font-size="18">🌐</text>
-  <text x="65" y="113" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#fff">Your Browser</text>
-  <text x="65" y="126" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">bliztechacademy.com</text>
-  <!-- Resolver -->
-  <rect x="165" y="70" width="110" height="60" rx="7" fill="#1a1a1a" stroke="#444"/>
-  <text x="220" y="96" text-anchor="middle" font-size="18">🔄</text>
-  <text x="220" y="113" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#fff">DNS Resolver</text>
-  <text x="220" y="126" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">8.8.8.8 (Google)</text>
-  <!-- Root NS -->
-  <rect x="320" y="20" width="110" height="60" rx="7" fill="#1a1a1a" stroke="#444"/>
-  <text x="375" y="46" text-anchor="middle" font-size="18">🌍</text>
-  <text x="375" y="63" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#fff">Root Server</text>
-  <text x="375" y="76" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">Knows .com TLD</text>
-  <!-- TLD NS -->
-  <rect x="320" y="120" width="110" height="60" rx="7" fill="#1a1a1a" stroke="#444"/>
-  <text x="375" y="146" text-anchor="middle" font-size="18">📂</text>
-  <text x="375" y="163" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#fff">TLD Server</text>
-  <text x="375" y="176" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">.com nameserver</text>
-  <!-- Auth NS -->
-  <rect x="480" y="70" width="120" height="60" rx="7" fill="#1a1a1a" stroke="#00d97e" stroke-width="1.5"/>
-  <text x="540" y="96" text-anchor="middle" font-size="18">✅</text>
-  <text x="540" y="113" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">Auth. Server</text>
-  <text x="540" y="126" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">Returns IP: 104.21.35.67</text>
-  <!-- Final server -->
-  <rect x="620" y="70" width="90" height="60" rx="7" fill="#1a1a1a" stroke="#333"/>
-  <text x="665" y="96" text-anchor="middle" font-size="18">🖥</text>
-  <text x="665" y="113" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#fff">Web Server</text>
-  <text x="665" y="126" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">104.21.35.67</text>
-  <!-- Arrows: numbered steps -->
-  <line x1="120" y1="100" x2="163" y2="100" stroke="#00d97e" stroke-width="1.5" marker-end="url(#da)"/>
-  <text x="141" y="95" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d97e">①</text>
-  <line x1="220" y1="70" x2="340" y2="55" stroke="#00d97e" stroke-width="1.5" marker-end="url(#da)"/>
-  <text x="275" y="55" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d97e">②</text>
-  <line x1="375" y1="80" x2="375" y2="122" stroke="#00d97e" stroke-width="1.5" marker-end="url(#da)"/>
-  <text x="388" y="108" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d97e">③</text>
-  <line x1="430" y1="150" x2="478" y2="120" stroke="#00d97e" stroke-width="1.5" marker-end="url(#da)"/>
-  <text x="460" y="130" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d97e">④</text>
-  <line x1="540" y1="70" x2="540" y2="50" stroke="none"/>
-  <line x1="540" y1="100" x2="618" y2="100" stroke="#00d97e" stroke-width="2" marker-end="url(#da)"/>
-  <text x="578" y="95" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#00d97e">⑤ IP</text>
-</svg>
-""", "DNS resolution — how a domain name is translated to an IP address (5-step process)")
+# ── MITM ─────────────────────────────────────────────────────────────────────
+MITM = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">MAN-IN-THE-MIDDLE ATTACK</text>'
+    '<rect x="20" y="44" width="120" height="58" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2d2d2d" stroke-width="1"/>'
+    '<text x="80" y="67" text-anchor="middle" font-size="12" font-weight="500" fill="#bbb">User</text>'
+    '<text x="80" y="84" text-anchor="middle" font-size="9" fill="#555">Sends message</text>'
+    '<text x="80" y="97" text-anchor="middle" font-size="9" fill="#555">or credentials</text>'
+    '<rect x="270" y="30" width="140" height="86" rx="5" fill="rgba(180,40,40,0.07)" stroke="#903030" stroke-width="1.5"/>'
+    '<text x="340" y="54" text-anchor="middle" font-size="11" font-weight="600" fill="#b04040">Attacker</text>'
+    '<text x="340" y="72" text-anchor="middle" font-size="9" fill="#888">Intercepts all traffic</text>'
+    '<text x="340" y="87" text-anchor="middle" font-size="9" fill="#888">Reads and modifies</text>'
+    '<text x="340" y="102" text-anchor="middle" font-size="9" fill="#888">before forwarding</text>'
+    '<rect x="540" y="44" width="120" height="58" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2d2d2d" stroke-width="1"/>'
+    '<text x="600" y="67" text-anchor="middle" font-size="12" font-weight="500" fill="#bbb">Server</text>'
+    '<text x="600" y="84" text-anchor="middle" font-size="9" fill="#555">Receives modified</text>'
+    '<text x="600" y="97" text-anchor="middle" font-size="9" fill="#555">or copied traffic</text>'
+    '<line x1="142" y1="73" x2="268" y2="73" stroke="#903030" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow)"/>'
+    '<text x="205" y="65" text-anchor="middle" font-size="9" fill="#903030">intercepted</text>'
+    '<line x1="412" y1="73" x2="538" y2="73" stroke="#903030" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow)"/>'
+    '<text x="476" y="65" text-anchor="middle" font-size="9" fill="#903030">forwarded</text>'
+    '<line x1="142" y1="152" x2="538" y2="152" stroke="#00d97e" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#arrow)"/>'
+    '<text x="340" y="145" text-anchor="middle" font-size="9" fill="#00d97e">What the user believes — a direct encrypted connection</text>'
+    '<rect x="20" y="166" width="640" height="26" rx="4" fill="rgba(0,217,126,0.04)" stroke="rgba(0,217,126,0.15)" stroke-width="1"/>'
+    '<text x="340" y="183" text-anchor="middle" font-size="10" fill="#00d97e">'
+    'Defence: TLS with certificate validation · HSTS preloading · VPN on untrusted networks</text>',
+    208, 'Man-in-the-middle — attacker silently reads and modifies all traffic between two parties')
 
-# ── TCP Three-Way Handshake (Lesson B2) ─────────────────────────────────────
-TCP_HANDSHAKE_SVG = diagram("""
-<svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="ta" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#00d97e" opacity="0.9"/>
-    </marker>
-  </defs>
-  <!-- Client -->
-  <rect x="30" y="10" width="100" height="40" rx="6" fill="#1a1a1a" stroke="#333"/>
-  <text x="80" y="35" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#fff">CLIENT</text>
-  <line x1="80" y1="50" x2="80" y2="185" stroke="#444" stroke-width="1" stroke-dasharray="4,3"/>
-  <!-- Server -->
-  <rect x="370" y="10" width="100" height="40" rx="6" fill="#1a1a1a" stroke="#333"/>
-  <text x="420" y="35" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="#fff">SERVER</text>
-  <line x1="420" y1="50" x2="420" y2="185" stroke="#444" stroke-width="1" stroke-dasharray="4,3"/>
-  <!-- Step 1: SYN -->
-  <line x1="80" y1="75" x2="420" y2="95" stroke="#00d97e" stroke-width="1.5" marker-end="url(#ta)"/>
-  <rect x="175" y="62" width="100" height="22" rx="4" fill="#0a1a12"/>
-  <text x="225" y="77" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e">① SYN</text>
-  <text x="225" y="89" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">"I want to connect"</text>
-  <!-- Step 2: SYN-ACK -->
-  <line x1="420" y1="115" x2="80" y2="135" stroke="#00d97e" stroke-width="1.5" marker-end="url(#ta)"/>
-  <rect x="175" y="110" width="100" height="22" rx="4" fill="#0a1a12"/>
-  <text x="225" y="125" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e">② SYN-ACK</text>
-  <text x="225" y="137" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">"OK, ready"</text>
-  <!-- Step 3: ACK -->
-  <line x1="80" y1="155" x2="420" y2="170" stroke="#00d97e" stroke-width="1.5" marker-end="url(#ta)"/>
-  <rect x="175" y="155" width="100" height="22" rx="4" fill="#0a1a12"/>
-  <text x="225" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e">③ ACK</text>
-  <text x="225" y="182" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">"Connected ✓"</text>
-</svg>
-""", "TCP three-way handshake — how a reliable connection is established before data is sent")
+# ── Network segmentation ──────────────────────────────────────────────────────
+NETWORK_SEG = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">NETWORK SEGMENTATION</text>'
+    '<rect x="10" y="40" width="80" height="96" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2a2a2a" stroke-width="1"/>'
+    '<text x="50" y="62" text-anchor="middle" font-size="10" font-weight="500" fill="#666">Internet</text>'
+    '<text x="50" y="80" text-anchor="middle" font-size="9" fill="#444">Untrusted</text>'
+    '<text x="50" y="95" text-anchor="middle" font-size="9" fill="#444">external</text>'
+    '<text x="50" y="110" text-anchor="middle" font-size="9" fill="#444">traffic</text>'
+    '<line x1="92" y1="88" x2="106" y2="88" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<rect x="108" y="58" width="52" height="60" rx="4" fill="rgba(0,217,126,0.05)" stroke="#00d97e" stroke-width="1.5"/>'
+    '<text x="134" y="82" text-anchor="middle" font-size="10" font-weight="600" fill="#00d97e">FW 1</text>'
+    '<text x="134" y="98" text-anchor="middle" font-size="8" fill="#666">Outer</text>'
+    '<text x="134" y="111" text-anchor="middle" font-size="8" fill="#666">firewall</text>'
+    '<line x1="162" y1="88" x2="176" y2="88" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<rect x="178" y="30" width="156" height="126" rx="5" fill="rgba(255,255,255,0.01)" stroke="#252525" stroke-dasharray="5,3" stroke-width="1"/>'
+    '<text x="256" y="48" text-anchor="middle" font-size="9" fill="#444">DMZ</text>'
+    '<rect x="188" y="54" width="136" height="36" rx="4" fill="rgba(255,255,255,0.02)" stroke="#222" stroke-width="1"/>'
+    '<text x="256" y="68" text-anchor="middle" font-size="10" font-weight="500" fill="#999">Web server</text>'
+    '<text x="256" y="82" text-anchor="middle" font-size="9" fill="#555">Public-facing</text>'
+    '<rect x="188" y="98" width="136" height="36" rx="4" fill="rgba(255,255,255,0.02)" stroke="#222" stroke-width="1"/>'
+    '<text x="256" y="112" text-anchor="middle" font-size="10" font-weight="500" fill="#999">Mail server</text>'
+    '<text x="256" y="126" text-anchor="middle" font-size="9" fill="#555">Email gateway</text>'
+    '<line x1="336" y1="88" x2="350" y2="88" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<rect x="352" y="58" width="52" height="60" rx="4" fill="rgba(0,217,126,0.05)" stroke="#00d97e" stroke-width="1.5"/>'
+    '<text x="378" y="82" text-anchor="middle" font-size="10" font-weight="600" fill="#00d97e">FW 2</text>'
+    '<text x="378" y="98" text-anchor="middle" font-size="8" fill="#666">Inner</text>'
+    '<text x="378" y="111" text-anchor="middle" font-size="8" fill="#666">firewall</text>'
+    '<line x1="406" y1="88" x2="420" y2="88" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<rect x="422" y="30" width="248" height="126" rx="5" fill="rgba(0,217,126,0.02)" stroke="rgba(0,217,126,0.18)" stroke-width="1"/>'
+    '<text x="546" y="48" text-anchor="middle" font-size="9" fill="#00d97e">Internal network</text>'
+    '<rect x="432" y="54" width="106" height="36" rx="4" fill="rgba(255,255,255,0.02)" stroke="#222" stroke-width="1"/>'
+    '<text x="485" y="68" text-anchor="middle" font-size="10" font-weight="500" fill="#999">Workstations</text>'
+    '<text x="485" y="82" text-anchor="middle" font-size="9" fill="#555">User devices</text>'
+    '<rect x="554" y="54" width="106" height="36" rx="4" fill="rgba(255,255,255,0.02)" stroke="#222" stroke-width="1"/>'
+    '<text x="607" y="68" text-anchor="middle" font-size="10" font-weight="500" fill="#999">Database</text>'
+    '<text x="607" y="82" text-anchor="middle" font-size="9" fill="#00d97e">Protected zone</text>'
+    '<rect x="432" y="98" width="228" height="36" rx="4" fill="rgba(255,255,255,0.02)" stroke="#222" stroke-width="1"/>'
+    '<text x="546" y="112" text-anchor="middle" font-size="10" font-weight="500" fill="#999">Finance and HR systems</text>'
+    '<text x="546" y="126" text-anchor="middle" font-size="9" fill="#555">No direct path from DMZ</text>'
+    '<text x="340" y="182" text-anchor="middle" font-size="10" fill="#444">'
+    'A compromised web server in the DMZ cannot reach the database directly — the second firewall blocks it</text>',
+    198, 'Network segmentation — zones separated by firewalls limit how far an attacker can move after a breach')
 
-# ── Defence in Depth (Lesson A5) ─────────────────────────────────────────────
-DEFENCE_DEPTH_SVG = diagram("""
-<svg viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <!-- Concentric rings -->
-  <circle cx="250" cy="150" r="220" fill="none" stroke="#1e1e1e" stroke-width="40"/>
-  <circle cx="250" cy="150" r="175" fill="none" stroke="#1a2a1a" stroke-width="40"/>
-  <circle cx="250" cy="150" r="130" fill="none" stroke="#162216" stroke-width="40"/>
-  <circle cx="250" cy="150" r="85" fill="none" stroke="#122012" stroke-width="40"/>
-  <circle cx="250" cy="150" r="42" fill="#0a1a0a"/>
-  <!-- Ring outlines -->
-  <circle cx="250" cy="150" r="240" fill="none" stroke="#2a2a2a" stroke-width="1"/>
-  <circle cx="250" cy="150" r="195" fill="none" stroke="#2a2a2a" stroke-width="1"/>
-  <circle cx="250" cy="150" r="150" fill="none" stroke="#2a2a2a" stroke-width="1"/>
-  <circle cx="250" cy="150" r="107" fill="none" stroke="#2a2a2a" stroke-width="1"/>
-  <circle cx="250" cy="150" r="62" fill="none" stroke="#00d97e" stroke-width="1.5" stroke-dasharray="4,3"/>
-  <!-- Labels on rings -->
-  <text x="250" y="17" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#555">PERIMETER · Firewall · Email filtering · IDS</text>
-  <text x="250" y="64" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#666">NETWORK · Segmentation · VPN · DMZ</text>
-  <text x="250" y="112" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#777">ENDPOINT · EDR · Patching · Encryption</text>
-  <text x="250" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#888">APPLICATION · Auth · Input validation</text>
-  <!-- Centre -->
-  <text x="250" y="146" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">DATA</text>
-  <text x="250" y="158" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#00d97e">Encrypted</text>
-  <!-- Attacker arrow -->
-  <line x1="10" y1="150" x2="188" y2="150" stroke="#e05c5c" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr_red)"/>
-  <text x="90" y="140" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#e05c5c">Attacker</text>
-  <defs>
-    <marker id="arr_red" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#e05c5c"/>
-    </marker>
-  </defs>
-  <text x="10" y="278" font-family="sans-serif" font-size="9" fill="#444">Each layer independently blocks the attacker</text>
-</svg>
-""", "Defence in depth — multiple independent security layers protect the core data asset")
+# ── TCP handshake ─────────────────────────────────────────────────────────────
+TCP_HANDSHAKE = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">TCP THREE-WAY HANDSHAKE</text>'
+    '<rect x="60" y="36" width="130" height="38" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2d2d2d" stroke-width="1"/>'
+    '<text x="125" y="60" text-anchor="middle" font-size="12" font-weight="500" fill="#bbb">Client</text>'
+    '<line x1="125" y1="74" x2="125" y2="196" stroke="#222" stroke-width="1" stroke-dasharray="4,3"/>'
+    '<rect x="490" y="36" width="130" height="38" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2d2d2d" stroke-width="1"/>'
+    '<text x="555" y="60" text-anchor="middle" font-size="12" font-weight="500" fill="#bbb">Server</text>'
+    '<line x1="555" y1="74" x2="555" y2="196" stroke="#222" stroke-width="1" stroke-dasharray="4,3"/>'
+    '<line x1="125" y1="92" x2="555" y2="112" stroke="#00d97e" stroke-width="1.5" marker-end="url(#arrow)"/>'
+    '<rect x="270" y="80" width="140" height="20" rx="3" fill="#050f08"/>'
+    '<text x="340" y="95" text-anchor="middle" font-size="11" font-weight="600" fill="#00d97e">SYN</text>'
+    '<text x="340" y="110" text-anchor="middle" font-size="9" fill="#444">"I want to connect"</text>'
+    '<line x1="555" y1="136" x2="125" y2="154" stroke="#00d97e" stroke-width="1.5" marker-end="url(#arrow)"/>'
+    '<rect x="270" y="124" width="140" height="20" rx="3" fill="#050f08"/>'
+    '<text x="340" y="139" text-anchor="middle" font-size="11" font-weight="600" fill="#00d97e">SYN-ACK</text>'
+    '<text x="340" y="154" text-anchor="middle" font-size="9" fill="#444">"Acknowledged, ready"</text>'
+    '<line x1="125" y1="172" x2="555" y2="188" stroke="#00d97e" stroke-width="1.5" marker-end="url(#arrow)"/>'
+    '<rect x="270" y="162" width="140" height="20" rx="3" fill="#050f08"/>'
+    '<text x="340" y="177" text-anchor="middle" font-size="11" font-weight="600" fill="#00d97e">ACK</text>'
+    '<text x="340" y="192" text-anchor="middle" font-size="9" fill="#00d97e">Connection established</text>'
+    '<text x="340" y="220" text-anchor="middle" font-size="10" fill="#444">'
+    'SYN floods exploit this — sending millions of SYNs without completing step 3 exhausts server memory</text>',
+    234, 'TCP three-way handshake — reliable connection established before any data is transmitted')
 
-# ── Phishing Attack Flow (Lesson C2) ─────────────────────────────────────────
-PHISHING_FLOW_SVG = diagram("""
-<svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="pa" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#e05c5c" opacity="0.9"/>
-    </marker>
-    <marker id="ga" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#00d97e" opacity="0.9"/>
-    </marker>
-  </defs>
-  <!-- Attacker -->
-  <rect x="10" y="50" width="95" height="60" rx="7" fill="#1a1a1a" stroke="#e05c5c" stroke-width="1.5"/>
-  <text x="57" y="76" text-anchor="middle" font-size="18">🕵️</text>
-  <text x="57" y="95" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#e05c5c">Attacker</text>
-  <!-- Email -->
-  <rect x="145" y="50" width="100" height="60" rx="7" fill="#1a1a1a" stroke="#444"/>
-  <text x="195" y="76" text-anchor="middle" font-size="18">📧</text>
-  <text x="195" y="95" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#fff">Fake Email</text>
-  <text x="195" y="107" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">"Your account..."</text>
-  <!-- Victim -->
-  <rect x="285" y="50" width="100" height="60" rx="7" fill="#1a1a1a" stroke="#444"/>
-  <text x="335" y="76" text-anchor="middle" font-size="18">👤</text>
-  <text x="335" y="95" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#fff">Victim</text>
-  <text x="335" y="107" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">Clicks link</text>
-  <!-- Fake site -->
-  <rect x="425" y="50" width="115" height="60" rx="7" fill="#1a1a1a" stroke="#e05c5c" stroke-width="1.5"/>
-  <text x="482" y="76" text-anchor="middle" font-size="18">🎣</text>
-  <text x="482" y="95" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#e05c5c">Fake Site</text>
-  <text x="482" y="107" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">Looks legitimate</text>
-  <!-- Attacker gets creds -->
-  <rect x="580" y="50" width="110" height="60" rx="7" fill="#1a1a1a" stroke="#e05c5c" stroke-width="1.5"/>
-  <text x="635" y="76" text-anchor="middle" font-size="18">🔑</text>
-  <text x="635" y="95" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#e05c5c">Stolen Creds</text>
-  <text x="635" y="107" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">Sent to attacker</text>
-  <!-- Arrows -->
-  <line x1="107" y1="80" x2="143" y2="80" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#pa)"/>
-  <line x1="247" y1="80" x2="283" y2="80" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#pa)"/>
-  <line x1="387" y1="80" x2="423" y2="80" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#pa)"/>
-  <line x1="542" y1="80" x2="578" y2="80" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#pa)"/>
-  <!-- Defence note -->
-  <text x="335" y="140" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">Defence: Check actual domain · SPF/DKIM · Hardware security keys</text>
-</svg>
-""", "Phishing attack flow — how credentials are stolen through a fake login page")
+# ── DNS resolution ────────────────────────────────────────────────────────────
+DNS_RESOLUTION = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">DNS RESOLUTION — 5 STEPS</text>'
+    '<rect x="20" y="62" width="110" height="48" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2d2d2d" stroke-width="1"/>'
+    '<text x="75" y="82" text-anchor="middle" font-size="11" font-weight="500" fill="#bbb">Browser</text>'
+    '<text x="75" y="98" text-anchor="middle" font-size="9" fill="#555">Types domain name</text>'
+    '<line x1="132" y1="86" x2="148" y2="86" stroke="#00d97e" stroke-width="1.5" marker-end="url(#arrow)"/>'
+    '<text x="140" y="78" text-anchor="middle" font-size="9" fill="#444">1</text>'
+    '<rect x="150" y="62" width="120" height="48" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2d2d2d" stroke-width="1"/>'
+    '<text x="210" y="82" text-anchor="middle" font-size="11" font-weight="500" fill="#bbb">Resolver</text>'
+    '<text x="210" y="98" text-anchor="middle" font-size="9" fill="#555">8.8.8.8 or 1.1.1.1</text>'
+    '<line x1="272" y1="74" x2="336" y2="42" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<text x="300" y="50" text-anchor="middle" font-size="9" fill="#444">2</text>'
+    '<rect x="338" y="24" width="120" height="44" rx="5" fill="rgba(255,255,255,0.02)" stroke="#222" stroke-width="1"/>'
+    '<text x="398" y="42" text-anchor="middle" font-size="11" font-weight="500" fill="#888">Root server</text>'
+    '<text x="398" y="58" text-anchor="middle" font-size="9" fill="#555">Knows .com TLD</text>'
+    '<line x1="398" y1="68" x2="398" y2="102" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<text x="412" y="90" font-size="9" fill="#444">3</text>'
+    '<rect x="338" y="104" width="120" height="44" rx="5" fill="rgba(255,255,255,0.02)" stroke="#222" stroke-width="1"/>'
+    '<text x="398" y="122" text-anchor="middle" font-size="11" font-weight="500" fill="#888">TLD server</text>'
+    '<text x="398" y="138" text-anchor="middle" font-size="9" fill="#555">.com nameserver</text>'
+    '<line x1="460" y1="126" x2="528" y2="96" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<text x="498" y="104" text-anchor="middle" font-size="9" fill="#444">4</text>'
+    '<rect x="530" y="62" width="130" height="48" rx="5" fill="rgba(0,217,126,0.05)" stroke="#00d97e" stroke-width="1.5"/>'
+    '<text x="595" y="82" text-anchor="middle" font-size="11" font-weight="500" fill="#00d97e">Auth. server</text>'
+    '<text x="595" y="98" text-anchor="middle" font-size="9" fill="#888">Returns IP address</text>'
+    '<line x1="528" y1="86" x2="272" y2="86" stroke="#00d97e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow)"/>'
+    '<text x="400" y="168" text-anchor="middle" font-size="9" fill="#00d97e">5  IP address returned to browser — connection made</text>'
+    '<text x="340" y="192" text-anchor="middle" font-size="10" fill="#444">'
+    'DNS cache poisoning inserts false records at the resolver — users are silently sent to attacker servers</text>',
+    208, 'DNS resolution — every domain name lookup follows these 5 steps taking roughly 10 milliseconds')
 
-# ── Network Segmentation (Lesson B1) ─────────────────────────────────────────
-NETWORK_SEG_SVG = diagram("""
-<svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="na" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
-      <path d="M0,0 L0,5 L5,2.5 z" fill="#555"/>
-    </marker>
-    <marker id="na2" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
-      <path d="M0,0 L0,5 L5,2.5 z" fill="#00d97e"/>
-    </marker>
-  </defs>
-  <!-- Internet -->
-  <rect x="10" y="70" width="90" height="60" rx="7" fill="#1a1a1a" stroke="#444"/>
-  <text x="55" y="97" text-anchor="middle" font-size="18">🌐</text>
-  <text x="55" y="116" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#aaa">Internet</text>
-  <!-- Firewall -->
-  <rect x="130" y="70" width="80" height="60" rx="7" fill="#1a1a1a" stroke="#00d97e" stroke-width="1.5"/>
-  <text x="170" y="97" text-anchor="middle" font-size="18">🛡</text>
-  <text x="170" y="116" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">Firewall</text>
-  <!-- DMZ -->
-  <rect x="245" y="40" width="110" height="120" rx="7" fill="#111" stroke="#555" stroke-dasharray="4,3"/>
-  <text x="300" y="60" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#666">DMZ</text>
-  <rect x="260" y="68" width="80" height="38" rx="5" fill="#1a1a1a" stroke="#333"/>
-  <text x="300" y="88" text-anchor="middle" font-size="13">🌐</text>
-  <text x="300" y="100" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">Web Server</text>
-  <rect x="260" y="112" width="80" height="38" rx="5" fill="#1a1a1a" stroke="#333"/>
-  <text x="300" y="132" text-anchor="middle" font-size="13">📧</text>
-  <text x="300" y="144" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">Mail Server</text>
-  <!-- Internal FW -->
-  <rect x="387" y="70" width="80" height="60" rx="7" fill="#1a1a1a" stroke="#00d97e" stroke-width="1.5"/>
-  <text x="427" y="97" text-anchor="middle" font-size="18">🛡</text>
-  <text x="427" y="116" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">Int. FW</text>
-  <!-- Internal zone -->
-  <rect x="498" y="20" width="170" height="160" rx="7" fill="#111" stroke="#00d97e" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="583" y="42" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">Internal Network</text>
-  <rect x="513" y="52" width="65" height="36" rx="5" fill="#1a1a1a" stroke="#333"/>
-  <text x="545" y="73" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">Workstations</text>
-  <rect x="590" y="52" width="65" height="36" rx="5" fill="#1a1a1a" stroke="#333"/>
-  <text x="622" y="73" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">HR Systems</text>
-  <rect x="513" y="100" width="65" height="36" rx="5" fill="#1a1a1a" stroke="#00d97e" stroke-width="1"/>
-  <text x="545" y="121" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#00d97e">Database</text>
-  <rect x="590" y="100" width="65" height="36" rx="5" fill="#1a1a1a" stroke="#333"/>
-  <text x="622" y="121" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">Finance</text>
-  <text x="583" y="158" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#444">Protected from DMZ</text>
-  <!-- Arrows -->
-  <line x1="102" y1="100" x2="128" y2="100" stroke="#555" stroke-width="1.5" marker-end="url(#na)"/>
-  <line x1="212" y1="100" x2="243" y2="100" stroke="#555" stroke-width="1.5" marker-end="url(#na)"/>
-  <line x1="357" y1="100" x2="385" y2="100" stroke="#555" stroke-width="1.5" marker-end="url(#na)"/>
-  <line x1="469" y1="100" x2="496" y2="100" stroke="#00d97e" stroke-width="1.5" marker-end="url(#na2)"/>
-</svg>
-""", "Network segmentation — firewall zones isolate public-facing servers from internal systems")
+# ── Auth factors ──────────────────────────────────────────────────────────────
+AUTH_FACTORS = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">THREE AUTHENTICATION FACTORS</text>'
+    '<rect x="30" y="36" width="186" height="102" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2a2a2a" stroke-width="1"/>'
+    '<text x="123" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#aaa">Something you know</text>'
+    '<line x1="48" y1="68" x2="198" y2="68" stroke="#1e1e1e" stroke-width="1"/>'
+    '<text x="123" y="84" text-anchor="middle" font-size="10" fill="#888">Password · PIN</text>'
+    '<text x="123" y="100" text-anchor="middle" font-size="10" fill="#666">Security question</text>'
+    '<text x="123" y="128" text-anchor="middle" font-size="9" fill="#803030">Can be phished or guessed</text>'
+    '<rect x="247" y="36" width="186" height="102" rx="5" fill="rgba(0,217,126,0.05)" stroke="#00d97e" stroke-width="1.5"/>'
+    '<text x="340" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#00d97e">Something you have</text>'
+    '<line x1="263" y1="68" x2="415" y2="68" stroke="rgba(0,217,126,0.2)" stroke-width="1"/>'
+    '<text x="340" y="84" text-anchor="middle" font-size="10" fill="#888">Authenticator app · Hardware key</text>'
+    '<text x="340" y="100" text-anchor="middle" font-size="10" fill="#888">Smart card · Phone</text>'
+    '<text x="340" y="128" text-anchor="middle" font-size="9" fill="#00d97e">Hardware key = phishing-proof</text>'
+    '<rect x="464" y="36" width="186" height="102" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2a2a2a" stroke-width="1"/>'
+    '<text x="557" y="58" text-anchor="middle" font-size="12" font-weight="600" fill="#aaa">Something you are</text>'
+    '<line x1="480" y1="68" x2="632" y2="68" stroke="#1e1e1e" stroke-width="1"/>'
+    '<text x="557" y="84" text-anchor="middle" font-size="10" fill="#888">Fingerprint · Face ID</text>'
+    '<text x="557" y="100" text-anchor="middle" font-size="10" fill="#666">Iris scan · Voice</text>'
+    '<text x="557" y="128" text-anchor="middle" font-size="9" fill="#666">Cannot be changed if stolen</text>'
+    '<rect x="30" y="156" width="620" height="30" rx="4" fill="rgba(0,217,126,0.04)" stroke="rgba(0,217,126,0.18)" stroke-width="1"/>'
+    '<text x="340" y="176" text-anchor="middle" font-size="11" font-weight="500" fill="#00d97e">'
+    'MFA = any two factors combined — blocks over 99% of credential-based account attacks</text>',
+    204, 'Three authentication factors — MFA combines two or more so stolen passwords alone are insufficient')
 
-# ── Ransomware Infection Chain (Lesson C4) ───────────────────────────────────
-RANSOMWARE_SVG = diagram("""
-<svg viewBox="0 0 720 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="ra" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#e05c5c" opacity="0.9"/>
-    </marker>
-  </defs>
-  <!-- Steps -->
-  <g font-family="JetBrains Mono, monospace" font-size="9" text-anchor="middle">
-    <rect x="10" y="25" width="95" height="70" rx="7" fill="#1a1a1a" stroke="#444"/>
-    <text x="57" y="52" font-size="16">📧</text>
-    <text x="57" y="70" fill="#fff" font-size="9" font-weight="600">Phishing</text>
-    <text x="57" y="83" fill="#666">Email arrives</text>
-    <line x1="107" y1="60" x2="118" y2="60" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#ra)"/>
+# ── Phishing flow ─────────────────────────────────────────────────────────────
+PHISHING_FLOW = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">PHISHING ATTACK FLOW</text>'
+    '<rect x="14" y="40" width="106" height="64" rx="5" fill="rgba(160,40,40,0.07)" stroke="#803030" stroke-width="1.5"/>'
+    '<text x="67" y="62" text-anchor="middle" font-size="11" font-weight="600" fill="#aa4040">Attacker</text>'
+    '<text x="67" y="78" text-anchor="middle" font-size="9" fill="#888">Crafts convincing</text>'
+    '<text x="67" y="93" text-anchor="middle" font-size="9" fill="#888">spoofed email</text>'
+    '<line x1="122" y1="72" x2="138" y2="72" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<rect x="140" y="40" width="116" height="64" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2a2a2a" stroke-width="1"/>'
+    '<text x="198" y="62" text-anchor="middle" font-size="11" font-weight="500" fill="#bbb">Fake email</text>'
+    '<text x="198" y="78" text-anchor="middle" font-size="9" fill="#666">Spoofed sender</text>'
+    '<text x="198" y="93" text-anchor="middle" font-size="9" fill="#666">Urgent message</text>'
+    '<line x1="258" y1="72" x2="274" y2="72" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<rect x="276" y="40" width="116" height="64" rx="5" fill="rgba(255,255,255,0.02)" stroke="#2a2a2a" stroke-width="1"/>'
+    '<text x="334" y="62" text-anchor="middle" font-size="11" font-weight="500" fill="#bbb">Victim</text>'
+    '<text x="334" y="78" text-anchor="middle" font-size="9" fill="#666">Clicks the link</text>'
+    '<text x="334" y="93" text-anchor="middle" font-size="9" fill="#666">or opens file</text>'
+    '<line x1="394" y1="72" x2="410" y2="72" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<rect x="412" y="40" width="116" height="64" rx="5" fill="rgba(160,40,40,0.07)" stroke="#803030" stroke-width="1"/>'
+    '<text x="470" y="62" text-anchor="middle" font-size="11" font-weight="500" fill="#aa4040">Fake site</text>'
+    '<text x="470" y="78" text-anchor="middle" font-size="9" fill="#888">Identical to real login</text>'
+    '<text x="470" y="93" text-anchor="middle" font-size="9" fill="#888">Valid HTTPS certificate</text>'
+    '<line x1="530" y1="72" x2="546" y2="72" stroke="#444" stroke-width="1" marker-end="url(#arrow)"/>'
+    '<rect x="548" y="40" width="118" height="64" rx="5" fill="rgba(160,40,40,0.09)" stroke="#903030" stroke-width="1.5"/>'
+    '<text x="607" y="62" text-anchor="middle" font-size="11" font-weight="600" fill="#aa4040">Credentials</text>'
+    '<text x="607" y="78" text-anchor="middle" font-size="9" fill="#888">Sent to attacker</text>'
+    '<text x="607" y="93" text-anchor="middle" font-size="9" fill="#888">Account compromised</text>'
+    '<rect x="14" y="120" width="652" height="26" rx="4" fill="rgba(0,217,126,0.04)" stroke="rgba(0,217,126,0.14)" stroke-width="1"/>'
+    '<text x="340" y="137" text-anchor="middle" font-size="10" fill="#00d97e">'
+    'Defence: Check actual sender domain · Verify SPF/DKIM/DMARC · Hardware keys are phishing-proof</text>',
+    164, 'Phishing — password strength is irrelevant because the victim types it directly into the attacker form')
 
-    <rect x="120" y="25" width="95" height="70" rx="7" fill="#1a1a1a" stroke="#444"/>
-    <text x="167" y="52" font-size="16">📎</text>
-    <text x="167" y="70" fill="#fff" font-size="9" font-weight="600">Attachment</text>
-    <text x="167" y="83" fill="#666">User opens it</text>
-    <line x1="217" y1="60" x2="228" y2="60" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#ra)"/>
+# ── Ransomware chain ──────────────────────────────────────────────────────────
+RANSOMWARE = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">RANSOMWARE INFECTION CHAIN</text>'
+    + ''.join([
+        f'<rect x="{10+i*108}" y="36" width="96" height="66" rx="5" fill="rgba(255,255,255,0.02)" '
+        f'stroke="{"#903030" if i==5 else "#2a2a2a"}" stroke-width="{"1.5" if i==5 else "1"}"/>'
+        f'<text x="{58+i*108}" y="58" text-anchor="middle" font-size="11" font-weight="{"600" if i==5 else "500"}" '
+        f'fill="{"#aa4040" if i==5 else "#bbb"}">{["Phishing","Execute","Persist","Exfiltrate","Encrypt","Ransom"][i]}</text>'
+        f'<text x="{58+i*108}" y="74" text-anchor="middle" font-size="9" fill="{"#888" if i>=4 else "#666"}">'
+        f'{["Email with attachment","User opens — macro runs","Registry key / task","Copy data out first","Lock all files","Pay or lose data"][i]}</text>'
+        f'<text x="{58+i*108}" y="89" text-anchor="middle" font-size="9" fill="#444">'
+        f'{["Convincing pretext","Payload downloads","Survives reboots","Double extortion","Key withheld","Avg $1.5M demand"][i]}</text>'
+        + (f'<line x1="{108+i*108}" y1="69" x2="{116+i*108}" y2="69" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>' if i<5 else '')
+        for i in range(6)
+    ])
+    + '<rect x="10" y="118" width="660" height="26" rx="4" fill="rgba(0,217,126,0.04)" stroke="rgba(0,217,126,0.14)" stroke-width="1"/>'
+    '<text x="340" y="135" text-anchor="middle" font-size="10" fill="#00d97e">'
+    'Defence: Offline backups that cannot be encrypted · Email filtering · Disable macros · EDR · Patching</text>',
+    150, 'Ransomware — modern groups steal data before encrypting for double extortion leverage')
 
-    <rect x="230" y="25" width="95" height="70" rx="7" fill="#1a1a1a" stroke="#444"/>
-    <text x="277" y="52" font-size="16">⚙️</text>
-    <text x="277" y="70" fill="#fff" font-size="9" font-weight="600">Macro runs</text>
-    <text x="277" y="83" fill="#666">Downloads payload</text>
-    <line x1="327" y1="60" x2="338" y2="60" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#ra)"/>
+# ── IR lifecycle ──────────────────────────────────────────────────────────────
+IR_LIFECYCLE = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">INCIDENT RESPONSE LIFECYCLE</text>'
+    + ''.join([
+        f'<rect x="{10+i*108}" y="36" width="96" height="64" rx="5" fill="rgba(255,255,255,0.02)" '
+        f'stroke="{"#00d97e" if i==5 else "#903030" if i==2 else "#2a2a2a"}" '
+        f'stroke-width="{"1.5" if i in [2,5] else "1"}"/>'
+        f'<text x="{58+i*108}" y="57" text-anchor="middle" font-size="11" font-weight="{"600" if i in [2,5] else "500"}" '
+        f'fill="{"#00d97e" if i==5 else "#aa4040" if i==2 else "#bbb"}">'
+        f'{["Prepare","Detect","Contain","Eradicate","Recover","Learn"][i]}</text>'
+        f'<text x="{58+i*108}" y="73" text-anchor="middle" font-size="9" fill="{"#888" if i in [2,5] else "#666"}">'
+        f'{["Policies & tools","SIEM & alerts","Isolate systems","Remove attacker","Restore systems","Post-incident"][i]}</text>'
+        f'<text x="{58+i*108}" y="88" text-anchor="middle" font-size="9" fill="#444">'
+        f'{["Training & plans","User reports","Stop the spread","Close entry point","Verify clean","Review & improve"][i]}</text>'
+        + (f'<line x1="{108+i*108}" y1="68" x2="{116+i*108}" y2="68" stroke="#2a2a2a" stroke-width="1" marker-end="url(#arrow)"/>' if i<5 else '')
+        for i in range(6)
+    ])
+    + '<text x="340" y="126" text-anchor="middle" font-size="10" fill="#444">'
+    'GDPR 72-hour notification clock starts at containment — not when the full investigation is complete</text>',
+    140, 'Incident response — six phases from preparation through to lessons learned and improved defences')
 
-    <rect x="340" y="25" width="95" height="70" rx="7" fill="#1a1a1a" stroke="#444"/>
-    <text x="387" y="52" font-size="16">🔐</text>
-    <text x="387" y="70" fill="#fff" font-size="9" font-weight="600">Encrypt</text>
-    <text x="387" y="83" fill="#666">Files locked</text>
-    <line x1="437" y1="60" x2="448" y2="60" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#ra)"/>
-
-    <rect x="450" y="25" width="95" height="70" rx="7" fill="#1a1a1a" stroke="#444"/>
-    <text x="497" y="52" font-size="16">📡</text>
-    <text x="497" y="70" fill="#fff" font-size="9" font-weight="600">Exfiltrate</text>
-    <text x="497" y="83" fill="#666">Data stolen too</text>
-    <line x1="547" y1="60" x2="558" y2="60" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#ra)"/>
-
-    <rect x="560" y="25" width="150" height="70" rx="7" fill="#1a1a1a" stroke="#e05c5c" stroke-width="1.5"/>
-    <text x="635" y="52" font-size="16">💰</text>
-    <text x="635" y="70" fill="#e05c5c" font-size="9" font-weight="600">Ransom Demand</text>
-    <text x="635" y="83" fill="#888">Pay or lose data</text>
-  </g>
-</svg>
-""", "Ransomware infection chain — from phishing email to ransom demand")
-
-# ── Authentication Factors (Lesson B5 / C1) ──────────────────────────────────
-AUTH_FACTORS_SVG = diagram("""
-<svg viewBox="0 0 600 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <!-- Factor 1 -->
-  <rect x="20" y="20" width="170" height="100" rx="8" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-  <text x="105" y="50" text-anchor="middle" font-size="24">🧠</text>
-  <text x="105" y="73" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e">Something you KNOW</text>
-  <text x="105" y="90" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">Password · PIN</text>
-  <text x="105" y="106" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555">Can be phished or stolen</text>
-  <!-- Factor 2 -->
-  <rect x="215" y="20" width="170" height="100" rx="8" fill="#1a1a1a" stroke="#00d97e" stroke-width="1.5"/>
-  <text x="300" y="50" text-anchor="middle" font-size="24">📱</text>
-  <text x="300" y="73" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e">Something you HAVE</text>
-  <text x="300" y="90" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">Phone · Hardware key</text>
-  <text x="300" y="106" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#00d97e">Strongest with FIDO2 key</text>
-  <!-- Factor 3 -->
-  <rect x="410" y="20" width="170" height="100" rx="8" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
-  <text x="495" y="50" text-anchor="middle" font-size="24">👆</text>
-  <text x="495" y="73" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#00d97e">Something you ARE</text>
-  <text x="495" y="90" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">Fingerprint · Face ID</text>
-  <text x="495" y="106" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#555">Can't be reset if stolen</text>
-  <!-- MFA = combine any 2 -->
-  <text x="300" y="133" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">MFA = any 2 factors combined → blocks 99.9% of account attacks</text>
-</svg>
-""", "The three authentication factors — MFA combines two or more for strong identity verification")
-
-# ── Shared Responsibility Model (Lesson D1) ──────────────────────────────────
-SHARED_RESP_SVG = diagram("""
-<svg viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <!-- Header row -->
-  <rect x="10" y="10" width="180" height="35" rx="5" fill="#111" stroke="#333"/>
-  <text x="100" y="32" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#666">RESPONSIBILITY</text>
-  <rect x="200" y="10" width="140" height="35" rx="5" fill="#111" stroke="#444"/>
-  <text x="270" y="32" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#aaa">IaaS (EC2)</text>
-  <rect x="350" y="10" width="140" height="35" rx="5" fill="#111" stroke="#444"/>
-  <text x="420" y="32" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#aaa">PaaS</text>
-  <rect x="500" y="10" width="150" height="35" rx="5" fill="#111" stroke="#444"/>
-  <text x="575" y="32" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#aaa">SaaS (M365)</text>
-
-  <!-- Rows -->
-  <g font-family="sans-serif" font-size="10" text-anchor="middle">
-    <!-- Data -->
-    <rect x="10" y="50" width="180" height="28" rx="0" fill="#1a1a1a" stroke="#222"/>
-    <text x="100" y="68" fill="#ccc">Data &amp; Access</text>
-    <rect x="200" y="50" width="140" height="28" fill="#0a2a0a" stroke="#222"/>
-    <text x="270" y="68" fill="#00d97e">Customer</text>
-    <rect x="350" y="50" width="140" height="28" fill="#0a2a0a" stroke="#222"/>
-    <text x="420" y="68" fill="#00d97e">Customer</text>
-    <rect x="500" y="50" width="150" height="28" fill="#0a2a0a" stroke="#222"/>
-    <text x="575" y="68" fill="#00d97e">Customer</text>
-    <!-- App -->
-    <rect x="10" y="80" width="180" height="28" rx="0" fill="#1a1a1a" stroke="#222"/>
-    <text x="100" y="98" fill="#ccc">Application</text>
-    <rect x="200" y="80" width="140" height="28" fill="#0a2a0a" stroke="#222"/>
-    <text x="270" y="98" fill="#00d97e">Customer</text>
-    <rect x="350" y="80" width="140" height="28" fill="#0a2a0a" stroke="#222"/>
-    <text x="420" y="98" fill="#00d97e">Customer</text>
-    <rect x="500" y="80" width="150" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="575" y="98" fill="#888">Provider</text>
-    <!-- OS -->
-    <rect x="10" y="110" width="180" height="28" rx="0" fill="#1a1a1a" stroke="#222"/>
-    <text x="100" y="128" fill="#ccc">OS &amp; Runtime</text>
-    <rect x="200" y="110" width="140" height="28" fill="#0a2a0a" stroke="#222"/>
-    <text x="270" y="128" fill="#00d97e">Customer</text>
-    <rect x="350" y="110" width="140" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="420" y="128" fill="#888">Provider</text>
-    <rect x="500" y="110" width="150" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="575" y="128" fill="#888">Provider</text>
-    <!-- Infra -->
-    <rect x="10" y="140" width="180" height="28" rx="0" fill="#1a1a1a" stroke="#222"/>
-    <text x="100" y="158" fill="#ccc">Infrastructure</text>
-    <rect x="200" y="140" width="140" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="270" y="158" fill="#888">Provider</text>
-    <rect x="350" y="140" width="140" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="420" y="158" fill="#888">Provider</text>
-    <rect x="500" y="140" width="150" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="575" y="158" fill="#888">Provider</text>
-    <!-- Physical -->
-    <rect x="10" y="170" width="180" height="28" rx="0" fill="#1a1a1a" stroke="#222"/>
-    <text x="100" y="188" fill="#ccc">Physical Security</text>
-    <rect x="200" y="170" width="140" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="270" y="188" fill="#888">Provider</text>
-    <rect x="350" y="170" width="140" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="420" y="188" fill="#888">Provider</text>
-    <rect x="500" y="170" width="150" height="28" fill="#1a2a1a" stroke="#222"/>
-    <text x="575" y="188" fill="#888">Provider</text>
-  </g>
-</svg>
-""", "Cloud shared responsibility model — what you secure vs what your cloud provider secures")
-
-# ── Risk Formula (Lesson A4) ──────────────────────────────────────────────────
-RISK_FORMULA_SVG = diagram("""
-<svg viewBox="0 0 600 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <!-- Risk = -->
-  <rect x="20" y="20" width="100" height="60" rx="8" fill="#1a1a1a" stroke="#00d97e" stroke-width="2"/>
-  <text x="70" y="48" text-anchor="middle" font-family="Syne, sans-serif" font-size="13" fill="#00d97e" font-weight="700">RISK</text>
-  <text x="70" y="66" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#555">= T × V × I</text>
-  <text x="140" y="55" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="20" fill="#444">=</text>
-  <!-- Threat -->
-  <rect x="158" y="20" width="120" height="60" rx="8" fill="#1a1a1a" stroke="#333"/>
-  <text x="218" y="45" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#fff" font-weight="600">THREAT</text>
-  <text x="218" y="62" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#666">Who might attack?</text>
-  <text x="288" y="55" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="20" fill="#444">×</text>
-  <!-- Vulnerability -->
-  <rect x="302" y="20" width="140" height="60" rx="8" fill="#1a1a1a" stroke="#333"/>
-  <text x="372" y="45" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#fff" font-weight="600">VULNERABILITY</text>
-  <text x="372" y="62" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#666">What weakness exists?</text>
-  <text x="452" y="55" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="20" fill="#444">×</text>
-  <!-- Impact -->
-  <rect x="466" y="20" width="114" height="60" rx="8" fill="#1a1a1a" stroke="#333"/>
-  <text x="523" y="45" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#fff" font-weight="600">IMPACT</text>
-  <text x="523" y="62" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#666">How bad if it happens?</text>
-</svg>
-""", "Risk formula — Risk = Threat × Vulnerability × Impact. If any factor is zero, risk is zero")
-
-# ── MITM / Sniffing on open WiFi (Lesson B2) ─────────────────────────────────
-WIFI_SNIFF_SVG = diagram("""
-<svg viewBox="0 0 600 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="wa" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#e05c5c" opacity="0.8"/>
-    </marker>
-  </defs>
-  <!-- User on laptop -->
-  <rect x="20" y="55" width="110" height="65" rx="7" fill="#1a1a1a" stroke="#333"/>
-  <text x="75" y="82" text-anchor="middle" font-size="20">💻</text>
-  <text x="75" y="100" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#fff">User</text>
-  <text x="75" y="114" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">Coffee shop WiFi</text>
-  <!-- WiFi signal waves -->
-  <path d="M145,88 Q165,70 185,88" fill="none" stroke="#444" stroke-width="1.5"/>
-  <path d="M145,78 Q172,55 200,78" fill="none" stroke="#444" stroke-width="1" opacity="0.5"/>
-  <!-- Rogue AP -->
-  <rect x="205" y="35" width="110" height="65" rx="7" fill="#1a1a1a" stroke="#e05c5c" stroke-width="1.5"/>
-  <text x="260" y="62" text-anchor="middle" font-size="20">📡</text>
-  <text x="260" y="82" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#e05c5c">Rogue AP</text>
-  <text x="260" y="96" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#888">"Free WiFi"</text>
-  <!-- Attacker reads -->
-  <rect x="205" y="110" width="110" height="45" rx="7" fill="#1a1a1a" stroke="#e05c5c" stroke-width="1"/>
-  <text x="260" y="130" text-anchor="middle" font-size="14">🕵️</text>
-  <text x="260" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#e05c5c">Reads all traffic</text>
-  <line x1="260" y1="102" x2="260" y2="108" stroke="#e05c5c" stroke-width="1.5" marker-end="url(#wa)"/>
-  <!-- Real AP -->
-  <rect x="380" y="55" width="110" height="65" rx="7" fill="#1a1a1a" stroke="#444"/>
-  <text x="435" y="82" text-anchor="middle" font-size="20">🌐</text>
-  <text x="435" y="100" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#aaa">Internet</text>
-  <text x="435" y="114" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666">Traffic forwarded</text>
-  <!-- Arrows -->
-  <line x1="318" y1="70" x2="378" y2="80" stroke="#555" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#wa)"/>
-  <!-- VPN defence -->
-  <rect x="490" y="55" width="100" height="65" rx="7" fill="#0a1a0a" stroke="#00d97e" stroke-width="1.5"/>
-  <text x="540" y="82" text-anchor="middle" font-size="20">🔒</text>
-  <text x="540" y="100" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">VPN</text>
-  <text x="540" y="114" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#00d97e">Encrypts all traffic</text>
-  <text x="300" y="155" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#00d97e">Defence: Use VPN on public Wi-Fi · HTTPS only · Avoid sensitive activity</text>
-</svg>
-""", "Evil twin / WiFi sniffing — attacker intercepts all traffic on an unsecured network")
-
-# ── Incident Response Lifecycle (Lesson C5) ──────────────────────────────────
-IR_LIFECYCLE_SVG = diagram("""
-<svg viewBox="0 0 640 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
-  <defs>
-    <marker id="ira" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L6,3 z" fill="#00d97e" opacity="0.8"/>
-    </marker>
-  </defs>
-  <g font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle">
-    <!-- Prepare -->
-    <rect x="10" y="30" width="95" height="75" rx="7" fill="#1a1a1a" stroke="#333"/>
-    <text x="57" y="57" font-size="16">📋</text>
-    <text x="57" y="75" fill="#fff" font-weight="600">Prepare</text>
-    <text x="57" y="89" fill="#666">Policies</text>
-    <text x="57" y="100" fill="#666">Training</text>
-    <line x1="107" y1="67" x2="118" y2="67" stroke="#00d97e" stroke-width="1.5" marker-end="url(#ira)"/>
-    <!-- Detect -->
-    <rect x="120" y="30" width="95" height="75" rx="7" fill="#1a1a1a" stroke="#333"/>
-    <text x="167" y="57" font-size="16">🔍</text>
-    <text x="167" y="75" fill="#fff" font-weight="600">Detect</text>
-    <text x="167" y="89" fill="#666">SIEM alerts</text>
-    <text x="167" y="100" fill="#666">User reports</text>
-    <line x1="217" y1="67" x2="228" y2="67" stroke="#00d97e" stroke-width="1.5" marker-end="url(#ira)"/>
-    <!-- Contain -->
-    <rect x="230" y="30" width="95" height="75" rx="7" fill="#1a1a1a" stroke="#e05c5c" stroke-width="1.5"/>
-    <text x="277" y="57" font-size="16">🛑</text>
-    <text x="277" y="75" fill="#e05c5c" font-weight="600">Contain</text>
-    <text x="277" y="89" fill="#888">Isolate systems</text>
-    <text x="277" y="100" fill="#888">Stop spread</text>
-    <line x1="327" y1="67" x2="338" y2="67" stroke="#00d97e" stroke-width="1.5" marker-end="url(#ira)"/>
-    <!-- Eradicate -->
-    <rect x="340" y="30" width="95" height="75" rx="7" fill="#1a1a1a" stroke="#333"/>
-    <text x="387" y="57" font-size="16">🧹</text>
-    <text x="387" y="75" fill="#fff" font-weight="600">Eradicate</text>
-    <text x="387" y="89" fill="#666">Remove malware</text>
-    <text x="387" y="100" fill="#666">Close entry point</text>
-    <line x1="437" y1="67" x2="448" y2="67" stroke="#00d97e" stroke-width="1.5" marker-end="url(#ira)"/>
-    <!-- Recover -->
-    <rect x="450" y="30" width="95" height="75" rx="7" fill="#1a1a1a" stroke="#333"/>
-    <text x="497" y="57" font-size="16">🔄</text>
-    <text x="497" y="75" fill="#fff" font-weight="600">Recover</text>
-    <text x="497" y="89" fill="#666">Restore systems</text>
-    <text x="497" y="100" fill="#666">Verify clean</text>
-    <line x1="547" y1="67" x2="558" y2="67" stroke="#00d97e" stroke-width="1.5" marker-end="url(#ira)"/>
-    <!-- Lessons -->
-    <rect x="560" y="30" width="70" height="75" rx="7" fill="#1a1a1a" stroke="#00d97e" stroke-width="1.5"/>
-    <text x="595" y="57" font-size="16">📝</text>
-    <text x="595" y="75" fill="#00d97e" font-weight="600">Learn</text>
-    <text x="595" y="89" fill="#888">Post-incident</text>
-    <text x="595" y="100" fill="#888">review</text>
-  </g>
-</svg>
-""", "Incident response lifecycle — the six phases from preparation through to lessons learned")
+# ── Shared responsibility ──────────────────────────────────────────────────────
+SHARED_RESP = d(
+    '<text x="340" y="24" text-anchor="middle" font-size="10" fill="#444" letter-spacing="1">CLOUD SHARED RESPONSIBILITY</text>'
+    '<rect x="20" y="36" width="170" height="26" rx="0" fill="rgba(255,255,255,0.02)" stroke="#1e1e1e"/>'
+    '<text x="105" y="54" text-anchor="middle" font-size="10" fill="#444">Layer</text>'
+    '<rect x="200" y="36" width="140" height="26" rx="0" fill="rgba(255,255,255,0.02)" stroke="#1e1e1e"/>'
+    '<text x="270" y="54" text-anchor="middle" font-size="10" fill="#888">IaaS (e.g. EC2)</text>'
+    '<rect x="350" y="36" width="140" height="26" rx="0" fill="rgba(255,255,255,0.02)" stroke="#1e1e1e"/>'
+    '<text x="420" y="54" text-anchor="middle" font-size="10" fill="#888">PaaS</text>'
+    '<rect x="500" y="36" width="160" height="26" rx="0" fill="rgba(255,255,255,0.02)" stroke="#1e1e1e"/>'
+    '<text x="580" y="54" text-anchor="middle" font-size="10" fill="#888">SaaS (e.g. M365)</text>'
+    + ''.join([
+        f'<rect x="20" y="{68+i*30}" width="170" height="30" rx="0" fill="rgba(255,255,255,0.015)" stroke="#1a1a1a"/>'
+        f'<text x="105" y="{87+i*30}" text-anchor="middle" font-size="10" fill="#888">'
+        f'{["Data and access","Applications","OS and runtime","Infrastructure","Physical security"][i]}</text>'
+        + ''.join([
+            f'<rect x="{200+j*150}" y="{68+i*30}" width="{140 if j<2 else 160}" height="30" rx="0" '
+            f'fill="{"rgba(0,217,126,0.07)" if [True,True,True,False,False][i] and j==0 or [True,True,False,False,False][i] and j==1 or [True,False,False,False,False][i] and j==2 else "rgba(255,255,255,0.01)"}" '
+            f'stroke="#1a1a1a"/>'
+            f'<text x="{270+j*150}" y="{87+i*30}" text-anchor="middle" font-size="10" '
+            f'font-weight="{"600" if [True,True,True,False,False][i] and j==0 or [True,True,False,False,False][i] and j==1 or [True,False,False,False,False][i] and j==2 else "400"}" '
+            f'fill="{"#00d97e" if [True,True,True,False,False][i] and j==0 or [True,True,False,False,False][i] and j==1 or [True,False,False,False,False][i] and j==2 else "#444"}">'
+            f'{"Customer" if [True,True,True,False,False][i] and j==0 or [True,True,False,False,False][i] and j==1 or [True,False,False,False,False][i] and j==2 else "Provider"}</text>'
+            for j in range(3)
+        ])
+        for i in range(5)
+    ])
+    + '<text x="340" y="242" text-anchor="middle" font-size="10" fill="#444">'
+    'Most cloud breaches exploit customer responsibility — misconfigured buckets and overly permissive IAM roles</text>',
+    256, 'Cloud shared responsibility — your security boundary depends on which service model you are using')
 
 
-# ── Lesson content patches ───────────────────────────────────────────────────
-
-PATCHES = {
-    "gic-a2": {
-        "insert_after": "<h2>The attack lifecycle</h2>",
-        "insert": ATTACK_LIFECYCLE_SVG,
-    },
-    "gic-a3": {
-        "insert_after": "<h2>The foundation of security thinking</h2>",
-        "insert": CIA_TRIAD_SVG,
-    },
-    "gic-a4": {
-        "insert_after": "<h2>How security professionals think about risk</h2>",
-        "insert": RISK_FORMULA_SVG,
-    },
-    "gic-a5": {
-        "insert_after": "<h2>Why no single control is enough</h2>",
-        "insert": DEFENCE_DEPTH_SVG,
-    },
-    "gic-b1": {
-        "insert_after": "<h2>Network security concepts</h2>",
-        "insert": NETWORK_SEG_SVG,
-    },
-    "gic-b2": {
-        "insert_after": "<h2>TCP and UDP — the two main transport protocols</h2>",
-        "insert": TCP_HANDSHAKE_SVG,
-    },
-    "gic-b3": {
-        "insert_after": "<h2>How DNS resolution works — step by step</h2>",
-        "insert": DNS_RESOLUTION_SVG,
-    },
-    "gic-b5": {
-        "insert_after": "<h2>Authentication factors</h2>",
-        "insert": AUTH_FACTORS_SVG,
-    },
-    "gic-c2": {
-        "insert_after": "<h2>Why email is the primary attack vector</h2>",
-        "insert": PHISHING_FLOW_SVG,
-    },
-    "gic-c4": {
-        "insert_after": "<h2>How infections happen — delivery mechanisms</h2>",
-        "insert": RANSOMWARE_SVG,
-    },
-    "gic-c5": {
-        "insert_after": "<h2>Incident response — the lifecycle</h2>",
-        "insert": IR_LIFECYCLE_SVG,
-    },
-    "gic-d1": {
-        "insert_after": "<h2>The shared responsibility model</h2>",
-        "insert": SHARED_RESP_SVG,
-    },
-}
-
-# Also add WiFi sniffing to B2 (second diagram)
-WIFI_PATCH = {
-    "gic-b2": {
-        "insert_after": "<h2>How to read an IP address in a security context</h2>",
-        "insert": WIFI_SNIFF_SVG,
-    }
-}
-
-# MITM diagram into B1
-MITM_PATCH = {
-    "gic-b1": {
-        "insert_after": "<h2>What a network is</h2>",
-        "insert": MITM_SVG,
-    }
-}
-
-
-def apply_patches(body, patches_list):
-    for patch in patches_list:
-        marker = patch["insert_after"]
-        insert = patch["insert"]
-        if marker in body:
-            # Insert after the closing </p> or </h2> that follows the marker
-            idx = body.find(marker)
-            # Find end of the heading tag
-            end_tag_idx = body.find('>', idx) + 1
-            body = body[:end_tag_idx] + insert + body[end_tag_idx:]
-    return body
+PATCHES = [
+    ("gic-a2", "<h2>The attack lifecycle</h2>",                           KILL_CHAIN),
+    ("gic-a3", "<h2>The foundation of security thinking</h2>",            CIA_TRIAD),
+    ("gic-a4", "<h2>How security professionals think about risk</h2>",    RISK_FORMULA),
+    ("gic-a5", "<h2>Why no single control is enough</h2>",                DEFENCE_DEPTH),
+    ("gic-b1", "<h2>What a network is</h2>",                              MITM),
+    ("gic-b1", "<h2>Network security concepts</h2>",                      NETWORK_SEG),
+    ("gic-b2", "<h2>TCP and UDP — the two main transport protocols</h2>", TCP_HANDSHAKE),
+    ("gic-b3", "<h2>How DNS resolution works — step by step</h2>",       DNS_RESOLUTION),
+    ("gic-b5", "<h2>Authentication factors</h2>",                         AUTH_FACTORS),
+    ("gic-c2", "<h2>Why email is the primary attack vector</h2>",         PHISHING_FLOW),
+    ("gic-c4", "<h2>How infections happen — delivery mechanisms</h2>",    RANSOMWARE),
+    ("gic-c5", "<h2>Incident response — the lifecycle</h2>",              IR_LIFECYCLE),
+    ("gic-d1", "<h2>The shared responsibility model</h2>",                SHARED_RESP),
+]
 
 
 def seed():
     from app.models import CourseTopic
     from app.extensions import db
 
-    all_patches = {}
-
-    # Merge all patch dicts
-    for slug, patch in PATCHES.items():
-        all_patches.setdefault(slug, []).append(patch)
-    for slug, patch in WIFI_PATCH.items():
-        all_patches.setdefault(slug, []).append(patch)
-    for slug, patch in MITM_PATCH.items():
-        all_patches.setdefault(slug, []).append(patch)
-
-    updated = 0
-    for slug, patches in all_patches.items():
+    updated = set()
+    for slug, marker, diagram in PATCHES:
         topic = CourseTopic.query.filter_by(slug=slug).first()
         if not topic:
             print(f"  SKIP {slug} — not found")
             continue
-        topic.body = apply_patches(topic.body, patches)
-        updated += 1
-        print(f"  patched {slug} — {len(patches)} diagram(s)")
+        if marker not in topic.body:
+            print(f"  WARN {slug} — marker not found: {marker[:50]}")
+            continue
+        idx = topic.body.find(marker)
+        end = topic.body.find('>', idx) + 1
+        topic.body = topic.body[:end] + diagram + topic.body[end:]
+        updated.add(slug)
+        print(f"  patched {slug}")
 
     db.session.commit()
-    print(f"\nDone — {updated} lessons updated with SVG diagrams.")
+    print(f"\nDone — {len(updated)} lessons updated.")
 
 
 if __name__ == "__main__":
-    import sys
-    import os
+    import sys, os
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from app import create_app
     app = create_app()
