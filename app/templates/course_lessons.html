@@ -25,9 +25,17 @@
       </div>
       <div class="cl-stat-div"></div>
       <div class="cl-stat">
-        <span class="cl-stat-num">∞</span>
-        <span class="cl-stat-label">Access</span>
+        <span class="cl-stat-num" id="completed-count">0</span>
+        <span class="cl-stat-label">Completed</span>
       </div>
+    </div>
+
+    <!-- Overall progress bar -->
+    <div class="cl-overall-progress">
+      <div class="cl-overall-bar">
+        <div class="cl-overall-fill" id="cl-overall-fill" style="width: 0%"></div>
+      </div>
+      <span class="cl-overall-label" id="cl-overall-label">0 of 20 lessons read</span>
     </div>
   </div>
 
@@ -46,7 +54,7 @@
       </div>
       <div class="cl-lessons">
         {% for topic in topics %}
-        <a class="cl-lesson" href="{{ url_for('main.course_lesson', slug=topic.slug) }}">
+        <a class="cl-lesson" href="{{ url_for('main.course_lesson', slug=topic.slug) }}" data-slug="{{ topic.slug }}">
           <span class="cl-num">{{ '%02d' % topic.lesson_number }}</span>
           <div class="cl-lesson-body">
             <div class="cl-lesson-title">{{ topic.title }}</div>
@@ -57,6 +65,9 @@
             </div>
             {% endif %}
           </div>
+          <span class="cl-check" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
           <span class="cl-arrow">→</span>
         </a>
         {% endfor %}
@@ -69,13 +80,12 @@
 </div>
 
 <style>
-/* ── Header ──────────────────────────────────────────── */
+/* ── Header ─────────────────────────────────────────── */
 .cl-header {
   padding: 40px 0 44px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 36px;
 }
-
 .cl-header-eyebrow {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
@@ -84,7 +94,6 @@
   color: var(--green);
   margin-bottom: 10px;
 }
-
 .cl-header-title {
   font-family: 'Syne', 'Space Grotesk', sans-serif;
   font-size: clamp(30px, 4vw, 42px);
@@ -93,27 +102,19 @@
   color: var(--text);
   margin: 0 0 10px;
 }
-
 .cl-header-sub {
   font-size: 14.5px;
   color: var(--text-3);
   margin: 0 0 24px;
-  line-height: 1.6;
 }
-
 .cl-header-stats {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+  margin-bottom: 20px;
 }
-
-.cl-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
+.cl-stat { display: flex; flex-direction: column; gap: 2px; }
 .cl-stat-num {
   font-family: 'Syne', 'Space Grotesk', sans-serif;
   font-size: 20px;
@@ -122,7 +123,6 @@
   letter-spacing: -0.5px;
   line-height: 1;
 }
-
 .cl-stat-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px;
@@ -130,32 +130,48 @@
   letter-spacing: 0.5px;
   color: var(--text-3);
 }
+.cl-stat-div { width: 1px; height: 28px; background: var(--border); }
 
-.cl-stat-div {
-  width: 1px;
-  height: 28px;
+/* Overall progress */
+.cl-overall-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cl-overall-bar {
+  flex: 1;
+  max-width: 300px;
+  height: 4px;
   background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cl-overall-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--green), rgba(0,217,126,0.6));
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.cl-overall-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
 }
 
-/* ── Sections ──────────────────────────────────────────── */
+/* ── Sections ─────────────────────────────────────────── */
 .cl-sections {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding-bottom: 60px;
 }
-
 .cl-section {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition: border-color 0.2s;
 }
-
-.cl-section:hover {
-  border-color: rgba(0,217,126,0.2);
-}
-
+.cl-section:hover { border-color: rgba(0,217,126,0.2); }
 .cl-section-head {
   display: flex;
   align-items: center;
@@ -164,13 +180,7 @@
   background: var(--bg-3);
   border-bottom: 1px solid var(--border);
 }
-
-.cl-section-head-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
+.cl-section-head-left { display: flex; align-items: center; gap: 12px; }
 .cl-section-tag {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px;
@@ -181,15 +191,12 @@
   color: var(--green);
   letter-spacing: 0.5px;
 }
-
 .cl-section-name {
   font-family: 'Syne', 'Space Grotesk', sans-serif;
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
-  letter-spacing: -0.2px;
 }
-
 .cl-section-count {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9.5px;
@@ -198,9 +205,8 @@
   letter-spacing: 0.4px;
 }
 
-/* ── Lessons ──────────────────────────────────────────── */
+/* ── Lessons ─────────────────────────────────────────── */
 .cl-lessons { display: grid; }
-
 .cl-lesson {
   display: flex;
   align-items: center;
@@ -212,23 +218,20 @@
   background: var(--bg-2);
   position: relative;
 }
-
 .cl-lesson:last-child { border-bottom: none; }
-
 .cl-lesson::after {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  left: 0; top: 0; bottom: 0;
   width: 3px;
   background: var(--green);
   opacity: 0;
   transition: opacity 0.15s;
 }
-
 .cl-lesson:hover { background: var(--bg-3); }
 .cl-lesson:hover::after { opacity: 1; }
+.cl-lesson.completed { background: rgba(0,217,126,0.02); }
+.cl-lesson.completed::after { opacity: 0.4; }
 
 .cl-num {
   font-family: 'JetBrains Mono', monospace;
@@ -238,11 +241,10 @@
   width: 24px;
   opacity: 0.7;
 }
-
 .cl-lesson:hover .cl-num { opacity: 1; }
+.cl-lesson.completed .cl-num { opacity: 1; }
 
 .cl-lesson-body { flex: 1; min-width: 0; }
-
 .cl-lesson-title {
   font-size: 14px;
   font-weight: 500;
@@ -252,6 +254,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.cl-lesson.completed .cl-lesson-title { color: var(--text-2); }
 
 .cl-lesson-lab {
   display: flex;
@@ -264,13 +267,17 @@
   letter-spacing: 0.4px;
   opacity: 0.8;
 }
-
 .cl-lab-dot {
-  width: 5px;
-  height: 5px;
+  width: 5px; height: 5px;
   border-radius: 50%;
   background: var(--green);
   flex-shrink: 0;
+}
+
+.cl-check {
+  color: var(--green);
+  flex-shrink: 0;
+  opacity: 0.9;
 }
 
 .cl-arrow {
@@ -279,10 +286,45 @@
   flex-shrink: 0;
   transition: transform 0.15s, color 0.15s;
 }
-
-.cl-lesson:hover .cl-arrow {
-  transform: translateX(3px);
-  color: var(--green);
-}
+.cl-lesson:hover .cl-arrow { transform: translateX(3px); color: var(--green); }
+.cl-lesson.completed .cl-arrow { display: none; }
 </style>
+
+<script>
+var COMPLETED_KEY = 'bliztech_completed';
+
+function getCompleted() {
+  try { return JSON.parse(localStorage.getItem(COMPLETED_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+
+function applyCompletionToList() {
+  var completed = getCompleted();
+  var count = 0;
+
+  document.querySelectorAll('.cl-lesson').forEach(function(el) {
+    var slug = el.getAttribute('data-slug');
+    if (completed[slug]) {
+      el.classList.add('completed');
+      var check = el.querySelector('.cl-check');
+      var arrow = el.querySelector('.cl-arrow');
+      if (check) check.style.display = 'flex';
+      if (arrow) arrow.style.display = 'none';
+      count++;
+    }
+  });
+
+  // Update stats
+  var countEl = document.getElementById('completed-count');
+  if (countEl) countEl.textContent = count;
+
+  var fill = document.getElementById('cl-overall-fill');
+  if (fill) fill.style.width = Math.round(count / 20 * 100) + '%';
+
+  var label = document.getElementById('cl-overall-label');
+  if (label) label.textContent = count + ' of 20 lessons read';
+}
+
+document.addEventListener('DOMContentLoaded', applyCompletionToList);
+</script>
 {% endblock %}
