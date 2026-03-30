@@ -381,14 +381,14 @@ LESSONS = [
 
 <p><strong>The file system structure</strong></p>
 
-<p>Windows organises files in a hierarchical structure starting from drive letters (C:\, D:\ etc). Key locations to know:</p>
+<p>Windows organises files in a hierarchical structure starting from drive letters (C:&#92;, D:&#92; etc). Key locations to know:</p>
 
 <ul>
-<li><code>C:\Windows\System32</code> — core operating system files. Attackers frequently place malicious files here to blend in with legitimate system files (a technique called masquerading).</li>
-<li><code>C:\Users\[username]</code> — each user's profile directory, containing their documents, desktop, downloads, and application data</li>
-<li><code>C:\Users\[username]\AppData</code> — hidden folder containing application settings and data. Malware frequently uses AppData\Roaming or AppData\Local to store files because users have write access here without administrator privileges</li>
-<li><code>C:\Program Files</code> — installed applications (requires administrator rights to write)</li>
-<li><code>C:\Temp</code> and <code>%TEMP%</code> — temporary files. Malware frequently drops files here during execution</li>
+<li><code>C:&#92;Windows&#92;System32</code> — core operating system files. Attackers frequently place malicious files here to blend in with legitimate system files (a technique called masquerading).</li>
+<li><code>C:&#92;Users&#92;[username]</code> — each user's profile directory, containing their documents, desktop, downloads, and application data</li>
+<li><code>C:&#92;Users&#92;[username]&#92;AppData</code> — hidden folder containing application settings and data. Malware frequently uses AppData&#92;Roaming or AppData&#92;Local to store files because users have write access here without administrator privileges</li>
+<li><code>C:&#92;Program Files</code> — installed applications (requires administrator rights to write)</li>
+<li><code>C:&#92;Temp</code> and <code>%TEMP%</code> — temporary files. Malware frequently drops files here during execution</li>
 </ul>
 
 <p><strong>The Windows Registry</strong></p>
@@ -397,9 +397,9 @@ LESSONS = [
 
 <p>Key registry locations for security:</p>
 <ul>
-<li><code>HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run</code> — programs that start automatically when the current user logs in. Malware frequently creates entries here to establish persistence.</li>
-<li><code>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run</code> — programs that start for all users. Requires administrator access to modify.</li>
-<li><code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services</code> — installed Windows services. Malware installed as a service will appear here.</li>
+<li><code>HKEY_CURRENT_USER&#92;Software&#92;Microsoft&#92;Windows&#92;CurrentVersion&#92;Run</code> — programs that start automatically when the current user logs in. Malware frequently creates entries here to establish persistence.</li>
+<li><code>HKEY_LOCAL_MACHINE&#92;Software&#92;Microsoft&#92;Windows&#92;CurrentVersion&#92;Run</code> — programs that start for all users. Requires administrator access to modify.</li>
+<li><code>HKEY_LOCAL_MACHINE&#92;SYSTEM&#92;CurrentControlSet&#92;Services</code> — installed Windows services. Malware installed as a service will appear here.</li>
 </ul>
 
 <p><strong>Windows Event Logs</strong></p>
