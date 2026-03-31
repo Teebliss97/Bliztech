@@ -92,6 +92,7 @@
 
   </div>
 
+  <!-- HERO STATS CARD -->
   <div class="hero-mid">
     <div class="stats-card">
       <div class="stats-card-title">Platform stats</div>
@@ -130,6 +131,7 @@
     </div>
   </div>
 
+  <!-- HERO TERMINAL + HACKER ILLUSTRATION -->
   <div class="hero-right">
     <div class="terminal">
       <div class="terminal-bar">
@@ -154,7 +156,17 @@
         <div class="t-line" style="margin-top:12px;"><span class="t-prompt">$</span> <span class="t-cursor">&#9608;</span></div>
       </div>
     </div>
+
+    <!-- Hacker illustration -->
+    <div style="margin-top:16px;">
+      <object data="{{ url_for('static', filename='img/hacker-scan.svg') }}"
+              type="image/svg+xml"
+              style="width:100%;border-radius:12px;display:block;"
+              aria-label="Security scan illustration">
+      </object>
+    </div>
   </div>
+
 </section>
 
 <!-- FEATURES -->
