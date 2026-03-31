@@ -2,35 +2,297 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-  <h2>Admin Dashboard</h2>
+<div class="page-wrap">
 
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-num">{{ total_users }}</div>
-      <div class="stat-label">Total users</div>
+  <div class="adm-header">
+    <div>
+      <div class="adm-eyebrow">BlizTech Academy</div>
+      <h1 class="adm-title">Admin Dashboard</h1>
     </div>
-
-    <div class="stat-card">
-      <div class="stat-num">{{ total_progress }}</div>
-      <div class="stat-label">Progress rows</div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-num">{{ passed_count }}</div>
-      <div class="stat-label">Passed topics</div>
+    <div class="adm-badge">
+      <span class="adm-live-dot"></span>
+      Live data
     </div>
   </div>
 
-  <!-- Admin quick links -->
-  <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
-    <a class="btn btn-outline" href="{{ url_for('admin.users') }}">View Users</a>
-    <a class="btn btn-outline" href="{{ url_for('admin.progress') }}">View Progress</a>
-    <a class="btn btn-outline" href="{{ url_for('admin.certificates') }}">Certificates</a>
+  <!-- Stats -->
+  <div class="adm-stats">
+    <div class="adm-stat">
+      <div class="adm-stat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div class="adm-stat-num">{{ total_users }}</div>
+      <div class="adm-stat-label">Total users</div>
+    </div>
 
-    <!-- NEW -->
-    <a class="btn btn-outline" href="{{ url_for('admin.referrals') }}">Referrals</a>
+    <div class="adm-stat">
+      <div class="adm-stat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="adm-stat-num">{{ total_progress }}</div>
+      <div class="adm-stat-label">Progress rows</div>
+    </div>
 
-    <a class="btn btn-outline" href="{{ url_for('admin.audit_logs') }}">Audit Logs</a>
-    <a class="btn btn-outline" href="{{ url_for('admin.monitoring') }}">Monitoring</a>
+    <div class="adm-stat adm-stat-green">
+      <div class="adm-stat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="adm-stat-num">{{ passed_count }}</div>
+      <div class="adm-stat-label">Passed topics</div>
+    </div>
+
+    <div class="adm-stat">
+      <div class="adm-stat-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="adm-stat-num">{{ (passed_count / total_progress * 100)|int if total_progress else 0 }}%</div>
+      <div class="adm-stat-label">Pass rate</div>
+    </div>
   </div>
+
+  <!-- Quick actions -->
+  <div class="adm-section-label">Quick actions</div>
+  <div class="adm-actions">
+
+    <a class="adm-action" href="{{ url_for('admin.users') }}">
+      <div class="adm-action-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div class="adm-action-body">
+        <div class="adm-action-title">Users</div>
+        <div class="adm-action-sub">Manage accounts and access</div>
+      </div>
+      <div class="adm-action-arrow">→</div>
+    </a>
+
+    <a class="adm-action" href="{{ url_for('admin.progress') }}">
+      <div class="adm-action-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <div class="adm-action-body">
+        <div class="adm-action-title">Progress</div>
+        <div class="adm-action-sub">View learner activity</div>
+      </div>
+      <div class="adm-action-arrow">→</div>
+    </a>
+
+    <a class="adm-action" href="{{ url_for('admin.certificates') }}">
+      <div class="adm-action-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      </div>
+      <div class="adm-action-body">
+        <div class="adm-action-title">Certificates</div>
+        <div class="adm-action-sub">Issue and revoke certificates</div>
+      </div>
+      <div class="adm-action-arrow">→</div>
+    </a>
+
+    <a class="adm-action" href="{{ url_for('admin.referrals') }}">
+      <div class="adm-action-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div class="adm-action-body">
+        <div class="adm-action-title">Referrals</div>
+        <div class="adm-action-sub">Track referral activity</div>
+      </div>
+      <div class="adm-action-arrow">→</div>
+    </a>
+
+    <a class="adm-action" href="{{ url_for('admin.audit_logs') }}">
+      <div class="adm-action-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div class="adm-action-body">
+        <div class="adm-action-title">Audit logs</div>
+        <div class="adm-action-sub">Review system activity</div>
+      </div>
+      <div class="adm-action-arrow">→</div>
+    </a>
+
+    <a class="adm-action" href="{{ url_for('admin.monitoring') }}">
+      <div class="adm-action-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <div class="adm-action-body">
+        <div class="adm-action-title">Monitoring</div>
+        <div class="adm-action-sub">System health and uptime</div>
+      </div>
+      <div class="adm-action-arrow">→</div>
+    </a>
+
+  </div>
+
+</div>
+
+<style>
+.adm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 32px 0 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.adm-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+.adm-title {
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  color: var(--text);
+  margin: 0;
+}
+.adm-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  padding: 5px 11px;
+  border-radius: var(--radius-xs);
+}
+.adm-live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: blink 2s ease-in-out infinite;
+}
+
+/* Stats */
+.adm-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+@media (max-width: 900px) { .adm-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .adm-stats { grid-template-columns: 1fr 1fr; } }
+
+.adm-stat {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.adm-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--border);
+}
+.adm-stat:hover { border-color: var(--border-2); }
+.adm-stat-green::before { background: var(--green); }
+.adm-stat-green { border-color: rgba(0,217,126,0.12); }
+
+.adm-stat-icon {
+  color: var(--text-3);
+  width: 28px; height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.adm-stat-green .adm-stat-icon { color: var(--green); border-color: var(--border-g); background: var(--green-dim); }
+.adm-stat-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.8px;
+  line-height: 1;
+}
+.adm-stat-green .adm-stat-num { color: var(--green); }
+.adm-stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+}
+
+/* Actions */
+.adm-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+.adm-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding-bottom: 60px;
+}
+@media (max-width: 900px) { .adm-actions { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .adm-actions { grid-template-columns: 1fr; } }
+
+.adm-action {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: all 0.12s;
+  position: relative;
+}
+.adm-action::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--green);
+  border-radius: 3px 0 0 3px;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.adm-action:hover { background: var(--bg-3); border-color: rgba(0,217,126,0.2); }
+.adm-action:hover::before { opacity: 1; }
+.adm-action:hover .adm-action-arrow { color: var(--green); transform: translateX(3px); }
+
+.adm-action-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  flex-shrink: 0;
+  transition: all 0.12s;
+}
+.adm-action:hover .adm-action-icon { border-color: var(--border-g); background: var(--green-dim); color: var(--green); }
+
+.adm-action-body { flex: 1; min-width: 0; }
+.adm-action-title { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.adm-action-sub { font-size: 11.5px; color: var(--text-3); }
+.adm-action-arrow { color: var(--text-3); font-size: 14px; flex-shrink: 0; transition: all 0.12s; }
+</style>
 {% endblock %}
