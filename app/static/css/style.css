@@ -328,7 +328,7 @@ h3 { font-size: 15px; font-weight: 600; }
   display: grid;
   grid-template-columns: 1fr 0.8fr;
   gap: 40px;
-  align-items: start;              /* FIXED: was center */
+  align-items: stretch;
   margin-top: 0;
   margin-left: 0;
   margin-right: 0;
@@ -871,11 +871,11 @@ code { display: inline-flex; align-items: center; padding: 2px 6px; border-radiu
 .hero {
   grid-template-columns: 1fr 0.7fr 1fr !important;
   gap: 56px !important;
-  align-items: start !important;   /* FIXED: was missing */
+  align-items: stretch !important;
 }
 
 @media (max-width: 1100px) {
-  .hero { grid-template-columns: 1fr 1.2fr !important; align-items: start !important; }
+  .hero { grid-template-columns: 1fr 1.2fr !important; align-items: stretch !important; }
   .hero-mid { display: none; }
 }
 
@@ -996,3 +996,12 @@ code { display: inline-flex; align-items: center; padding: 2px 6px; border-radiu
 .hct-sub { font-size: 11.5px; color: var(--text-3); }
 .hct-arrow { font-size: 18px; color: var(--green); flex-shrink: 0; transition: transform 0.15s; }
 .hero-course-teaser:hover .hct-arrow { transform: translateX(4px); }
+
+/* ── Hero right column stretch ── */
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  align-self: stretch;
+}
