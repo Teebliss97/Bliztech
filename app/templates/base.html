@@ -43,6 +43,8 @@
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-GYN6VFZ64E"></script>
   <script src="{{ url_for('static', filename='js/nav.js') }}" defer></script>
+
+  {% block head %}{% endblock %}
 </head>
 
 <body>
@@ -66,7 +68,7 @@
             <a href="{{ url_for('main.link_analyzer') }}" class="{% if request.endpoint == 'main.link_analyzer' %}active{% endif %}">Link Checker</a>
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
-              <a href="{{ url_for('cert.certificate_home') }}" class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">Certificate</a>
+              <a href="{{ url_for('cert.paid_certificate_home') }}" class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">Certificate</a>
               {% if current_user.is_admin %}
                 <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint and request.endpoint.startswith('admin.') %}active{% endif %}">Admin</a>
               {% endif %}
@@ -98,7 +100,7 @@
             <a href="{{ url_for('main.link_analyzer') }}">Link Checker</a>
             {% if current_user.is_authenticated %}
               <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-              <a href="{{ url_for('cert.certificate_home') }}">Certificate</a>
+              <a href="{{ url_for('cert.paid_certificate_home') }}">Certificate</a>
               {% if current_user.is_admin %}
                 <a href="{{ url_for('admin.dashboard') }}">Admin</a>
               {% endif %}

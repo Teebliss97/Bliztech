@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Get Into Cybersecurity — BlizTech{% endblock %}
 
+{% block head %}
+<meta property="og:title" content="Get Into Cybersecurity — BlizTech Academy">
+<meta property="og:description" content="20 structured lessons, 4 labs, certificate included. From zero to job-ready. £11 one-time, lifetime access.">
+<meta property="og:image" content="{{ url_for('static', filename='img/og-course.png', _external=True) }}">
+<meta property="og:url" content="{{ request.base_url }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Get Into Cybersecurity — BlizTech Academy">
+<meta name="twitter:description" content="20 structured lessons, 4 labs, certificate included. £11 one-time, lifetime access.">
+<meta name="twitter:image" content="{{ url_for('static', filename='img/og-course.png', _external=True) }}">
+{% endblock %}
+
 {% block content %}
 
 <!-- ===== HERO ===== -->
@@ -201,7 +212,7 @@
       <div class="curriculum-section">
         <div class="curriculum-section-head">
           <span class="curr-section-tag">Section C</span>
-          <span class="curr-section-name">Defence & Response</span>
+          <span class="curr-section-name">Defence &amp; Response</span>
         </div>
         <div class="curriculum-lessons">
           <div class="curr-lesson">
@@ -333,7 +344,6 @@
 </section>
 
 <style>
-/* ===== COURSE HERO ===== */
 .course-hero {
   background: var(--bg-2);
   border-bottom: 1px solid var(--border);
@@ -357,7 +367,6 @@
 @media (max-width: 480px) {
   .course-hero { padding: 32px 16px; margin-left: -16px; margin-right: -16px; }
 }
-
 .course-hero-inner {
   display: grid;
   grid-template-columns: 1fr 0.85fr;
@@ -367,7 +376,6 @@
   margin: 0 auto;
 }
 @media (max-width: 900px) { .course-hero-inner { grid-template-columns: 1fr; gap: 36px; } }
-
 .course-tag {
   display: inline-flex;
   align-items: center;
@@ -381,7 +389,6 @@
   letter-spacing: 0.5px;
   margin-bottom: 16px;
 }
-
 .course-title {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 54px;
@@ -393,7 +400,6 @@
 .course-title-accent { color: var(--green); }
 @media (max-width: 900px) { .course-title { font-size: 38px; } }
 @media (max-width: 480px) { .course-title { font-size: 30px; } }
-
 .course-subtitle {
   color: var(--text-2);
   font-size: 15px;
@@ -401,7 +407,6 @@
   max-width: 48ch;
   margin: 0 0 28px;
 }
-
 .course-meta-row {
   display: flex;
   align-items: center;
@@ -427,20 +432,13 @@
   letter-spacing: 0.4px;
 }
 .course-meta-div { width: 1px; height: 28px; background: var(--border); }
-
 .course-cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.course-btn-primary {
-  font-size: 14px;
-  padding: 10px 24px;
-  min-height: 42px;
-}
+.course-btn-primary { font-size: 14px; padding: 10px 24px; min-height: 42px; }
 .course-one-time {
   font-size: 12px;
   color: var(--text-3);
   font-family: 'JetBrains Mono', monospace;
 }
-
-/* Course preview card */
 .course-card-preview {
   border: 1px solid var(--border-g);
   border-radius: var(--radius-xl);
@@ -486,8 +484,6 @@
   color: var(--green);
   font-family: 'JetBrains Mono', monospace;
 }
-
-/* ===== SECTION SHARED ===== */
 .course-section { padding: 60px 0; border-bottom: 1px solid var(--border); }
 .cs-label {
   font-family: 'JetBrains Mono', monospace;
@@ -504,15 +500,12 @@
   letter-spacing: -0.5px;
   margin: 0 0 36px;
 }
-
-/* ===== FOR WHO ===== */
 .course-for-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 @media (max-width: 800px) { .course-for-grid { grid-template-columns: 1fr; } }
-
 .course-for-item {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -527,15 +520,12 @@
   margin-bottom: 8px;
 }
 .cfi-text { font-size: 13px; color: var(--text-3); line-height: 1.7; }
-
-/* ===== CURRICULUM ===== */
 .curriculum-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 @media (max-width: 800px) { .curriculum-grid { grid-template-columns: 1fr; } }
-
 .curriculum-section {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -607,8 +597,6 @@
   color: var(--green);
   flex-shrink: 0;
 }
-
-/* ===== ENROL ===== */
 .enrol-card {
   display: grid;
   grid-template-columns: 1fr 0.6fr;
@@ -620,7 +608,6 @@
   background: var(--bg-2);
 }
 @media (max-width: 800px) { .enrol-card { grid-template-columns: 1fr; gap: 32px; padding: 28px 24px; } }
-
 .enrol-title {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 26px;
@@ -629,13 +616,7 @@
   margin: 0 0 8px;
 }
 .enrol-sub { font-size: 13px; color: var(--text-3); margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; }
-.enrol-list {
-  list-style: none;
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-}
+.enrol-list { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
 .enrol-list li {
   display: flex;
   align-items: flex-start;
@@ -644,13 +625,7 @@
   color: var(--text-2);
   line-height: 1.5;
 }
-.enrol-list li::before {
-  content: '✓';
-  color: var(--green);
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
+.enrol-list li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
 .enrol-price-card {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -674,18 +649,7 @@
   margin-bottom: 20px;
 }
 .enrol-btn { width: 100%; font-size: 14px; min-height: 44px; }
-.enrol-login-note {
-  font-size: 12px;
-  color: var(--text-3);
-  margin-top: 10px;
-}
-.enrol-login-note a { color: var(--green); }
-.enrol-secure {
-  margin-top: 14px;
-  font-size: 11px;
-  color: var(--text-3);
-  font-family: 'JetBrains Mono', monospace;
-}
+.enrol-secure { margin-top: 14px; font-size: 11px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
 </style>
 
 {% endblock %}
