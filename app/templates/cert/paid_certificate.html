@@ -7,7 +7,7 @@
   <div class="gc-header">
     <div class="gc-eyebrow">Get Into Cybersecurity</div>
     <h1 class="gc-title">Certificate of Completion</h1>
-    <p class="gc-sub">You have completed all 20 lessons. Download your certificate to share your achievement.</p>
+    <p class="gc-sub">Complete all 20 lessons to earn your certificate.</p>
   </div>
 
   <div class="gc-layout">
@@ -15,46 +15,59 @@
     <!-- Certificate preview -->
     <div class="gc-preview">
       <div class="gc-cert-card">
-        <div class="gc-cert-top">
-          <div class="gc-cert-logo">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 8v8c0 7.2 5.2 13.9 12 15.5C23.8 29.9 28 23.2 28 16V8L16 2z" fill="rgba(0,217,126,0.15)" stroke="#00d97e" stroke-width="1.5"/><path d="M11 16l3.5 3.5L21 12" stroke="#00d97e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="gc-cert-brand">BlizTech</span>
+        <div class="gc-cert-top-bar"></div>
+        <div class="gc-cert-inner">
+          <div class="gc-cert-header">
+            <div class="gc-cert-logo">
+              <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 8v8c0 7.2 5.2 13.9 12 15.5C23.8 29.9 28 23.2 28 16V8L16 2z" fill="rgba(0,217,126,0.15)" stroke="#00d97e" stroke-width="1.5"/><path d="M11 16l3.5 3.5L21 12" stroke="#00d97e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="gc-cert-brand">BlizTech Academy</span>
+            </div>
+            <div class="gc-cert-badge-pill">Certificate of Completion</div>
           </div>
-          <div class="gc-cert-badge">Certificate of Completion</div>
-        </div>
 
-        <div class="gc-cert-body">
-          <div class="gc-cert-presents">This certifies that</div>
-          <div class="gc-cert-name" id="gc-cert-name">{{ default_name }}</div>
-          <div class="gc-cert-course">has successfully completed</div>
-          <div class="gc-cert-course-name">Get Into Cybersecurity</div>
-          <div class="gc-cert-detail">20 lessons · 4 sections · 4 practical labs</div>
-        </div>
+          <div class="gc-cert-divider"></div>
 
-        <div class="gc-cert-footer">
-          <div class="gc-cert-footer-left">
-            <div class="gc-cert-footer-label">Issued by</div>
-            <div class="gc-cert-footer-value">BlizTech Academy</div>
+          <div class="gc-cert-body">
+            <div class="gc-cert-presents">This is to certify that</div>
+            <div class="gc-cert-name" id="gc-cert-name">{{ default_name }}</div>
+            <div class="gc-cert-underline" id="gc-cert-underline"></div>
+            <div class="gc-cert-completed">has successfully completed</div>
+            <div class="gc-cert-course">Get Into Cybersecurity</div>
+            <div class="gc-cert-detail">20 lessons · 4 sections · 4 practical labs · Lifetime access</div>
           </div>
-          <div class="gc-cert-footer-mid">
-            {% if cert %}
-            <div class="gc-cert-footer-label">Certificate ID</div>
-            <div class="gc-cert-footer-value gc-cert-id">{{ cert.cert_id }}</div>
-            {% else %}
-            <div class="gc-cert-footer-label">Certificate ID</div>
-            <div class="gc-cert-footer-value gc-cert-id">—</div>
-            {% endif %}
-          </div>
-          <div class="gc-cert-footer-right">
-            <div class="gc-cert-footer-label">Date issued</div>
-            <div class="gc-cert-footer-value">{{ cert.issued_at.strftime('%d %b %Y') if cert else 'Upon download' }}</div>
+
+          <div class="gc-cert-footer">
+            <div class="gc-cert-col">
+              <div class="gc-cert-col-label">Issued by</div>
+              <div class="gc-cert-col-val">BlizTech Academy</div>
+            </div>
+            <div class="gc-cert-col gc-cert-col-mid">
+              <div class="gc-cert-col-label">Certificate ID</div>
+              <div class="gc-cert-col-val gc-cert-id">{{ cert.cert_id if cert else '—' }}</div>
+            </div>
+            <div class="gc-cert-col">
+              <div class="gc-cert-col-label">Date issued</div>
+              <div class="gc-cert-col-val">{{ cert.issued_at.strftime('%d %b %Y') if cert else 'Upon download' }}</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Download form -->
+    <!-- Form side -->
     <div class="gc-form-side">
+
+      <!-- Completion status -->
+      <div class="gc-progress-block" id="gc-progress-block">
+        <div class="gc-progress-header">
+          <span class="gc-progress-label">Course progress</span>
+          <span class="gc-progress-count" id="gc-progress-count">Checking...</span>
+        </div>
+        <div class="gc-progress-track">
+          <div class="gc-progress-fill" id="gc-progress-fill" style="width:0%"></div>
+        </div>
+        <div class="gc-progress-status" id="gc-progress-status"></div>
+      </div>
 
       {% if cert and cert.revoked %}
       <div class="gc-alert gc-alert-error">
@@ -63,191 +76,203 @@
       </div>
       {% elif cert %}
       <div class="gc-alert gc-alert-success">
-        <strong>Certificate ready</strong>
+        <strong>Certificate issued</strong>
         <div class="gc-alert-sub">ID: {{ cert.cert_id }}</div>
         {% if verify_url %}
-        <a href="{{ verify_url }}" target="_blank" rel="noopener" class="gc-verify-link">View verification page →</a>
+        <a href="{{ verify_url }}" target="_blank" rel="noopener" class="gc-verify-link">Verify certificate →</a>
         {% endif %}
       </div>
       {% endif %}
 
-      <form method="POST" action="{{ url_for('cert.paid_certificate_pdf') }}" class="gc-form">
-        <label class="gc-label">Your full name</label>
-        <input class="gc-input" name="name" type="text" value="{{ default_name }}" required
-               oninput="document.getElementById('gc-cert-name').textContent = this.value || '{{ default_name }}'">
-        <div class="gc-input-hint">This name will appear on your certificate exactly as typed</div>
+      <form method="POST" action="{{ url_for('cert.paid_certificate_pdf') }}" class="gc-form" id="gc-form">
+        <input type="hidden" name="completed_count" id="gc-completed-count" value="0">
 
-        <button class="gc-btn" type="submit">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <label class="gc-label">Your full name</label>
+        <input class="gc-input" name="name" id="gc-name-input" type="text" value="{{ default_name }}" required
+               oninput="updatePreviewName(this.value)">
+        <div class="gc-input-hint">This name appears on your certificate exactly as typed</div>
+
+        <button class="gc-btn" type="submit" id="gc-submit-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download Certificate (PDF)
         </button>
+
+        <div class="gc-locked-msg" id="gc-locked-msg" style="display:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Complete all lessons to unlock your certificate
+        </div>
       </form>
 
       <div class="gc-tips">
-        <div class="gc-tip">Use your real full name so you can share it professionally on LinkedIn</div>
+        <div class="gc-tip">Use your real full name to share it professionally on LinkedIn</div>
         {% if cert %}
-        <div class="gc-tip">Downloading again reuses the same certificate ID — your record is permanent</div>
+        <div class="gc-tip">Downloading again reuses the same certificate ID</div>
         {% endif %}
       </div>
 
+      {% if cert %}
       <div class="gc-share">
         <div class="gc-share-label">Share your achievement</div>
-        <a class="gc-share-btn gc-share-li" href="https://www.linkedin.com/sharing/share-offsite/?url={{ verify_url or request.url }}" target="_blank" rel="noopener">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
-          Share on LinkedIn
+        <a class="gc-share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url={{ verify_url or request.url }}" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          Add to LinkedIn
         </a>
       </div>
+      {% endif %}
 
     </div>
   </div>
-
 </div>
 
 <style>
-.gc-header { padding: 32px 0 36px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+.gc-header { padding: 32px 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
 .gc-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--green); margin-bottom: 8px; }
 .gc-title { font-size: clamp(24px, 3vw, 34px); font-weight: 700; letter-spacing: -0.8px; color: var(--text); margin: 0 0 8px; }
 .gc-sub { font-size: 14px; color: var(--text-3); margin: 0; }
 
-.gc-layout { display: grid; grid-template-columns: 1fr 320px; gap: 40px; align-items: start; }
-@media (max-width: 900px) { .gc-layout { grid-template-columns: 1fr; } }
+.gc-layout { display: grid; grid-template-columns: 1fr 300px; gap: 40px; align-items: start; }
+@media (max-width: 860px) { .gc-layout { grid-template-columns: 1fr; } }
 
-/* Certificate preview card */
+/* Certificate preview */
 .gc-preview { position: sticky; top: 80px; }
 .gc-cert-card {
-  border: 1px solid var(--border-g);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  background: var(--bg-2);
-  position: relative;
+  background: #0d0d0f;
+  border: 1px solid rgba(0,217,126,0.2);
+  box-shadow: 0 0 40px rgba(0,217,126,0.06);
 }
-.gc-cert-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(to right, var(--green), rgba(0,217,126,0.3));
-}
+.gc-cert-top-bar { height: 3px; background: linear-gradient(to right, var(--green), rgba(0,217,126,0.3)); }
+.gc-cert-inner { padding: 24px 28px 20px; }
 
-.gc-cert-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--border);
-}
+.gc-cert-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .gc-cert-logo { display: flex; align-items: center; gap: 8px; }
-.gc-cert-brand { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-.gc-cert-badge {
+.gc-cert-brand { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.gc-cert-badge-pill {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--green);
   border: 1px solid var(--border-g);
   background: var(--green-dim);
-  padding: 3px 9px;
+  padding: 3px 8px;
   border-radius: 4px;
 }
+.gc-cert-divider { height: 1px; background: var(--border); margin-bottom: 20px; }
 
-.gc-cert-body { padding: 32px 24px; text-align: center; }
-.gc-cert-presents { font-size: 12px; color: var(--text-3); margin-bottom: 10px; font-style: italic; }
-.gc-cert-name {
-  font-size: clamp(20px, 3vw, 28px);
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-  margin-bottom: 12px;
-  line-height: 1.2;
-  min-height: 36px;
-  transition: all 0.15s;
-}
-.gc-cert-course { font-size: 12px; color: var(--text-3); margin-bottom: 6px; font-style: italic; }
-.gc-cert-course-name { font-size: 17px; font-weight: 700; color: var(--green); letter-spacing: -0.3px; margin-bottom: 6px; }
-.gc-cert-detail { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; }
+.gc-cert-body { text-align: center; margin-bottom: 20px; }
+.gc-cert-presents { font-size: 11px; color: var(--text-3); font-style: italic; margin-bottom: 8px; }
+.gc-cert-name { font-size: clamp(18px, 2.5vw, 26px); font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1.2; min-height: 32px; transition: all 0.15s; }
+.gc-cert-underline { height: 1px; background: linear-gradient(to right, transparent, rgba(200,160,40,0.6), transparent); margin: 6px auto 10px; width: 60%; }
+.gc-cert-completed { font-size: 11px; color: var(--text-3); font-style: italic; margin-bottom: 6px; }
+.gc-cert-course { font-size: 15px; font-weight: 700; color: var(--green); letter-spacing: -0.2px; margin-bottom: 5px; }
+.gc-cert-detail { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.4px; }
 
-.gc-cert-footer {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 1px;
-  border-top: 1px solid var(--border);
-  background: var(--border);
-}
-.gc-cert-footer-left, .gc-cert-footer-mid, .gc-cert-footer-right {
-  background: var(--bg-3);
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.gc-cert-footer-label { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-3); }
-.gc-cert-footer-value { font-size: 11.5px; font-weight: 600; color: var(--text); }
-.gc-cert-id { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--green); }
+.gc-cert-footer { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; border-top: 1px solid var(--border); background: var(--border); margin: 0 -28px -20px; }
+.gc-cert-col { background: #0a0a0c; padding: 10px 14px; }
+.gc-cert-col-mid { text-align: center; }
+.gc-cert-col:last-child { text-align: right; }
+.gc-cert-col-label { font-family: 'JetBrains Mono', monospace; font-size: 7.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-3); margin-bottom: 3px; }
+.gc-cert-col-val { font-size: 11px; font-weight: 600; color: var(--text-2); }
+.gc-cert-id { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 10px; }
 
-/* Form side */
-.gc-alert { padding: 12px 14px; border-radius: 8px; margin-bottom: 20px; }
+/* Progress block */
+.gc-progress-block { margin-bottom: 20px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.gc-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.gc-progress-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); }
+.gc-progress-count { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-3); }
+.gc-progress-track { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+.gc-progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.5s ease; }
+.gc-progress-status { font-size: 11px; }
+.gc-progress-status.complete { color: var(--green); }
+.gc-progress-status.incomplete { color: var(--text-3); }
+
+/* Form */
+.gc-alert { padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; }
 .gc-alert-success { background: rgba(0,217,126,0.06); border: 1px solid rgba(0,217,126,0.2); }
 .gc-alert-success strong { color: var(--green); font-size: 13px; }
 .gc-alert-error { background: rgba(220,50,50,0.06); border: 1px solid rgba(220,50,50,0.2); }
 .gc-alert-error strong { color: #e05c5c; font-size: 13px; }
 .gc-alert-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-3); margin-top: 4px; }
-.gc-verify-link { font-size: 11px; color: var(--green); text-decoration: none; display: inline-block; margin-top: 6px; }
-.gc-verify-link:hover { text-decoration: underline; }
+.gc-verify-link { font-size: 11px; color: var(--green); display: inline-block; margin-top: 5px; }
 
-.gc-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-.gc-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); }
-.gc-input {
-  background: var(--bg-3);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 14px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: inherit;
-  transition: border-color 0.12s;
-  width: 100%;
-  box-sizing: border-box;
-}
+.gc-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.gc-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); }
+.gc-input { background: var(--bg-3); border: 1px solid var(--border); border-radius: 6px; padding: 10px 13px; color: var(--text); font-size: 14px; font-family: inherit; transition: border-color 0.12s; width: 100%; box-sizing: border-box; }
 .gc-input:focus { outline: none; border-color: var(--green); }
 .gc-input-hint { font-size: 11px; color: var(--text-3); }
-.gc-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--green);
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.12s;
-  font-family: inherit;
-  margin-top: 4px;
-}
-.gc-btn:hover { opacity: 0.88; }
 
-.gc-tips { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+.gc-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--green); color: #000; border: none; border-radius: 6px; padding: 11px 18px; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: opacity 0.12s; font-family: inherit; margin-top: 4px; }
+.gc-btn:hover { opacity: 0.88; }
+.gc-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.gc-locked-msg { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-3); padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-3); }
+
+.gc-tips { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
 .gc-tip { font-size: 11.5px; color: var(--text-3); line-height: 1.5; padding-left: 10px; border-left: 2px solid var(--border); }
 
 .gc-share { display: flex; flex-direction: column; gap: 8px; }
 .gc-share-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); }
-.gc-share-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 14px;
-  border-radius: 6px;
-  font-size: 12.5px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.12s;
-  border: 1px solid var(--border);
-  background: var(--bg-3);
-  color: var(--text-2);
-}
-.gc-share-li:hover { border-color: #0077b5; color: #0077b5; background: rgba(0,119,181,0.06); }
+.gc-share-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 500; text-decoration: none; border: 1px solid var(--border); background: var(--bg-3); color: var(--text-2); transition: all 0.12s; }
+.gc-share-btn:hover { border-color: #0077b5; color: #0077b5; background: rgba(0,119,181,0.06); }
 </style>
+
+<script>
+var CK = 'bliztech_completed';
+var TOTAL = {{ total_lessons }};
+var IS_ADMIN = {{ 'true' if is_admin else 'false' }};
+
+function getCompleted() {
+  try {
+    var d = JSON.parse(localStorage.getItem(CK) || '{}');
+    return Object.values(d).filter(Boolean).length;
+  } catch(e) { return 0; }
+}
+
+function updatePreviewName(val) {
+  var el = document.getElementById('gc-cert-name');
+  if (el) el.textContent = val || '{{ default_name }}';
+}
+
+function initProgress() {
+  var count = getCompleted();
+  var pct = Math.min(100, Math.round(count / TOTAL * 100));
+  var fill = document.getElementById('gc-progress-fill');
+  var countEl = document.getElementById('gc-progress-count');
+  var status = document.getElementById('gc-progress-status');
+  var btn = document.getElementById('gc-submit-btn');
+  var lockedMsg = document.getElementById('gc-locked-msg');
+  var countInput = document.getElementById('gc-completed-count');
+
+  if (fill) fill.style.width = pct + '%';
+  if (countEl) countEl.textContent = count + ' / ' + TOTAL + ' lessons';
+  if (countInput) countInput.value = count;
+
+  var complete = IS_ADMIN || count >= TOTAL;
+
+  if (status) {
+    if (complete) {
+      status.textContent = '✓ All lessons complete — certificate ready';
+      status.className = 'gc-progress-status complete';
+    } else {
+      status.textContent = (TOTAL - count) + ' lessons remaining';
+      status.className = 'gc-progress-status incomplete';
+    }
+  }
+
+  if (btn && lockedMsg) {
+    if (complete) {
+      btn.style.display = 'flex';
+      btn.disabled = false;
+      lockedMsg.style.display = 'none';
+    } else {
+      btn.style.display = 'none';
+      lockedMsg.style.display = 'flex';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initProgress);
+</script>
 {% endblock %}
