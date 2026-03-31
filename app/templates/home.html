@@ -20,7 +20,6 @@
     </p>
 
     {% if current_user.is_authenticated and progress %}
-      <!-- ============ CONTINUE CARD ============ -->
       <div class="continue-card pop-in">
         <div class="continue-top">
           <div>
@@ -67,18 +66,15 @@
       </div>
 
     {% else %}
-      <!-- ============ PUBLIC CTA ============ -->
       <div class="hero-actions">
         <a class="btn" href="{{ url_for('topics.list_topics') }}">Start Learning</a>
         <a class="btn btn-outline" href="{{ youtube_url }}" target="_blank" rel="noopener">▶ Watch on YouTube</a>
       </div>
-
       <p class="muted" style="font-size:13.5px;">
         Free to start — create an account to track progress and earn a certificate.
       </p>
     {% endif %}
 
-    <!-- ============ STATS ============ -->
     <div class="hero-stats">
       <div class="stat">
         <div class="stat-num">10</div>
@@ -94,19 +90,8 @@
       </div>
     </div>
 
-    <!-- ============ PAID COURSE TEASER ============ -->
-    <a href="{{ url_for('main.course') }}" class="hero-course-teaser">
-      <div class="hct-left">
-        <div class="hct-tag">Paid Course</div>
-        <div class="hct-title">Get Into Cybersecurity</div>
-        <div class="hct-sub">20 lessons · 4 labs · Certificate · £11 one-time</div>
-      </div>
-      <div class="hct-arrow">→</div>
-    </a>
+  </div>
 
-  </div><!-- /hero-left -->
-
-  <!-- ============ HERO STATS CARD ============ -->
   <div class="hero-mid">
     <div class="stats-card">
       <div class="stats-card-title">Platform stats</div>
@@ -145,7 +130,6 @@
     </div>
   </div>
 
-  <!-- ============ HERO VISUAL — TERMINAL ============ -->
   <div class="hero-right">
     <div class="terminal">
       <div class="terminal-bar">
@@ -173,7 +157,7 @@
   </div>
 </section>
 
-<!-- ============ FEATURES ============ -->
+<!-- FEATURES -->
 <section class="section-grid">
   <div class="feature">
     <div class="feature-icon">
@@ -182,7 +166,6 @@
     <h3>Simple lessons</h3>
     <p>No jargon. Just clear explanations and real-world examples.</p>
   </div>
-
   <div class="feature">
     <div class="feature-icon">
       <img src="{{ url_for('static', filename='img/icon-quiz.svg') }}" alt="">
@@ -190,7 +173,6 @@
     <h3>Quick quizzes</h3>
     <p>Test yourself after each topic and build confidence gradually.</p>
   </div>
-
   <div class="feature">
     <div class="feature-icon">
       <img src="{{ url_for('static', filename='img/icon-unlock.svg') }}" alt="">
@@ -198,7 +180,6 @@
     <h3>Structured progression</h3>
     <p>Pass to unlock the next topic — always in the right order.</p>
   </div>
-
   <div class="feature">
     <div class="feature-icon">
       <img src="{{ url_for('static', filename='img/icon-tips.svg') }}" alt="">
@@ -208,7 +189,7 @@
   </div>
 </section>
 
-<!-- ============ HOW IT WORKS ============ -->
+<!-- HOW IT WORKS -->
 <section class="how-card">
   <div class="how-left">
     <h2>How it works</h2>
@@ -218,7 +199,6 @@
       <li><strong>Take the quiz</strong> — 5 questions to check your understanding</li>
       <li><strong>Pass to unlock</strong> the next topic and keep building</li>
     </ol>
-
     <div class="how-actions">
       <a class="btn" href="{{ url_for('topics.list_topics') }}">Browse topics</a>
       {% if current_user.is_authenticated %}
@@ -229,13 +209,11 @@
     </div>
   </div>
 
-  <!-- ============ SECURITY SCORE CARD ============ -->
   <div class="score-card">
     <div class="score-card-header">
       <span class="score-card-title">Security score</span>
       <span class="score-badge">SAMPLE</span>
     </div>
-
     <div class="score-ring-wrap">
       <svg class="score-ring" viewBox="0 0 120 120">
         <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
@@ -248,7 +226,6 @@
         <div class="score-label">/ 100</div>
       </div>
     </div>
-
     <div class="score-checks">
       <div class="score-check good"><span>&#10003;</span> Strong password</div>
       <div class="score-check good"><span>&#10003;</span> 2FA enabled</div>
@@ -256,14 +233,13 @@
       <div class="score-check good"><span>&#10003;</span> Phishing aware</div>
       <div class="score-check warn"><span>&#9888;</span> Public Wi-Fi risks</div>
     </div>
-
     <a class="btn" style="width:100%; margin-top:16px;" href="{{ url_for('topics.list_topics') }}">
       Improve your score
     </a>
   </div>
 </section>
 
-<!-- ============ COURSE PROMO ============ -->
+<!-- COURSE PROMO -->
 <section class="course-promo">
   <div class="course-promo-inner">
     <div class="course-promo-left">
@@ -284,22 +260,10 @@
     <div class="course-promo-right">
       <div class="course-promo-card">
         <div class="course-promo-sections">
-          <div class="cps-item">
-            <span class="cps-tag">A</span>
-            <span>Foundation — CIA triad, risk, attack surface</span>
-          </div>
-          <div class="cps-item">
-            <span class="cps-tag">B</span>
-            <span>Technical Core — networking, Linux, protocols</span>
-          </div>
-          <div class="cps-item">
-            <span class="cps-tag">C</span>
-            <span>Defence & Response — phishing investigation, logs</span>
-          </div>
-          <div class="cps-item">
-            <span class="cps-tag">D</span>
-            <span>Career Launchpad — job roles, tools, 90-day plan</span>
-          </div>
+          <div class="cps-item"><span class="cps-tag">A</span><span>Foundation — CIA triad, risk, attack surface</span></div>
+          <div class="cps-item"><span class="cps-tag">B</span><span>Technical Core — networking, Linux, protocols</span></div>
+          <div class="cps-item"><span class="cps-tag">C</span><span>Defence & Response — phishing investigation, logs</span></div>
+          <div class="cps-item"><span class="cps-tag">D</span><span>Career Launchpad — job roles, tools, 90-day plan</span></div>
         </div>
         <div class="course-promo-cta">
           <div class="course-promo-price">£11 <span>one-time</span></div>
@@ -310,28 +274,16 @@
   </div>
 </section>
 
-<!-- ============ SUPPORT CTA ============ -->
+<!-- CTA -->
 <section class="cta">
   <div class="cta-inner">
     <div>
       <h2>Support BlizTech 💙</h2>
-      <p>
-        If this platform has helped you, support it with a small donation —
-        or get the Business Security Audit Checklist.
-      </p>
+      <p>If this platform has helped you, support it with a small donation — or get the Business Security Audit Checklist.</p>
     </div>
-
     <div class="actions">
-      <a class="btn btn-accent"
-         href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=atinukeadebayo97%40gmail.com&currency_code=GBP"
-         target="_blank" rel="noopener">
-        Donate via PayPal
-      </a>
-      <a class="btn btn-outline"
-         href="https://atinuke2.gumroad.com/l/business-security"
-         target="_blank" rel="noopener">
-        Get the checklist
-      </a>
+      <a class="btn btn-accent" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=atinukeadebayo97%40gmail.com&currency_code=GBP" target="_blank" rel="noopener">Donate via PayPal</a>
+      <a class="btn btn-outline" href="https://atinuke2.gumroad.com/l/business-security" target="_blank" rel="noopener">Get the checklist</a>
       <a class="btn btn-outline" href="{{ url_for('main.support') }}">Support page</a>
     </div>
   </div>

@@ -1,6 +1,5 @@
 import io
 import os
-import math
 from datetime import datetime
 
 from flask import (
@@ -37,10 +36,6 @@ def _required_topics():
         return 10
 
 
-def user_completed_free_course():
-    return _passed_topic_count() >= _required_topics()
-
-
 def get_or_create_paid_certificate(recipient_name):
     existing = Certificate.query.filter_by(user_id=current_user.id).filter(
         Certificate.cert_id.like('P%')
@@ -68,9 +63,7 @@ def _has_paid_access():
     return current_user.is_admin or bool(CourseAccess.query.filter_by(user_id=current_user.id).first())
 
 
-# ─────────────────────────────────────────────
-# FREE COURSE — disabled
-# ─────────────────────────────────────────────
+# ── FREE COURSE — disabled ───────────────────────────────────
 
 @cert_bp.route("/", methods=["GET"])
 @login_required
@@ -88,9 +81,7 @@ def certificate_pdf():
     return redirect(url_for("main.course"))
 
 
-# ─────────────────────────────────────────────
-# PAID COURSE CERTIFICATE
-# ─────────────────────────────────────────────
+# ── PAID COURSE CERTIFICATE ──────────────────────────────────
 
 @cert_bp.route("/paid", methods=["GET"])
 @login_required
@@ -108,12 +99,8 @@ def paid_certificate_home():
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     verify_url = f"{base_url}/certificate/verify/{existing.cert_id}" if existing and base_url else None
 
-    # Check if user has completed all 20 lessons
-    # Admins can always download; regular users must complete all lessons
     from app.models import CourseTopic
     total_lessons = CourseTopic.query.count()
-    course_complete = current_user.is_admin  # admins always get access
-    # For non-admins, we pass the flag to the template — actual enforcement is in the PDF route
 
     return render_template(
         "cert/paid_certificate.html",
@@ -137,219 +124,180 @@ def paid_certificate_pdf():
         flash("Please enter your name for the certificate.", "error")
         return redirect(url_for("cert.paid_certificate_home"))
 
-    # Completion check — admins bypass, regular users must complete all lessons
-    # We check via a hidden field sent from the form (JS sets it based on localStorage)
     if not current_user.is_admin:
         completed_count = int(request.form.get("completed_count", "0") or "0")
         from app.models import CourseTopic
         total = CourseTopic.query.count()
         if completed_count < total:
-            flash(f"You need to complete all {total} lessons before downloading your certificate. You have completed {completed_count}.", "error")
+            flash(f"Complete all {total} lessons to download your certificate. You have completed {completed_count}.", "error")
             return redirect(url_for("cert.paid_certificate_home"))
 
     cert = get_or_create_paid_certificate(name)
     buf = _generate_certificate_pdf(cert)
-
     filename = f"BlizTech-GIC-Certificate-{cert.cert_id}.pdf"
     return send_file(buf, as_attachment=True, download_name=filename, mimetype="application/pdf")
 
 
 def _generate_certificate_pdf(cert):
     """
-    Generate a premium dark certificate PDF entirely in code.
-    No background image — clean dark theme matching BlizTech brand.
-    Landscape A4: 841.9 × 595.3 pts
+    Premium dark certificate — landscape A4 (841.9 x 595.3 pts)
+    Content is spread across the full height with generous spacing.
     """
     pagesize = landscape(A4)
-    W, H = pagesize
+    W, H = pagesize  # 841.9 x 595.3
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=pagesize)
     c.setTitle("BlizTech — Certificate of Completion")
 
-    # ── Background ──────────────────────────────────────────────
-    # Deep dark background
+    # ── Background ──────────────────────────────────────────
     c.setFillColorRGB(0.04, 0.04, 0.05)
     c.rect(0, 0, W, H, fill=1, stroke=0)
 
-    # Subtle green radial glow top-right
-    # Approximate with layered transparent rectangles
-    for i in range(8):
-        alpha = 0.018 - i * 0.002
-        r = 180 - i * 20
-        if alpha > 0 and r > 0:
-            c.setFillColorRGB(0, 0.85, 0.49)
+    # Subtle green glow — top right
+    for i in range(6):
+        r = 220 - i * 30
+        alpha = 0.015 - i * 0.002
+        if r > 0 and alpha > 0:
             c.saveState()
-            # Can't do true radial, so use concentric circles via ellipse
+            c.setFillColorRGB(0, 0.85, 0.49)
             c.setFillAlpha(alpha)
-            cx_glow = W - 80
-            cy_glow = H - 60
-            c.ellipse(cx_glow - r, cy_glow - r, cx_glow + r, cy_glow + r, fill=1, stroke=0)
+            c.ellipse(W - 60 - r, H - 60 - r, W - 60 + r, H - 60 + r, fill=1, stroke=0)
             c.restoreState()
 
-    # ── Border ───────────────────────────────────────────────────
-    # Outer border
-    c.setStrokeColorRGB(0.12, 0.12, 0.14)
+    # ── Borders ─────────────────────────────────────────────
+    c.setStrokeColorRGB(0.12, 0.12, 0.15)
     c.setLineWidth(1)
-    c.rect(16, 16, W - 32, H - 32, fill=0, stroke=1)
+    c.rect(14, 14, W - 28, H - 28, fill=0, stroke=1)
 
-    # Inner accent border — green
     c.setStrokeColorRGB(0, 0.85, 0.49)
-    c.setLineWidth(0.4)
-    c.rect(22, 22, W - 44, H - 44, fill=0, stroke=1)
+    c.setLineWidth(0.5)
+    c.rect(20, 20, W - 40, H - 40, fill=0, stroke=1)
 
-    # Green top bar
+    # Top green bar
     c.setFillColorRGB(0, 0.85, 0.49)
-    c.rect(22, H - 22, W - 44, 3, fill=1, stroke=0)
+    c.rect(20, H - 20, W - 40, 4, fill=1, stroke=0)
+    # Bottom green bar
+    c.rect(20, 20, W - 40, 4, fill=1, stroke=0)
 
-    # Green bottom bar
-    c.rect(22, 22, W - 44, 3, fill=1, stroke=0)
+    # Corner accents
+    a = 22
+    c.setStrokeColorRGB(0, 0.85, 0.49)
+    c.setLineWidth(1.5)
+    for px, py, dx, dy in [(26, H-26, 1, -1), (W-26, H-26, -1, -1), (26, 26, 1, 1), (W-26, 26, -1, 1)]:
+        c.line(px, py, px + dx*a, py)
+        c.line(px, py, px, py + dy*a)
 
     cx = W / 2
 
-    # ── Header ───────────────────────────────────────────────────
-    # BlizTech wordmark
+    # ── Header — y positions from top ───────────────────────
+    # H = 595. Work top-down leaving good margins.
+
+    # Brand name
     c.setFillColorRGB(1, 1, 1)
-    c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(cx, H - 60, "BLIZTECH ACADEMY")
+    c.setFont("Helvetica-Bold", 18)
+    c.drawCentredString(cx, H - 68, "BLIZTECH ACADEMY")
 
+    # URL
     c.setFillColorRGB(0, 0.85, 0.49)
-    c.setFont("Helvetica", 8)
-    c.drawCentredString(cx, H - 74, "bliztechacademy.com")
+    c.setFont("Helvetica", 10)
+    c.drawCentredString(cx, H - 88, "bliztechacademy.com")
 
-    # Divider
-    c.setStrokeColorRGB(0.15, 0.15, 0.18)
+    # Thin divider
+    c.setStrokeColorRGB(0.18, 0.18, 0.22)
     c.setLineWidth(0.5)
-    c.line(cx - 200, H - 84, cx + 200, H - 84)
+    c.line(cx - 220, H - 102, cx + 220, H - 102)
 
     # "CERTIFICATE OF COMPLETION"
-    c.setFillColorRGB(0.75, 0.75, 0.80)
-    c.setFont("Helvetica", 9)
-    # Letter-spaced via drawString with manual spacing
-    title_text = "CERTIFICATE  OF  COMPLETION"
-    c.drawCentredString(cx, H - 104, title_text)
+    c.setFillColorRGB(0.78, 0.78, 0.82)
+    c.setFont("Helvetica-Bold", 13)
+    title = "CERTIFICATE  OF  COMPLETION"
+    c.drawCentredString(cx, H - 124, title)
 
     # Green underline
-    tw = c.stringWidth(title_text, "Helvetica", 9)
+    tw = c.stringWidth(title, "Helvetica-Bold", 13)
     c.setStrokeColorRGB(0, 0.85, 0.49)
-    c.setLineWidth(0.8)
-    c.line(cx - tw/2, H - 109, cx + tw/2, H - 109)
+    c.setLineWidth(1)
+    c.line(cx - tw/2, H - 131, cx + tw/2, H - 131)
 
-    # ── Body ─────────────────────────────────────────────────────
+    # ── Body — spread across middle of page ─────────────────
+    # Available vertical space: from H-150 down to ~160 (footer area)
+    # That's about 390pts — use it generously
+
     # "This is to certify that"
-    c.setFillColorRGB(0.55, 0.55, 0.60)
-    c.setFont("Helvetica-Oblique", 11)
-    c.drawCentredString(cx, H - 148, "This is to certify that")
+    c.setFillColorRGB(0.55, 0.55, 0.62)
+    c.setFont("Helvetica-Oblique", 13)
+    c.drawCentredString(cx, H - 175, "This is to certify that")
 
-    # Recipient name — large white bold
-    name_size = 38
-    # Scale down if name is long
+    # Recipient name
+    name_size = 46
     nw = c.stringWidth(cert.recipient_name, "Helvetica-Bold", name_size)
-    while nw > W - 160 and name_size > 22:
+    while nw > W - 140 and name_size > 28:
         name_size -= 2
         nw = c.stringWidth(cert.recipient_name, "Helvetica-Bold", name_size)
 
-    c.setFillColorRGB(0.96, 0.96, 0.98)
+    c.setFillColorRGB(0.97, 0.97, 1.0)
     c.setFont("Helvetica-Bold", name_size)
-    c.drawCentredString(cx, H - 196, cert.recipient_name)
+    c.drawCentredString(cx, H - 232, cert.recipient_name)
 
     # Gold underline
     c.setStrokeColorRGB(0.85, 0.70, 0.25)
-    c.setLineWidth(1)
-    c.line(cx - nw/2, H - 204, cx + nw/2, H - 204)
+    c.setLineWidth(1.2)
+    c.line(cx - nw/2, H - 242, cx + nw/2, H - 242)
 
     # "has successfully completed"
-    c.setFillColorRGB(0.55, 0.55, 0.60)
-    c.setFont("Helvetica-Oblique", 11)
-    c.drawCentredString(cx, H - 228, "has successfully completed")
+    c.setFillColorRGB(0.55, 0.55, 0.62)
+    c.setFont("Helvetica-Oblique", 13)
+    c.drawCentredString(cx, H - 278, "has successfully completed")
 
-    # Course name — green
+    # Course name
     c.setFillColorRGB(0, 0.85, 0.49)
-    c.setFont("Helvetica-Bold", 22)
-    c.drawCentredString(cx, H - 260, "Get Into Cybersecurity")
+    c.setFont("Helvetica-Bold", 28)
+    c.drawCentredString(cx, H - 322, "Get Into Cybersecurity")
 
     # Detail line
-    c.setFillColorRGB(0.40, 0.40, 0.45)
-    c.setFont("Helvetica", 9)
-    c.drawCentredString(cx, H - 280,
+    c.setFillColorRGB(0.48, 0.48, 0.54)
+    c.setFont("Helvetica", 12)
+    c.drawCentredString(cx, H - 356,
         "20 structured lessons  \u00b7  4 sections  \u00b7  4 practical labs  \u00b7  Lifetime access")
 
-    # ── Footer divider ────────────────────────────────────────────
-    c.setStrokeColorRGB(0.12, 0.12, 0.15)
+    # ── Footer ──────────────────────────────────────────────
+    # Footer divider sits at y=148 — well above the bottom border
+    footer_y = 155
+    c.setStrokeColorRGB(0.16, 0.16, 0.20)
     c.setLineWidth(0.5)
-    footer_line_y = 120
-    c.line(40, footer_line_y, W - 40, footer_line_y)
+    c.line(40, footer_y, W - 40, footer_y)
 
-    # ── Footer columns ────────────────────────────────────────────
-    col_l = W * 0.20
+    col_l = W * 0.22
     col_c = cx
-    col_r = W * 0.80
+    col_r = W * 0.78
 
-    label_y = footer_line_y - 16
-    value_y = footer_line_y - 32
+    # Labels
+    c.setFillColorRGB(0.38, 0.38, 0.44)
+    c.setFont("Helvetica", 9)
+    c.drawCentredString(col_l, footer_y - 20, "ISSUED BY")
+    c.drawCentredString(col_c, footer_y - 20, "CERTIFICATE ID")
+    c.drawCentredString(col_r, footer_y - 20, "DATE ISSUED")
 
-    c.setFillColorRGB(0.35, 0.35, 0.40)
-    c.setFont("Helvetica", 7.5)
-    c.drawCentredString(col_l, label_y, "ISSUED BY")
-    c.drawCentredString(col_c, label_y, "CERTIFICATE ID")
-    c.drawCentredString(col_r, label_y, "DATE ISSUED")
-
-    c.setFillColorRGB(0.80, 0.80, 0.85)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(col_l, value_y, "BlizTech Academy")
+    # Values
+    c.setFillColorRGB(0.82, 0.82, 0.88)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(col_l, footer_y - 40, "BlizTech Academy")
 
     c.setFillColorRGB(0, 0.85, 0.49)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(col_c, value_y, cert.cert_id)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(col_c, footer_y - 40, cert.cert_id)
 
-    c.setFillColorRGB(0.80, 0.80, 0.85)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawCentredString(col_r, value_y, cert.issued_at.strftime("%d %B %Y"))
+    c.setFillColorRGB(0.82, 0.82, 0.88)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(col_r, footer_y - 40, cert.issued_at.strftime("%d %B %Y"))
 
     # Verify URL
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     if base_url:
         verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"
-        c.setFillColorRGB(0.28, 0.28, 0.32)
-        c.setFont("Helvetica", 7)
-        c.drawCentredString(cx, footer_line_y - 48, f"Verify at: {verify_url}")
-
-    # ── Corner accents ────────────────────────────────────────────
-    accent = 18
-    c.setStrokeColorRGB(0, 0.85, 0.49)
-    c.setLineWidth(1.5)
-    # Top-left
-    c.line(28, H - 28, 28 + accent, H - 28)
-    c.line(28, H - 28, 28, H - 28 - accent)
-    # Top-right
-    c.line(W - 28, H - 28, W - 28 - accent, H - 28)
-    c.line(W - 28, H - 28, W - 28, H - 28 - accent)
-    # Bottom-left
-    c.line(28, 28, 28 + accent, 28)
-    c.line(28, 28, 28, 28 + accent)
-    # Bottom-right
-    c.line(W - 28, 28, W - 28 - accent, 28)
-    c.line(W - 28, 28, W - 28, 28 + accent)
-
-    # ── Shield icon (simple geometric, bottom-left area) ──────────
-    sx, sy = 100, 82
-    c.setFillColorRGB(0, 0.85, 0.49)
-    c.setFillAlpha(0.12)
-    # Shield outline
-    c.setStrokeColorRGB(0, 0.85, 0.49)
-    c.setLineWidth(0.8)
-    c.setFillAlpha(0.08)
-    shield_pts = [
-        (sx, sy + 28), (sx + 20, sy + 28),
-        (sx + 20, sy + 8), (sx + 10, sy),
-        (sx, sy + 8), (sx, sy + 28)
-    ]
-    path = c.beginPath()
-    path.moveTo(*shield_pts[0])
-    for pt in shield_pts[1:]:
-        path.lineTo(*pt)
-    path.close()
-    c.drawPath(path, fill=1, stroke=1)
-    c.setFillAlpha(1)
+        c.setFillColorRGB(0.30, 0.30, 0.36)
+        c.setFont("Helvetica", 8)
+        c.drawCentredString(cx, footer_y - 60, f"Verify: {verify_url}")
 
     c.showPage()
     c.save()
@@ -357,9 +305,7 @@ def _generate_certificate_pdf(cert):
     return buf
 
 
-# ─────────────────────────────────────────────
-# VERIFICATION
-# ─────────────────────────────────────────────
+# ── VERIFICATION ─────────────────────────────────────────────
 
 @cert_bp.route("/verify/<cert_id>", methods=["GET"])
 @limiter.limit("30 per minute; 200 per day")
