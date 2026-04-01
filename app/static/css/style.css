@@ -3405,3 +3405,23 @@ code {
   color: var(--green);
   width: 30%;
 }
+
+.lesson-card table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.lesson-card td:first-child,
+.lesson-card th:first-child {
+  width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lesson-card td:not(:first-child),
+.lesson-card th:not(:first-child) {
+  width: 60%;
+  white-space: normal;
+  word-break: break-word;
+}
