@@ -225,16 +225,31 @@ function buildTOC() {
   var nav = document.getElementById('toc-nav');
   if (!content || !nav) return;
 
-  // Exclude h2s inside SVGs and diagram wrapper divs (which use inline border-radius:8px)
-  var headings = Array.from(content.querySelectorAll('h2')).filter(function(h) {
-    return !h.closest('svg') && !h.closest('[style*="border-radius:8px"]');
+  // Clone the content node and strip all SVGs and diagram wrapper divs
+  // so we only scan real lesson headings, not SVG label text
+  var clone = content.cloneNode(true);
+  clone.querySelectorAll('svg').forEach(function(el) { el.remove(); });
+  clone.querySelectorAll('div[style*="border-radius"]').forEach(function(el) { el.remove(); });
+
+  var cloneHeadings = clone.querySelectorAll('h2');
+  if (cloneHeadings.length === 0) return;
+
+  // Build a set of valid heading texts from the clean clone
+  var validTexts = Array.from(cloneHeadings).map(function(h) {
+    return h.textContent.trim();
   });
 
-  if (headings.length === 0) return;
+  // Match back to real DOM headings by text
+  var realHeadings = content.querySelectorAll('h2');
+  var matched = Array.from(realHeadings).filter(function(h) {
+    return validTexts.indexOf(h.textContent.trim()) !== -1;
+  });
+
+  if (matched.length === 0) return;
 
   nav.innerHTML = '';
 
-  headings.forEach(function (h, i) {
+  matched.forEach(function(h, i) {
     var id = 'section-' + i;
     h.id = id;
 
@@ -243,7 +258,7 @@ function buildTOC() {
     a.textContent = h.textContent;
     a.className = 'side-link';
 
-    a.addEventListener('click', function (e) {
+    a.addEventListener('click', function(e) {
       e.preventDefault();
       h.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -251,24 +266,19 @@ function buildTOC() {
     nav.appendChild(a);
   });
 
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
       if (entry.isIntersecting) {
-        nav.querySelectorAll('a').forEach(function (link) {
+        nav.querySelectorAll('a').forEach(function(link) {
           link.classList.remove('active');
         });
-
         var active = nav.querySelector('a[href="#' + entry.target.id + '"]');
         if (active) active.classList.add('active');
       }
     });
-  }, {
-    rootMargin: '-20% 0px -70% 0px'
-  });
+  }, { rootMargin: '-20% 0px -70% 0px' });
 
-  headings.forEach(function (h) {
-    observer.observe(h);
-  });
+  matched.forEach(function(h) { observer.observe(h); });
 }
 
 function buildKeyTerms() {
