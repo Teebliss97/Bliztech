@@ -3249,3 +3249,38 @@ code {
   color: var(--green);
   white-space: nowrap;
 }
+
+/* Prevent lesson content from overflowing its grid column */
+.lesson-card {
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* SVGs must never exceed their container */
+.lesson-card svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Tables scroll horizontally rather than blow out */
+.lesson-card table {
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap; /* for wide tables */
+}
+
+.lesson-card table tbody,
+.lesson-card table thead,
+.lesson-card table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Second column and beyond — allow wrapping */
+.lesson-card td:not(:first-child),
+.lesson-card th:not(:first-child) {
+  white-space: normal;
+  word-break: break-word;
+}
