@@ -4,100 +4,114 @@
 {% block content %}
 <div class="page-wrap">
 
-  <!-- Lesson header -->
   <div class="lesson-header">
-    <div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.8px;color:var(--green);margin-bottom:6px;">
+    <div class="lesson-header-main">
+      <div class="lesson-section-label">
         Section {{ topic.section }} · Lesson {{ topic.lesson_number }}
       </div>
-      <h1 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.5px;margin:0;">
-        {{ topic.title }}
-        <span class="lesson-time" id="read-time">— min read</span>
-      </h1>
+
+      <h1 class="lesson-page-title">{{ topic.title }}</h1>
+
+      <div class="lesson-meta">
+        <span class="lesson-time" id="read-time">7 min read</span>
+        <span class="lesson-meta-chip">Paid course</span>
+        <span class="lesson-meta-chip">Premium lesson</span>
+      </div>
     </div>
+
     <div class="lesson-header-actions">
       <a class="btn btn-outline btn-sm" href="{{ url_for('main.course_lessons') }}">← All lessons</a>
       <button class="btn btn-sm" id="mark-read-btn" onclick="markRead()">Mark as read</button>
     </div>
   </div>
 
-  <!-- 3-column layout -->
   <div class="lesson-layout">
 
-    <!-- Left sidebar — TOC -->
-    <div class="lesson-side" style="top:76px;">
+    <aside class="lesson-side">
       <div class="side-card">
         <div class="side-title">In this lesson</div>
-        <nav id="toc-nav" style="display:grid;gap:4px;"></nav>
+        <nav id="toc-nav" class="side-list"></nav>
       </div>
+
       <div class="side-card">
         <div class="side-title">Progress</div>
-        <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;" id="progress-label">Loading...</div>
-        <div style="height:3px;background:var(--bg-4);border-radius:999px;overflow:hidden;">
-          <div id="progress-bar" style="height:100%;background:var(--green);border-radius:999px;width:0%;transition:width 0.3s;"></div>
+        <div class="side-text lesson-progress-label" id="progress-label">Loading...</div>
+        <div class="bar">
+          <div id="progress-bar" class="bar-fill lesson-progress-bar-fill" style="width:0%;"></div>
         </div>
       </div>
+
       <div class="side-card">
         <div class="side-title">Section</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:var(--radius-xs);border:1px solid var(--border-g);background:var(--green-dim);color:var(--green);display:inline-block;margin-bottom:6px;">
+        <div class="pill pill-green lesson-section-pill">
           Section {{ topic.section }}
         </div>
-        <div style="font-size:12px;color:var(--text-3);">Lesson {{ topic.lesson_number }} of 20</div>
+        <div class="side-text">Lesson {{ topic.lesson_number }} of 20</div>
       </div>
-    </div>
+    </aside>
 
-    <!-- Main content -->
-    <div>
-      <div class="lesson-card" id="lesson-content">
+    <div class="lesson-main">
+      <article class="lesson-card" id="lesson-content">
         {{ topic.body | safe }}
-      </div>
+      </article>
 
       {% if topic.lab %}
-      <div style="margin-top:20px;border:1px solid var(--border-g);border-radius:var(--radius-lg);padding:24px 28px;background:var(--green-dim);">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.8px;color:var(--green);margin-bottom:12px;">Practical Lab</div>
-        {{ topic.lab | safe }}
-      </div>
+      <section class="takeaway lesson-lab-block">
+        <div class="takeaway-title">Practical Lab</div>
+        <div class="lesson-card-content">
+          {{ topic.lab | safe }}
+        </div>
+      </section>
       {% endif %}
 
-      <!-- Navigation -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:28px;padding-top:20px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap;">
+      <div class="lesson-nav-row">
         {% if prev_topic %}
-        <a class="btn btn-outline" href="{{ url_for('main.course_lesson', slug=prev_topic.slug) }}">← {{ prev_topic.title }}</a>
+        <a class="btn btn-outline lesson-nav-btn-prev" href="{{ url_for('main.course_lesson', slug=prev_topic.slug) }}">
+          ← {{ prev_topic.title }}
+        </a>
         {% else %}
         <div></div>
         {% endif %}
+
         {% if next_topic %}
-        <a class="btn" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}">{{ next_topic.title }} →</a>
+        <a class="btn lesson-nav-btn-next" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}">
+          {{ next_topic.title }} →
+        </a>
         {% else %}
-        <a class="btn" href="{{ url_for('cert.paid_certificate_home') }}">Get your certificate →</a>
+        <a class="btn lesson-nav-btn-next" href="{{ url_for('cert.paid_certificate_home') }}">
+          Get your certificate →
+        </a>
         {% endif %}
       </div>
     </div>
 
-    <!-- Right panel -->
-    <div class="lesson-side" style="top:76px;">
-      <div class="side-card" id="key-terms-card" style="display:none;">
+    <aside class="lesson-side">
+      <div class="side-card" id="key-terms-card" hidden>
         <div class="side-title">Key terms</div>
-        <div id="key-terms-list" style="display:grid;gap:6px;"></div>
+        <div id="key-terms-list" class="term-list"></div>
       </div>
 
       {% if next_topic %}
       <div class="side-card">
         <div class="side-title">Up next</div>
-        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">{{ next_topic.title }}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-3);margin-bottom:10px;">Lesson {{ next_topic.lesson_number }}</div>
-        <a class="btn btn-sm" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}" style="width:100%;">Continue →</a>
+        <div class="lesson-upnext-title">{{ next_topic.title }}</div>
+        <div class="side-text lesson-upnext-meta">Lesson {{ next_topic.lesson_number }}</div>
+        <a class="btn btn-sm lesson-upnext-btn" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}">
+          Continue →
+        </a>
       </div>
       {% endif %}
 
       <div class="side-card">
         <div class="side-title">Notes</div>
-        <textarea id="lesson-notes" placeholder="Your notes for this lesson..."
-          style="width:100%;min-height:120px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;padding:10px;resize:vertical;outline:none;line-height:1.6;"
+        <textarea
+          id="lesson-notes"
+          class="notes-box"
+          placeholder="Your notes for this lesson..."
           oninput="saveNote(this.value)"></textarea>
-        <div style="font-size:10.5px;color:var(--text-3);margin-top:4px;">Saved locally in your browser</div>
+        <div class="notes-help">Saved locally in your browser</div>
       </div>
-    </div>
+    </aside>
 
   </div>
 </div>
@@ -107,45 +121,47 @@ var SLUG = '{{ topic.slug }}';
 var CK = 'bliztech_completed';
 var NK = 'bliztech_notes_' + SLUG;
 
-function getC() { try { return JSON.parse(localStorage.getItem(CK)||'{}'); } catch(e) { return {}; } }
+function getC() {
+  try {
+    return JSON.parse(localStorage.getItem(CK) || '{}');
+  } catch (e) {
+    return {};
+  }
+}
 
-// Read time
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
   var content = document.getElementById('lesson-content');
+
   if (content) {
     var words = content.innerText.trim().split(/\s+/).length;
     var mins = Math.max(1, Math.round(words / 200));
     var el = document.getElementById('read-time');
-    if (el) el.textContent = '— ' + mins + ' min read';
+    if (el) el.textContent = mins + ' min read';
   }
 
-  // Progress
   var c = getC();
   var done = Object.keys(c).length;
   var total = 20;
   var pct = Math.round(done / total * 100);
   var bar = document.getElementById('progress-bar');
   var label = document.getElementById('progress-label');
+
   if (bar) bar.style.width = pct + '%';
   if (label) label.textContent = done + ' of ' + total + ' completed';
 
-  // Mark read button
   if (c[SLUG]) {
     var btn = document.getElementById('mark-read-btn');
-    if (btn) { btn.textContent = '✓ Read'; btn.classList.add('btn-outline'); }
+    if (btn) {
+      btn.textContent = '✓ Read';
+      btn.classList.add('btn-outline');
+    }
   }
 
-  // Notes
   var notes = document.getElementById('lesson-notes');
   if (notes) notes.value = localStorage.getItem(NK) || '';
 
-  // TOC
   buildTOC();
-
-  // Key terms
   buildKeyTerms();
-
-  // Auto-mark on scroll
   setupAutoMark();
 });
 
@@ -153,12 +169,18 @@ function markRead() {
   var c = getC();
   c[SLUG] = true;
   localStorage.setItem(CK, JSON.stringify(c));
+
   var btn = document.getElementById('mark-read-btn');
-  if (btn) { btn.textContent = '✓ Read'; btn.classList.add('btn-outline'); }
+  if (btn) {
+    btn.textContent = '✓ Read';
+    btn.classList.add('btn-outline');
+  }
+
   var done = Object.keys(c).length;
   var pct = Math.round(done / 20 * 100);
   var bar = document.getElementById('progress-bar');
   var label = document.getElementById('progress-label');
+
   if (bar) bar.style.width = pct + '%';
   if (label) label.textContent = done + ' of 20 completed';
 }
@@ -169,80 +191,104 @@ function saveNote(val) {
 
 function buildTOC() {
   var content = document.getElementById('lesson-content');
-  if (!content) return;
-  var headings = content.querySelectorAll('h2');
   var nav = document.getElementById('toc-nav');
-  if (!nav || headings.length === 0) return;
-  headings.forEach(function(h, i) {
+  if (!content || !nav) return;
+
+  var headings = content.querySelectorAll('h2');
+  if (headings.length === 0) return;
+
+  nav.innerHTML = '';
+
+  headings.forEach(function (h, i) {
     var id = 'section-' + i;
     h.id = id;
+
     var a = document.createElement('a');
     a.href = '#' + id;
     a.textContent = h.textContent;
-    a.style.cssText = 'font-size:11.5px;color:var(--text-3);text-decoration:none;padding:3px 0;border-left:2px solid transparent;padding-left:8px;transition:all 0.12s;display:block;';
-    a.addEventListener('click', function(e) {
+    a.className = 'side-link';
+
+    a.addEventListener('click', function (e) {
       e.preventDefault();
       h.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+
     nav.appendChild(a);
   });
 
-  // Highlight active section
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
       if (entry.isIntersecting) {
-        nav.querySelectorAll('a').forEach(function(a) {
-          a.style.color = 'var(--text-3)';
-          a.style.borderLeftColor = 'transparent';
+        nav.querySelectorAll('a').forEach(function (link) {
+          link.classList.remove('active');
         });
+
         var active = nav.querySelector('a[href="#' + entry.target.id + '"]');
-        if (active) {
-          active.style.color = 'var(--green)';
-          active.style.borderLeftColor = 'var(--green)';
-        }
+        if (active) active.classList.add('active');
       }
     });
-  }, { rootMargin: '-20% 0px -70% 0px' });
+  }, {
+    rootMargin: '-20% 0px -70% 0px'
+  });
 
-  headings.forEach(function(h) { observer.observe(h); });
+  headings.forEach(function (h) {
+    observer.observe(h);
+  });
 }
 
 function buildKeyTerms() {
   var content = document.getElementById('lesson-content');
-  if (!content) return;
-  var terms = content.querySelectorAll('strong');
-  if (terms.length === 0) return;
-  var seen = {};
   var list = document.getElementById('key-terms-list');
   var card = document.getElementById('key-terms-card');
+
+  if (!content || !list || !card) return;
+
+  var terms = content.querySelectorAll('strong');
+  if (terms.length === 0) return;
+
+  var seen = {};
   var count = 0;
-  terms.forEach(function(t) {
+  list.innerHTML = '';
+
+  terms.forEach(function (t) {
     var text = t.textContent.trim();
+
     if (text.length > 2 && text.length < 40 && !seen[text]) {
       seen[text] = true;
+
       var div = document.createElement('div');
-      div.style.cssText = 'font-size:11.5px;color:var(--text-2);padding:4px 8px;background:var(--bg-3);border-radius:var(--radius-xs);border:1px solid var(--border);';
+      div.className = 'term-chip';
       div.textContent = text;
+
       list.appendChild(div);
       count++;
     }
   });
-  if (count > 0 && card) card.style.display = 'block';
+
+  if (count > 0) {
+    card.hidden = false;
+  }
 }
 
 function setupAutoMark() {
   var content = document.getElementById('lesson-content');
   if (!content) return;
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
+
+  var last = content.lastElementChild;
+  if (!last) return;
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
       if (entry.isIntersecting && entry.intersectionRatio > 0.8) {
         markRead();
         observer.disconnect();
       }
     });
-  }, { threshold: 0.8 });
-  var last = content.lastElementChild;
-  if (last) observer.observe(last);
+  }, {
+    threshold: 0.8
+  });
+
+  observer.observe(last);
 }
 </script>
 {% endblock %}

@@ -2,255 +2,193 @@
 {% block title %}Get Into Cybersecurity — Lessons{% endblock %}
 
 {% block content %}
-<div class="page-wrap">
+<div class="page-wrap course-index-wrap">
 
-  <div class="cl-head">
-    <div class="cl-eyebrow">Get Into Cybersecurity</div>
-    <h1 class="cl-title">Your lessons</h1>
-    <p class="cl-sub">20 lessons across four sections. Work through them in order.</p>
-
-    <div class="cl-stats">
-      <div class="cl-stat"><span class="cl-snum">20</span><span class="cl-slabel">Lessons</span></div>
-      <div class="cl-sdiv"></div>
-      <div class="cl-stat"><span class="cl-snum">4</span><span class="cl-slabel">Sections</span></div>
-      <div class="cl-sdiv"></div>
-      <div class="cl-stat"><span class="cl-snum">4</span><span class="cl-slabel">Labs</span></div>
-      <div class="cl-sdiv"></div>
-      <div class="cl-stat"><span class="cl-snum" id="cl-done">0</span><span class="cl-slabel">Completed</span></div>
-    </div>
-
-    <div class="cl-prog-row">
-      <div class="cl-prog-track"><div class="cl-prog-fill" id="cl-prog-fill" style="width:0%"></div></div>
-      <span class="cl-prog-label" id="cl-prog-label">0 of 20 read</span>
-    </div>
-  </div>
-
-  <div class="cl-body">
-    {% for section_key in ["A", "B", "C", "D"] %}
-    {% set section_name = section_names[section_key] %}
-    {% set topics = sections[section_key] %}
-    {% if topics %}
-    <div class="cl-section">
-      <div class="cl-sec-head">
-        <div class="cl-sec-left">
-          <span class="cl-sec-tag">Section {{ section_key }}</span>
-          <span class="cl-sec-name">{{ section_name }}</span>
-        </div>
-        <span class="cl-sec-count">{{ topics|length }} lessons</span>
+  <section class="course-index-hero">
+    <div class="course-index-hero-top">
+      <div>
+        <div class="course-index-eyebrow">Get Into Cybersecurity</div>
+        <h1 class="course-index-title">Your lessons</h1>
+        <p class="course-index-sub">
+          20 lessons across four sections. Work through them in order, track your progress, and unlock your certificate at the end.
+        </p>
       </div>
-      {% for topic in topics %}
-      <a class="cl-row" href="{{ url_for('main.course_lesson', slug=topic.slug) }}" data-slug="{{ topic.slug }}">
-        <span class="cl-num">{{ '%02d' % topic.lesson_number }}</span>
-        <div class="cl-row-body">
-          <div class="cl-row-title">{{ topic.title }}</div>
-          {% if topic.lab %}
-          <div class="cl-row-lab"><span class="cl-lab-dot"></span>Includes practical lab</div>
-          {% endif %}
+    </div>
+
+    <div class="course-index-stats">
+      <div class="course-index-stat">
+        <span class="course-index-stat-num">20</span>
+        <span class="course-index-stat-label">Lessons</span>
+      </div>
+
+      <div class="course-index-stat-divider"></div>
+
+      <div class="course-index-stat">
+        <span class="course-index-stat-num">4</span>
+        <span class="course-index-stat-label">Sections</span>
+      </div>
+
+      <div class="course-index-stat-divider"></div>
+
+      <div class="course-index-stat">
+        <span class="course-index-stat-num">4</span>
+        <span class="course-index-stat-label">Labs</span>
+      </div>
+
+      <div class="course-index-stat-divider"></div>
+
+      <div class="course-index-stat">
+        <span class="course-index-stat-num" id="cl-done">0</span>
+        <span class="course-index-stat-label">Completed</span>
+      </div>
+    </div>
+
+    <div class="course-index-progress-row">
+      <div class="course-index-progress-track">
+        <div class="course-index-progress-fill" id="cl-prog-fill" style="width:0%"></div>
+      </div>
+      <span class="course-index-progress-label" id="cl-prog-label">0 of 20 read</span>
+    </div>
+  </section>
+
+  <div class="course-index-body">
+    <div class="course-index-main">
+
+      {% for section_key in ["A", "B", "C", "D"] %}
+      {% set section_name = section_names[section_key] %}
+      {% set topics = sections[section_key] %}
+
+      {% if topics %}
+      <section class="course-section-card">
+        <div class="course-section-head">
+          <div class="course-section-head-left">
+            <span class="course-section-tag">Section {{ section_key }}</span>
+            <div>
+              <div class="course-section-name">{{ section_name }}</div>
+              <div class="course-section-meta">{{ topics|length }} lessons</div>
+            </div>
+          </div>
         </div>
-        <span class="cl-check" style="display:none">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        </span>
-        <span class="cl-arrow">→</span>
-      </a>
+
+        <div class="course-section-list">
+          {% for topic in topics %}
+          <a class="course-lesson-row" href="{{ url_for('main.course_lesson', slug=topic.slug) }}" data-slug="{{ topic.slug }}">
+            <span class="course-lesson-num">{{ '%02d' % topic.lesson_number }}</span>
+
+            <div class="course-lesson-body">
+              <div class="course-lesson-title">{{ topic.title }}</div>
+
+              <div class="course-lesson-meta-row">
+                <span class="course-lesson-meta-chip">Lesson {{ topic.lesson_number }}</span>
+                {% if topic.lab %}
+                <span class="course-lesson-meta-chip course-lesson-meta-chip-green">
+                  <span class="course-lesson-lab-dot"></span>
+                  Includes practical lab
+                </span>
+                {% endif %}
+              </div>
+            </div>
+
+            <span class="course-lesson-check" style="display:none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+
+            <span class="course-lesson-arrow">→</span>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
       {% endfor %}
-    </div>
-    {% endif %}
-    {% endfor %}
 
-    <!-- Certificate banner -->
-    <div class="cl-cert-banner">
-      <div class="cl-cert-left">
-        <div class="cl-cert-icon">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 8v8c0 7.2 5.2 13.9 12 15.5C23.8 29.9 28 23.2 28 16V8L16 2z" fill="rgba(0,217,126,0.15)" stroke="#00d97e" stroke-width="1.5"/><path d="M11 16l3.5 3.5L21 12" stroke="#00d97e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div>
-          <div class="cl-cert-title">Certificate of Completion</div>
-          <div class="cl-cert-sub">Available to all enrolled students — download and share on LinkedIn</div>
+    </div>
+
+    <aside class="course-index-side">
+      <div class="side-card">
+        <div class="side-title">Course status</div>
+        <div class="course-side-status-title">Keep going</div>
+        <div class="side-text" id="course-side-status-text">
+          You have completed 0 of 20 lessons.
         </div>
       </div>
-      <a href="{{ url_for('cert.paid_certificate_home') }}" class="cl-cert-btn">Get certificate →</a>
-    </div>
 
+      <div class="side-card">
+        <div class="side-title">What you’ll get</div>
+        <div class="term-list">
+          <div class="term-chip">20 structured lessons</div>
+          <div class="term-chip">4 practical labs</div>
+          <div class="term-chip">Step-by-step progression</div>
+          <div class="term-chip">Completion certificate</div>
+        </div>
+      </div>
+
+      <div class="side-card course-cert-card">
+        <div class="side-title">Certificate</div>
+        <div class="course-cert-card-title">Certificate of Completion</div>
+        <div class="side-text">
+          Available to all enrolled students after completing the course.
+        </div>
+        <a href="{{ url_for('cert.paid_certificate_home') }}" class="btn btn-sm" style="width:100%; margin-top:14px;">
+          Get certificate →
+        </a>
+      </div>
+    </aside>
   </div>
-
 </div>
-
-<style>
-.cl-head {
-  padding: 32px 0 24px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 16px;
-}
-.cl-eyebrow {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--green);
-  margin-bottom: 8px;
-}
-.cl-title {
-  font-size: clamp(26px, 3.5vw, 36px);
-  font-weight: 700;
-  letter-spacing: -0.8px;
-  color: var(--text);
-  margin: 0 0 8px;
-}
-.cl-sub { font-size: 14px; color: var(--text-3); margin: 0 0 20px; }
-
-.cl-stats { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
-.cl-stat { display: flex; flex-direction: column; gap: 1px; }
-.cl-snum { font-size: 19px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; line-height: 1; }
-.cl-slabel { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-3); }
-.cl-sdiv { width: 1px; height: 24px; background: var(--border); }
-
-.cl-prog-row { display: flex; align-items: center; gap: 10px; }
-.cl-prog-track { flex: 1; max-width: 260px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
-.cl-prog-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s ease; min-width: 2px; }
-.cl-prog-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-3); }
-
-/* Sections */
-.cl-body { display: flex; flex-direction: column; gap: 12px; padding-bottom: 60px; margin-top: 4px; }
-.cl-section { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.15s; }
-.cl-section:hover { border-color: rgba(0,217,126,0.18); }
-
-.cl-sec-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 18px;
-  background: var(--bg-3);
-  border-bottom: 1px solid var(--border);
-}
-.cl-sec-left { display: flex; align-items: center; gap: 10px; }
-.cl-sec-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8.5px;
-  padding: 2px 7px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--border-g);
-  background: var(--green-dim);
-  color: var(--green);
-  letter-spacing: 0.4px;
-}
-.cl-sec-name { font-size: 13.5px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
-.cl-sec-count { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.4px; }
-
-/* Rows */
-.cl-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 13px 18px;
-  border-bottom: 1px solid var(--border);
-  text-decoration: none;
-  background: var(--bg-2);
-  transition: background 0.12s;
-  position: relative;
-}
-.cl-row:last-child { border-bottom: none; }
-.cl-row::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 2px;
-  background: var(--green);
-  opacity: 0;
-  transition: opacity 0.12s;
-}
-.cl-row:hover { background: var(--bg-3); }
-.cl-row:hover::before { opacity: 1; }
-.cl-row.done { background: rgba(0,217,126,0.02); }
-.cl-row.done::before { opacity: 0.35; }
-
-.cl-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10.5px;
-  color: var(--green);
-  flex-shrink: 0;
-  width: 22px;
-  opacity: 0.6;
-}
-.cl-row:hover .cl-num, .cl-row.done .cl-num { opacity: 1; }
-
-.cl-row-body { flex: 1; min-width: 0; }
-.cl-row-title { font-size: 13.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cl-row.done .cl-row-title { color: var(--text-2); }
-
-.cl-row-lab {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  color: var(--green);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  margin-top: 2px;
-  opacity: 0.75;
-}
-.cl-lab-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-
-.cl-check { color: var(--green); flex-shrink: 0; display: flex; align-items: center; }
-.cl-arrow { color: var(--text-3); font-size: 13px; flex-shrink: 0; transition: transform 0.12s, color 0.12s; }
-.cl-row:hover .cl-arrow { transform: translateX(3px); color: var(--green); }
-.cl-row.done .cl-arrow { display: none; }
-
-/* Certificate banner */
-.cl-cert-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border: 1px solid var(--border-g);
-  border-radius: var(--radius-lg);
-  background: rgba(0,217,126,0.04);
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.cl-cert-left { display: flex; align-items: center; gap: 12px; }
-.cl-cert-icon { flex-shrink: 0; }
-.cl-cert-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
-.cl-cert-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-.cl-cert-btn {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--green);
-  text-decoration: none;
-  border: 1px solid var(--border-g);
-  background: var(--green-dim);
-  padding: 8px 16px;
-  border-radius: var(--radius-xs);
-  white-space: nowrap;
-  transition: all 0.12s;
-  flex-shrink: 0;
-}
-.cl-cert-btn:hover { background: var(--green); color: #000; }
-</style>
 
 <script>
 var CK = 'bliztech_completed';
-function getC() { try { return JSON.parse(localStorage.getItem(CK)||'{}'); } catch(e) { return {}; } }
 
-document.addEventListener('DOMContentLoaded', function() {
-  var c = getC(); var count = 0;
-  document.querySelectorAll('.cl-row').forEach(function(row) {
+function getC() {
+  try {
+    return JSON.parse(localStorage.getItem(CK) || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var c = getC();
+  var count = 0;
+  var total = 20;
+
+  document.querySelectorAll('.course-lesson-row').forEach(function (row) {
     var slug = row.getAttribute('data-slug');
     if (c[slug]) {
       row.classList.add('done');
-      var chk = row.querySelector('.cl-check');
-      var arr = row.querySelector('.cl-arrow');
+
+      var chk = row.querySelector('.course-lesson-check');
+      var arr = row.querySelector('.course-lesson-arrow');
+
       if (chk) chk.style.display = 'flex';
       if (arr) arr.style.display = 'none';
+
       count++;
     }
   });
+
   var done = document.getElementById('cl-done');
   var fill = document.getElementById('cl-prog-fill');
   var label = document.getElementById('cl-prog-label');
+  var sideText = document.getElementById('course-side-status-text');
+
+  var pct = Math.round((count / total) * 100);
+
   if (done) done.textContent = count;
-  if (fill) fill.style.width = Math.round(count / 20 * 100) + '%';
-  if (label) label.textContent = count + ' of 20 read';
+  if (fill) fill.style.width = pct + '%';
+  if (label) label.textContent = count + ' of ' + total + ' read';
+
+  if (sideText) {
+    if (count === 0) {
+      sideText.textContent = 'You have completed 0 of 20 lessons.';
+    } else if (count < total) {
+      sideText.textContent = 'You have completed ' + count + ' of ' + total + ' lessons.';
+    } else {
+      sideText.textContent = 'You have completed the full course.';
+    }
+  }
 });
 </script>
 {% endblock %}
