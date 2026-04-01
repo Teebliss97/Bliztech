@@ -2827,3 +2827,230 @@ code {
     display: none;
   }
 }
+
+/* -----------------------------
+   25) Lesson page rebuild - 2 column
+------------------------------ */
+.lesson-page-wrap {
+  padding-top: 8px;
+}
+
+.lesson-header-compact {
+  align-items: flex-start;
+  gap: 24px;
+  margin: 0 0 24px;
+  padding-bottom: 16px;
+}
+
+.lesson-page-title-compact {
+  max-width: 11ch;
+  font-size: clamp(42px, 5.2vw, 74px);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+  margin-bottom: 14px;
+}
+
+.lesson-layout-2col {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 36px;
+  justify-content: stretch;
+  align-items: start;
+}
+
+.lesson-side-left {
+  position: sticky;
+  top: 82px;
+}
+
+.lesson-main-wide {
+  min-width: 0;
+}
+
+.lesson-card-wide {
+  width: 100%;
+  max-width: none;
+  padding: 44px 56px;
+}
+
+.lesson-card-wide h2 {
+  font-size: 30px;
+  margin: 38px 0 16px;
+}
+
+.lesson-card-wide p,
+.lesson-card-wide li {
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.lesson-card-wide p {
+  margin-bottom: 20px;
+}
+
+.lesson-card-wide ul,
+.lesson-card-wide ol {
+  margin: 0 0 20px 24px;
+}
+
+.lesson-progress-label {
+  margin-bottom: 10px;
+}
+
+.lesson-progress-bar-fill {
+  min-width: 2px;
+}
+
+.lesson-section-pill {
+  margin-bottom: 8px;
+}
+
+.lesson-lab-block {
+  margin-top: 22px;
+}
+
+.lesson-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lesson-nav-btn-prev,
+.lesson-nav-btn-next {
+  max-width: 100%;
+}
+
+.lesson-upnext-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.45;
+}
+
+.lesson-upnext-meta {
+  margin-bottom: 12px;
+}
+
+.lesson-upnext-btn {
+  width: 100%;
+}
+
+.lesson-card-content p,
+.lesson-card-content li {
+  color: rgba(244,244,244,0.88);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.lesson-card-content h2,
+.lesson-card-content h3,
+.lesson-card-content h4 {
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.lesson-card-content p {
+  margin: 0 0 14px;
+}
+
+.lesson-card-content ul,
+.lesson-card-content ol {
+  margin: 0 0 14px 20px;
+}
+
+/* Make TOC panel feel slimmer and more premium */
+.lesson-side-left .side-card {
+  border-radius: 16px;
+}
+
+.lesson-side-left .side-list a,
+.lesson-side-left .side-list button,
+.lesson-side-left .side-link {
+  padding: 9px 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* Slightly reduce chip heaviness in header */
+.lesson-meta {
+  gap: 8px;
+}
+
+.lesson-meta-chip,
+.lesson-time {
+  padding: 4px 10px;
+  font-size: 10px;
+}
+
+/* Responsive */
+@media (max-width: 1180px) {
+  .lesson-layout-2col {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .lesson-card-wide {
+    padding: 34px 32px;
+  }
+
+  .lesson-page-title-compact {
+    font-size: clamp(36px, 4.8vw, 58px);
+    max-width: 12ch;
+  }
+}
+
+@media (max-width: 900px) {
+  .lesson-layout-2col {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .lesson-side-left {
+    position: static;
+  }
+
+  .lesson-card-wide {
+    padding: 28px 22px;
+  }
+
+  .lesson-page-title-compact {
+    max-width: 14ch;
+    font-size: clamp(30px, 8vw, 46px);
+    line-height: 1.02;
+  }
+
+  .lesson-nav-row {
+    align-items: stretch;
+  }
+
+  .lesson-nav-btn-prev,
+  .lesson-nav-btn-next {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .lesson-header-compact {
+    margin-bottom: 18px;
+  }
+
+  .lesson-card-wide {
+    padding: 22px 18px;
+  }
+
+  .lesson-card-wide h2 {
+    font-size: 24px;
+  }
+
+  .lesson-card-wide p,
+  .lesson-card-wide li {
+    font-size: 16px;
+  }
+}

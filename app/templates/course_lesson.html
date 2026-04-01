@@ -2,15 +2,17 @@
 {% block title %}{{ topic.title }} — Get Into Cybersecurity{% endblock %}
 
 {% block content %}
-<div class="page-wrap">
+<div class="page-wrap lesson-page-wrap">
 
-  <div class="lesson-header">
+  <div class="lesson-header lesson-header-compact">
     <div class="lesson-header-main">
       <div class="lesson-section-label">
         Section {{ topic.section }} · Lesson {{ topic.lesson_number }}
       </div>
 
-      <h1 class="lesson-page-title">{{ topic.title }}</h1>
+      <h1 class="lesson-page-title lesson-page-title-compact">
+        {{ topic.title }}
+      </h1>
 
       <div class="lesson-meta">
         <span class="lesson-time" id="read-time">7 min read</span>
@@ -25,9 +27,9 @@
     </div>
   </div>
 
-  <div class="lesson-layout">
+  <div class="lesson-layout lesson-layout-2col">
 
-    <aside class="lesson-side">
+    <aside class="lesson-side lesson-side-left">
       <div class="side-card">
         <div class="side-title">In this lesson</div>
         <nav id="toc-nav" class="side-list"></nav>
@@ -48,10 +50,36 @@
         </div>
         <div class="side-text">Lesson {{ topic.lesson_number }} of 20</div>
       </div>
+
+      <div class="side-card" id="key-terms-card" hidden>
+        <div class="side-title">Key terms</div>
+        <div id="key-terms-list" class="term-list"></div>
+      </div>
+
+      {% if next_topic %}
+      <div class="side-card">
+        <div class="side-title">Up next</div>
+        <div class="lesson-upnext-title">{{ next_topic.title }}</div>
+        <div class="side-text lesson-upnext-meta">Lesson {{ next_topic.lesson_number }}</div>
+        <a class="btn btn-sm lesson-upnext-btn" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}">
+          Continue →
+        </a>
+      </div>
+      {% endif %}
+
+      <div class="side-card">
+        <div class="side-title">Notes</div>
+        <textarea
+          id="lesson-notes"
+          class="notes-box"
+          placeholder="Your notes for this lesson..."
+          oninput="saveNote(this.value)"></textarea>
+        <div class="notes-help">Saved locally in your browser</div>
+      </div>
     </aside>
 
-    <div class="lesson-main">
-      <article class="lesson-card" id="lesson-content">
+    <div class="lesson-main lesson-main-wide">
+      <article class="lesson-card lesson-card-wide" id="lesson-content">
         {{ topic.body | safe }}
       </article>
 
@@ -84,34 +112,6 @@
         {% endif %}
       </div>
     </div>
-
-    <aside class="lesson-side">
-      <div class="side-card" id="key-terms-card" hidden>
-        <div class="side-title">Key terms</div>
-        <div id="key-terms-list" class="term-list"></div>
-      </div>
-
-      {% if next_topic %}
-      <div class="side-card">
-        <div class="side-title">Up next</div>
-        <div class="lesson-upnext-title">{{ next_topic.title }}</div>
-        <div class="side-text lesson-upnext-meta">Lesson {{ next_topic.lesson_number }}</div>
-        <a class="btn btn-sm lesson-upnext-btn" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}">
-          Continue →
-        </a>
-      </div>
-      {% endif %}
-
-      <div class="side-card">
-        <div class="side-title">Notes</div>
-        <textarea
-          id="lesson-notes"
-          class="notes-box"
-          placeholder="Your notes for this lesson..."
-          oninput="saveNote(this.value)"></textarea>
-        <div class="notes-help">Saved locally in your browser</div>
-      </div>
-    </aside>
 
   </div>
 </div>
