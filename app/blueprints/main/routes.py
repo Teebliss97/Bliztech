@@ -1,7 +1,7 @@
 from datetime import datetime
 import re
 
-from flask import Blueprint, render_template, session, redirect, url_for, flash, request
+from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify
 from flask_login import current_user
 from app.models import Progress
 from app.blueprints.topics.routes import TOPICS
@@ -318,7 +318,6 @@ def course():
 @login_required
 def course_lessons():
     from app.models import CourseTopic, CourseAccess
-    # Check access
     has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
     if not has_access:
         flash("You need to purchase the course to access lessons.", "error")
@@ -333,7 +332,6 @@ def course_lessons():
         "D": "Career Launchpad",
     }
 
-    # Group by section
     sections = {"A": [], "B": [], "C": [], "D": []}
     for t in topics:
         key = t.section.strip().upper() if t.section else ""
@@ -352,7 +350,6 @@ def course_lesson(slug):
     import markdown as md_lib
     from app.models import CourseTopic, CourseAccess
 
-    # Check access
     has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
     if not has_access:
         flash("You need to purchase the course to access lessons.", "error")
@@ -360,7 +357,6 @@ def course_lesson(slug):
 
     topic = CourseTopic.query.filter_by(slug=slug).first_or_404()
 
-    # Get prev/next for navigation
     all_topics = CourseTopic.query.order_by(CourseTopic.order).all()
     idx = next((i for i, t in enumerate(all_topics) if t.slug == slug), None)
     prev_topic = all_topics[idx - 1] if idx and idx > 0 else None
@@ -375,6 +371,19 @@ def course_lesson(slug):
 @main_bp.route('/course/thankyou')
 def course_thankyou():
     return render_template('course_thankyou.html')
+
+
+# -------------------------
+# PAID COURSE — check access (AJAX polling from thank you page)
+# -------------------------
+@main_bp.route('/course/check-access')
+@login_required
+def course_check_access():
+    from app.models import CourseAccess
+    has_access = current_user.is_admin or bool(
+        CourseAccess.query.filter_by(user_id=current_user.id).first()
+    )
+    return jsonify({"has_access": has_access})
 
 
 # -------------------------
@@ -413,7 +422,6 @@ def admin_grant_course():
                 db.session.commit()
                 message = {"type": "success", "text": f"Course access granted to {email}."}
 
-    # List all users with access
     access_list = (
         CourseAccess.query
         .join(User, CourseAccess.user_id == User.id)
