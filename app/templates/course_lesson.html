@@ -1,423 +1,248 @@
 {% extends "base.html" %}
-{% block title %}Get Into Cybersecurity — BlizTech{% endblock %}
-
-{% block og_title %}Get Into Cybersecurity — BlizTech Academy{% endblock %}
-{% block og_description %}20 structured lessons, 4 labs, certificate included. From zero to job-ready. £11 one-time, lifetime access.{% endblock %}
-{% block og_image %}{{ url_for('static', filename='img/og-course.png', _external=True) }}{% endblock %}
-{% block twitter_title %}Get Into Cybersecurity — BlizTech Academy{% endblock %}
-{% block twitter_description %}20 structured lessons, 4 labs, certificate included. £11 one-time, lifetime access.{% endblock %}
-{% block twitter_image %}{{ url_for('static', filename='img/og-course.png', _external=True) }}{% endblock %}
+{% block title %}{{ topic.title }} — Get Into Cybersecurity{% endblock %}
 
 {% block content %}
+<div class="page-wrap">
 
-<!-- ===== HERO ===== -->
-<section class="course-hero">
-  <div class="course-hero-inner">
-    <div class="course-hero-left">
-      <div class="course-tag">Paid Course</div>
-      <h1 class="course-title">Get Into<br><span class="course-title-accent">Cybersecurity</span></h1>
-      <p class="course-subtitle">
-        20 structured lessons across four sections — from core concepts to career readiness.
-        Built for people who want to understand cybersecurity properly, not just pass a quiz.
-      </p>
+  <!-- Lesson header -->
+  <div class="lesson-header">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.8px;color:var(--green);margin-bottom:6px;">
+        Section {{ topic.section }} · Lesson {{ topic.lesson_number }}
+      </div>
+      <h1 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.5px;margin:0;">
+        {{ topic.title }}
+        <span class="lesson-time" id="read-time">— min read</span>
+      </h1>
+    </div>
+    <div class="lesson-header-actions">
+      <a class="btn btn-outline btn-sm" href="{{ url_for('main.course_lessons') }}">← All lessons</a>
+      <button class="btn btn-sm" id="mark-read-btn" onclick="markRead()">Mark as read</button>
+    </div>
+  </div>
 
-      <div class="course-meta-row">
-        <div class="course-meta-item">
-          <span class="course-meta-num">20</span>
-          <span class="course-meta-label">Lessons</span>
-        </div>
-        <div class="course-meta-div"></div>
-        <div class="course-meta-item">
-          <span class="course-meta-num">4</span>
-          <span class="course-meta-label">Sections</span>
-        </div>
-        <div class="course-meta-div"></div>
-        <div class="course-meta-item">
-          <span class="course-meta-num">Lifetime</span>
-          <span class="course-meta-label">Access</span>
-        </div>
-        <div class="course-meta-div"></div>
-        <div class="course-meta-item">
-          <span class="course-meta-num">Labs</span>
-          <span class="course-meta-label">Included</span>
+  <!-- 3-column layout -->
+  <div class="lesson-layout" style="grid-template-columns:0.25fr 1fr 0.3fr;">
+
+    <!-- Left sidebar — TOC -->
+    <div class="lesson-side" style="top:76px;">
+      <div class="side-card">
+        <div class="side-title">In this lesson</div>
+        <nav id="toc-nav" style="display:grid;gap:4px;"></nav>
+      </div>
+      <div class="side-card">
+        <div class="side-title">Progress</div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;" id="progress-label">Loading...</div>
+        <div style="height:3px;background:var(--bg-4);border-radius:999px;overflow:hidden;">
+          <div id="progress-bar" style="height:100%;background:var(--green);border-radius:999px;width:0%;transition:width 0.3s;"></div>
         </div>
       </div>
+      <div class="side-card">
+        <div class="side-title">Section</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:var(--radius-xs);border:1px solid var(--border-g);background:var(--green-dim);color:var(--green);display:inline-block;margin-bottom:6px;">
+          Section {{ topic.section }}
+        </div>
+        <div style="font-size:12px;color:var(--text-3);">Lesson {{ topic.lesson_number }} of 20</div>
+      </div>
+    </div>
 
-      <div class="course-cta-row">
-        {% if has_access %}
-        <a href="{{ url_for('main.course_lessons') }}" class="btn course-btn-primary">Go to my lessons →</a>
-        <span class="course-one-time">You have full access · Lifetime</span>
+    <!-- Main content -->
+    <div>
+      <div class="lesson-card" id="lesson-content" style="max-width:66ch;">
+        {{ topic.body | safe }}
+      </div>
+
+      {% if topic.lab %}
+      <div style="margin-top:20px;border:1px solid var(--border-g);border-radius:var(--radius-lg);padding:24px 28px;background:var(--green-dim);">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.8px;color:var(--green);margin-bottom:12px;">Practical Lab</div>
+        {{ topic.lab | safe }}
+      </div>
+      {% endif %}
+
+      <!-- Navigation -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:28px;padding-top:20px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap;">
+        {% if prev_topic %}
+        <a class="btn btn-outline" href="{{ url_for('main.course_lesson', slug=prev_topic.slug) }}">← {{ prev_topic.title }}</a>
         {% else %}
-        <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="btn course-btn-primary">Enrol for £11</a>
-        <span class="course-one-time">One-time payment · Lifetime access</span>
+        <div></div>
+        {% endif %}
+        {% if next_topic %}
+        <a class="btn" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}">{{ next_topic.title }} →</a>
+        {% else %}
+        <a class="btn" href="{{ url_for('cert.paid_certificate_home') }}">Get your certificate →</a>
         {% endif %}
       </div>
     </div>
 
-    <div class="course-hero-right">
-      <div class="course-card-preview">
-        <div class="ccp-header">
-          <span class="ccp-tag">What you will learn</span>
-        </div>
-        <div class="ccp-list">
-          <div class="ccp-item">How the internet and networks actually work</div>
-          <div class="ccp-item">How attackers think and operate</div>
-          <div class="ccp-item">How to investigate phishing emails</div>
-          <div class="ccp-item">How to read logs and respond to incidents</div>
-          <div class="ccp-item">Linux and Windows security fundamentals</div>
-          <div class="ccp-item">Cloud security and data protection</div>
-          <div class="ccp-item">What cybersecurity jobs actually involve</div>
-          <div class="ccp-item">How to start your career in the field</div>
-        </div>
-        <div class="ccp-footer">
-          <span class="ccp-cert">Includes certificate of completion</span>
-        </div>
+    <!-- Right panel -->
+    <div class="lesson-side" style="top:76px;">
+      <div class="side-card" id="key-terms-card" style="display:none;">
+        <div class="side-title">Key terms</div>
+        <div id="key-terms-list" style="display:grid;gap:6px;"></div>
+      </div>
+
+      {% if next_topic %}
+      <div class="side-card">
+        <div class="side-title">Up next</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">{{ next_topic.title }}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-3);margin-bottom:10px;">Lesson {{ next_topic.lesson_number }}</div>
+        <a class="btn btn-sm" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}" style="width:100%;">Continue →</a>
+      </div>
+      {% endif %}
+
+      <div class="side-card">
+        <div class="side-title">Notes</div>
+        <textarea id="lesson-notes" placeholder="Your notes for this lesson..."
+          style="width:100%;min-height:120px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12.5px;padding:10px;resize:vertical;outline:none;line-height:1.6;"
+          oninput="saveNote(this.value)"></textarea>
+        <div style="font-size:10.5px;color:var(--text-3);margin-top:4px;">Saved locally in your browser</div>
       </div>
     </div>
+
   </div>
-</section>
+</div>
 
-<!-- ===== FOR WHO ===== -->
-<section class="course-section course-for">
-  <div class="page-wrap">
-    <div class="cs-label">Who this is for</div>
-    <div class="course-for-grid">
-      <div class="course-for-item">
-        <div class="cfi-title">You completed the free course</div>
-        <div class="cfi-text">You know the basics. This takes you significantly further — into technical depth, real tools, and career-relevant skills.</div>
-      </div>
-      <div class="course-for-item">
-        <div class="cfi-title">You want to work in cybersecurity</div>
-        <div class="cfi-text">This course gives you the foundation every entry-level role expects — without the noise of certification prep materials.</div>
-      </div>
-      <div class="course-for-item">
-        <div class="cfi-title">You want practical knowledge</div>
-        <div class="cfi-text">Every section includes a hands-on lab. You will run real commands, use real tools, and produce real outputs.</div>
-      </div>
-    </div>
-  </div>
-</section>
+<script>
+var SLUG = '{{ topic.slug }}';
+var CK = 'bliztech_completed';
+var NK = 'bliztech_notes_' + SLUG;
 
-<!-- ===== CURRICULUM ===== -->
-<section class="course-section course-curriculum">
-  <div class="page-wrap">
-    <div class="cs-label">Curriculum</div>
-    <h2 class="cs-title">Four sections. Twenty lessons.</h2>
+function getC() { try { return JSON.parse(localStorage.getItem(CK)||'{}'); } catch(e) { return {}; } }
 
-    <div class="curriculum-grid">
+// Read time
+window.addEventListener('load', function() {
+  var content = document.getElementById('lesson-content');
+  if (content) {
+    var words = content.innerText.trim().split(/\s+/).length;
+    var mins = Math.max(1, Math.round(words / 200));
+    var el = document.getElementById('read-time');
+    if (el) el.textContent = '— ' + mins + ' min read';
+  }
 
-      <!-- Section A -->
-      <div class="curriculum-section">
-        <div class="curriculum-section-head">
-          <span class="curr-section-tag">Section A</span>
-          <span class="curr-section-name">Foundation</span>
-        </div>
-        <div class="curriculum-lessons">
-          <div class="curr-lesson">
-            <span class="curr-num">01</span>
-            <div>
-              <div class="curr-title">Introduction to modern cybersecurity</div>
-              <div class="curr-sub">The threat landscape, why it matters, who the attackers are</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">02</span>
-            <div>
-              <div class="curr-title">Types of threats and attackers</div>
-              <div class="curr-sub">Nation states, cybercriminals, insiders, and opportunists</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">03</span>
-            <div>
-              <div class="curr-title">CIA triad and security principles</div>
-              <div class="curr-sub">Confidentiality, integrity, availability — and why they conflict</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">04</span>
-            <div>
-              <div class="curr-title">Risk, vulnerabilities, and attack surface</div>
-              <div class="curr-sub">How risk is measured and where organisations are exposed</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">05</span>
-            <div>
-              <div class="curr-title">Defence in depth</div>
-              <div class="curr-sub">Layered security — why no single control is enough</div>
-            </div>
-          </div>
-          <div class="curr-lab">
-            <span class="curr-lab-tag">Lab</span>
-            Map your own attack surface — devices, accounts, and exposure points
-          </div>
-        </div>
-      </div>
+  // Progress
+  var c = getC();
+  var done = Object.keys(c).length;
+  var total = 20;
+  var pct = Math.round(done / total * 100);
+  var bar = document.getElementById('progress-bar');
+  var label = document.getElementById('progress-label');
+  if (bar) bar.style.width = pct + '%';
+  if (label) label.textContent = done + ' of ' + total + ' completed';
 
-      <!-- Section B -->
-      <div class="curriculum-section">
-        <div class="curriculum-section-head">
-          <span class="curr-section-tag">Section B</span>
-          <span class="curr-section-name">Technical Core</span>
-        </div>
-        <div class="curriculum-lessons">
-          <div class="curr-lesson">
-            <span class="curr-num">06</span>
-            <div>
-              <div class="curr-title">Networking fundamentals for cyber</div>
-              <div class="curr-sub">How data moves — packets, switches, routers, firewalls</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">07</span>
-            <div>
-              <div class="curr-title">IP addresses, ports, and protocols</div>
-              <div class="curr-sub">TCP/IP, UDP, common ports and what runs on them</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">08</span>
-            <div>
-              <div class="curr-title">DNS, domains, and web traffic</div>
-              <div class="curr-sub">How a URL becomes a page — and where attacks happen</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">09</span>
-            <div>
-              <div class="curr-title">Windows and Linux basics</div>
-              <div class="curr-sub">File systems, terminal commands, and OS security</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">10</span>
-            <div>
-              <div class="curr-title">Users, permissions, and access control</div>
-              <div class="curr-sub">Least privilege, admin rights, and why it matters</div>
-            </div>
-          </div>
-          <div class="curr-lab">
-            <span class="curr-lab-tag">Lab</span>
-            Run network commands — traceroute, nslookup, netstat — and read the output
-          </div>
-        </div>
-      </div>
+  // Mark read button
+  if (c[SLUG]) {
+    var btn = document.getElementById('mark-read-btn');
+    if (btn) { btn.textContent = '✓ Read'; btn.classList.add('btn-outline'); }
+  }
 
-      <!-- Section C -->
-      <div class="curriculum-section">
-        <div class="curriculum-section-head">
-          <span class="curr-section-tag">Section C</span>
-          <span class="curr-section-name">Defence &amp; Response</span>
-        </div>
-        <div class="curriculum-lessons">
-          <div class="curr-lesson">
-            <span class="curr-num">11</span>
-            <div>
-              <div class="curr-title">Password security, MFA, and identity</div>
-              <div class="curr-sub">Beyond basics — credential stuffing, MFA bypass, identity attacks</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">12</span>
-            <div>
-              <div class="curr-title">Email security and phishing investigation</div>
-              <div class="curr-sub">Header analysis, SPF/DKIM/DMARC, and spotting spoofed senders</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">13</span>
-            <div>
-              <div class="curr-title">Secure browsing and website trust</div>
-              <div class="curr-sub">HTTPS, certificates, browser security, and safe habits</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">14</span>
-            <div>
-              <div class="curr-title">Malware basics and how infections happen</div>
-              <div class="curr-sub">Ransomware, trojans, delivery methods, and what to do</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">15</span>
-            <div>
-              <div class="curr-title">Logging, alerts, and incident basics</div>
-              <div class="curr-sub">What logs tell you, how to read them, and first response steps</div>
-            </div>
-          </div>
-          <div class="curr-lab">
-            <span class="curr-lab-tag">Lab</span>
-            Investigate a real phishing email — analyse headers and identify the attack
-          </div>
-        </div>
-      </div>
+  // Notes
+  var notes = document.getElementById('lesson-notes');
+  if (notes) notes.value = localStorage.getItem(NK) || '';
 
-      <!-- Section D -->
-      <div class="curriculum-section">
-        <div class="curriculum-section-head">
-          <span class="curr-section-tag">Section D</span>
-          <span class="curr-section-name">Career Launchpad</span>
-        </div>
-        <div class="curriculum-lessons">
-          <div class="curr-lesson">
-            <span class="curr-num">16</span>
-            <div>
-              <div class="curr-title">Cloud security fundamentals</div>
-              <div class="curr-sub">AWS, Azure, shared responsibility, and common misconfigurations</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">17</span>
-            <div>
-              <div class="curr-title">Data protection and privacy basics</div>
-              <div class="curr-sub">GDPR, data handling, and what organisations must do</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">18</span>
-            <div>
-              <div class="curr-title">Cybersecurity job roles explained</div>
-              <div class="curr-sub">SOC analyst, pentester, GRC, cloud security — what each role does</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">19</span>
-            <div>
-              <div class="curr-title">Beginner tools and safe practice</div>
-              <div class="curr-sub">TryHackMe, VirusTotal, Wireshark — getting started safely</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">20</span>
-            <div>
-              <div class="curr-title">How to start a career in cybersecurity</div>
-              <div class="curr-sub">Certifications, CVs, portfolios, and your 90-day plan</div>
-            </div>
-          </div>
-          <div class="curr-lab">
-            <span class="curr-lab-tag">Lab</span>
-            Create a TryHackMe account and complete your first room
-          </div>
-        </div>
-      </div>
+  // TOC
+  buildTOC();
 
-    </div>
-  </div>
-</section>
+  // Key terms
+  buildKeyTerms();
 
-<!-- ===== ENROL ===== -->
-<section class="course-section course-enrol" id="enrol">
-  <div class="page-wrap">
-    <div class="enrol-card">
-      <div class="enrol-left">
-        <div class="cs-label">{% if has_access %}Your course{% else %}Enrol today{% endif %}</div>
-        <h2 class="enrol-title">Get Into Cybersecurity</h2>
-        <p class="enrol-sub">20 lessons · 4 practical labs · Certificate of completion · Lifetime access</p>
-        <ul class="enrol-list">
-          <li>Full access to all 20 lessons immediately</li>
-          <li>Hands-on labs with step-by-step instructions</li>
-          <li>Certificate of completion to share or download</li>
-          <li>Access to all future updates at no extra cost</li>
-        </ul>
-      </div>
-      <div class="enrol-right">
-        <div class="enrol-price-card">
-          {% if has_access %}
-          <div class="enrol-price" style="font-size: 32px; color: var(--green);">✓ Enrolled</div>
-          <div class="enrol-price-sub">you have lifetime access</div>
-          <a href="{{ url_for('main.course_lessons') }}" class="btn enrol-btn">Go to my lessons →</a>
-          {% else %}
-          <div class="enrol-price">£11</div>
-          <div class="enrol-price-sub">one-time · lifetime access</div>
-          <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="btn enrol-btn">Enrol for £11</a>
-          <div class="enrol-secure">Secure payment via Gumroad</div>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+  // Auto-mark on scroll
+  setupAutoMark();
+});
 
-<style>
-.course-hero {
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--border);
-  padding: 72px 80px;
-  margin-left: -80px;
-  margin-right: -80px;
-  position: relative;
-  overflow: hidden;
+function markRead() {
+  var c = getC();
+  c[SLUG] = true;
+  localStorage.setItem(CK, JSON.stringify(c));
+  var btn = document.getElementById('mark-read-btn');
+  if (btn) { btn.textContent = '✓ Read'; btn.classList.add('btn-outline'); }
+  var done = Object.keys(c).length;
+  var pct = Math.round(done / 20 * 100);
+  var bar = document.getElementById('progress-bar');
+  var label = document.getElementById('progress-label');
+  if (bar) bar.style.width = pct + '%';
+  if (label) label.textContent = done + ' of 20 completed';
 }
-.course-hero::before {
-  content: '';
-  position: absolute;
-  top: -100px; right: -100px;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(0,217,126,0.07) 0%, transparent 70%);
-  pointer-events: none;
-}
-@media (max-width: 900px) { .course-hero { padding: 40px 24px; margin-left: -24px; margin-right: -24px; } }
-@media (max-width: 480px) { .course-hero { padding: 32px 16px; margin-left: -16px; margin-right: -16px; } }
-.course-hero-inner { display: grid; grid-template-columns: 1fr 0.85fr; gap: 60px; align-items: center; max-width: 1200px; margin: 0 auto; }
-@media (max-width: 900px) { .course-hero-inner { grid-template-columns: 1fr; gap: 36px; } }
-.course-tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: var(--radius-xs); border: 1px solid var(--border-g); background: var(--green-dim); color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.5px; margin-bottom: 16px; }
-.course-title { font-family: 'Space Grotesk', sans-serif; font-size: 54px; font-weight: 700; letter-spacing: -2px; line-height: 1.05; margin: 0 0 20px; }
-.course-title-accent { color: var(--green); }
-@media (max-width: 900px) { .course-title { font-size: 38px; } }
-@media (max-width: 480px) { .course-title { font-size: 30px; } }
-.course-subtitle { color: var(--text-2); font-size: 15px; line-height: 1.75; max-width: 48ch; margin: 0 0 28px; }
-.course-meta-row { display: flex; align-items: center; gap: 20px; padding: 18px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 28px; flex-wrap: wrap; }
-.course-meta-item { display: flex; flex-direction: column; gap: 2px; }
-.course-meta-num { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
-.course-meta-label { font-size: 10.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.4px; }
-.course-meta-div { width: 1px; height: 28px; background: var(--border); }
-.course-cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.course-btn-primary { font-size: 14px; padding: 10px 24px; min-height: 42px; }
-.course-one-time { font-size: 12px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
-.course-card-preview { border: 1px solid var(--border-g); border-radius: var(--radius-xl); background: var(--bg-3); overflow: hidden; }
-.ccp-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg-4); }
-.ccp-tag { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--green); }
-.ccp-list { padding: 16px 20px; display: grid; gap: 10px; }
-.ccp-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-2); line-height: 1.5; }
-.ccp-item::before { content: '→'; color: var(--green); flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-top: 1px; }
-.ccp-footer { padding: 12px 20px; border-top: 1px solid var(--border); background: var(--bg-4); }
-.ccp-cert { font-size: 11.5px; color: var(--green); font-family: 'JetBrains Mono', monospace; }
-.course-section { padding: 60px 0; border-bottom: 1px solid var(--border); }
-.cs-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--green); margin-bottom: 16px; }
-.cs-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 36px; }
-.course-for-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-@media (max-width: 800px) { .course-for-grid { grid-template-columns: 1fr; } }
-.course-for-item { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 24px; background: var(--bg-2); }
-.cfi-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-.cfi-text { font-size: 13px; color: var(--text-3); line-height: 1.7; }
-.curriculum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 800px) { .curriculum-grid { grid-template-columns: 1fr; } }
-.curriculum-section { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-2); overflow: hidden; }
-.curriculum-section-head { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg-3); }
-.curr-section-tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: var(--radius-xs); border: 1px solid var(--border-g); background: var(--green-dim); color: var(--green); letter-spacing: 0.5px; }
-.curr-section-name { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
-.curriculum-lessons { padding: 8px 0; }
-.curr-lesson { display: flex; align-items: flex-start; gap: 14px; padding: 11px 20px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
-.curr-lesson:last-of-type { border-bottom: none; }
-.curr-lesson:hover { background: var(--bg-3); }
-.curr-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--green); flex-shrink: 0; margin-top: 2px; width: 20px; }
-.curr-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
-.curr-sub { font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
-.curr-lab { display: flex; align-items: center; gap: 10px; padding: 11px 20px; background: var(--green-dim); border-top: 1px solid var(--border-g); font-size: 12px; color: var(--text-2); }
-.curr-lab-tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: var(--radius-xs); border: 1px solid var(--border-g); background: var(--bg-3); color: var(--green); flex-shrink: 0; }
-.enrol-card { display: grid; grid-template-columns: 1fr 0.6fr; gap: 60px; align-items: start; border: 1px solid var(--border-g); border-radius: var(--radius-xl); padding: 40px 44px; background: var(--bg-2); }
-@media (max-width: 800px) { .enrol-card { grid-template-columns: 1fr; gap: 32px; padding: 28px 24px; } }
-.enrol-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 8px; }
-.enrol-sub { font-size: 13px; color: var(--text-3); margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; }
-.enrol-list { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
-.enrol-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--text-2); line-height: 1.5; }
-.enrol-list li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
-.enrol-price-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; background: var(--bg-3); text-align: center; }
-.enrol-price { font-family: 'Space Grotesk', sans-serif; font-size: 48px; font-weight: 700; color: var(--text); letter-spacing: -2px; line-height: 1; margin-bottom: 4px; }
-.enrol-price-sub { font-size: 11px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; margin-bottom: 20px; }
-.enrol-btn { width: 100%; font-size: 14px; min-height: 44px; }
-.enrol-secure { margin-top: 14px; font-size: 11px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
-</style>
 
+function saveNote(val) {
+  localStorage.setItem(NK, val);
+}
+
+function buildTOC() {
+  var content = document.getElementById('lesson-content');
+  if (!content) return;
+  var headings = content.querySelectorAll('h2');
+  var nav = document.getElementById('toc-nav');
+  if (!nav || headings.length === 0) return;
+  headings.forEach(function(h, i) {
+    var id = 'section-' + i;
+    h.id = id;
+    var a = document.createElement('a');
+    a.href = '#' + id;
+    a.textContent = h.textContent;
+    a.style.cssText = 'font-size:11.5px;color:var(--text-3);text-decoration:none;padding:3px 0;border-left:2px solid transparent;padding-left:8px;transition:all 0.12s;display:block;';
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    nav.appendChild(a);
+  });
+
+  // Highlight active section
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        nav.querySelectorAll('a').forEach(function(a) {
+          a.style.color = 'var(--text-3)';
+          a.style.borderLeftColor = 'transparent';
+        });
+        var active = nav.querySelector('a[href="#' + entry.target.id + '"]');
+        if (active) {
+          active.style.color = 'var(--green)';
+          active.style.borderLeftColor = 'var(--green)';
+        }
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  headings.forEach(function(h) { observer.observe(h); });
+}
+
+function buildKeyTerms() {
+  var content = document.getElementById('lesson-content');
+  if (!content) return;
+  var terms = content.querySelectorAll('strong');
+  if (terms.length === 0) return;
+  var seen = {};
+  var list = document.getElementById('key-terms-list');
+  var card = document.getElementById('key-terms-card');
+  var count = 0;
+  terms.forEach(function(t) {
+    var text = t.textContent.trim();
+    if (text.length > 2 && text.length < 40 && !seen[text]) {
+      seen[text] = true;
+      var div = document.createElement('div');
+      div.style.cssText = 'font-size:11.5px;color:var(--text-2);padding:4px 8px;background:var(--bg-3);border-radius:var(--radius-xs);border:1px solid var(--border);';
+      div.textContent = text;
+      list.appendChild(div);
+      count++;
+    }
+  });
+  if (count > 0 && card) card.style.display = 'block';
+}
+
+function setupAutoMark() {
+  var content = document.getElementById('lesson-content');
+  if (!content) return;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.8) {
+        markRead();
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.8 });
+  var last = content.lastElementChild;
+  if (last) observer.observe(last);
+}
+</script>
 {% endblock %}
