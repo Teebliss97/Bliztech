@@ -1,43 +1,53 @@
 import os
-import resend
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
-def _get_resend_config():
-    api_key = os.getenv("RESEND_API_KEY")
+BREVO_SMTP_SERVER = "smtp-relay.brevo.com"
+BREVO_SMTP_PORT   = 587
+BREVO_LOGIN       = "a6df42001@smtp-brevo.com"
+
+
+def _get_brevo_config():
+    password  = os.getenv("BREVO_SMTP_KEY")
     from_email = os.getenv("MAIL_FROM") or os.getenv("SENDGRID_FROM_EMAIL")
-    return api_key, from_email
+    return password, from_email
 
 
 def send_email(to_email: str, subject: str, html_content: str) -> bool:
     """
-    Generic Resend email sender.
+    Generic Brevo SMTP email sender.
     Returns True if sent, False otherwise.
     """
-    api_key, from_email = _get_resend_config()
+    password, from_email = _get_brevo_config()
 
-    if not api_key or not from_email:
-        print("❌ Resend not configured: missing RESEND_API_KEY or MAIL_FROM")
+    if not password or not from_email:
+        print("❌ Brevo not configured: missing BREVO_SMTP_KEY or MAIL_FROM")
         return False
 
-    resend.api_key = api_key
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = from_email
+    msg["To"]      = to_email
+    msg.attach(MIMEText(html_content, "html"))
 
     try:
-        response = resend.Emails.send({
-            "from": from_email,
-            "to": [to_email],
-            "subject": subject,
-            "html": html_content,
-        })
-        print("✅ Email sent:", response.get("id"))
+        with smtplib.SMTP(BREVO_SMTP_SERVER, BREVO_SMTP_PORT) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(BREVO_LOGIN, password)
+            server.sendmail(from_email, to_email, msg.as_string())
+        print(f"✅ Email sent to {to_email}")
         return True
     except Exception as e:
-        print("❌ Resend error:", e)
+        print(f"❌ Brevo error: {e}")
         return False
 
 
 def send_course_completion_email(to_email: str) -> bool:
     """
-    Sends course completion email using Resend.
+    Sends course completion email via Brevo SMTP.
     Returns True if sent successfully, False otherwise.
     """
     subject = "🎉 Congratulations! You completed the BlizTech Cyber Awareness Course"
@@ -51,13 +61,10 @@ def send_course_completion_email(to_email: str) -> bool:
           You have successfully completed all <strong>10 topics</strong> in the
           <strong>BlizTech Cybersecurity Awareness Course</strong>.
         </p>
-
         <p>
           You've taken an important step toward staying safer online.
         </p>
-
         <hr style="border:1px solid #2c3e50">
-
         <p style="font-size:14px; color:#b0c4de;">
           BlizTech • Cyber Awareness Program<br>
           Learn. Protect. Stay Safe.
