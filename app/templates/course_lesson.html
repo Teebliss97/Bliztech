@@ -225,7 +225,9 @@ function buildTOC() {
   var nav = document.getElementById('toc-nav');
   if (!content || !nav) return;
 
-  var headings = content.querySelectorAll('h2');
+  var headings = Array.from(content.querySelectorAll('h2')).filter(function(h) {
+  return !h.closest('svg') && !h.closest('.diagram');
+  });
   if (headings.length === 0) return;
 
   nav.innerHTML = '';
