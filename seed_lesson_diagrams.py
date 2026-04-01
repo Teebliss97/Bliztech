@@ -13,9 +13,10 @@ ARROW_DEFS = '<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" mar
 def d(inner, h, caption):
     return (
         '<div style="margin:28px 0;border:1px solid rgba(255,255,255,0.07);'
-        'border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.02)">'
+        'border-radius:8px;overflow:hidden;background:rgba(255,255,255,0.02);max-width:100%;">'
         f'<svg width="100%" viewBox="0 0 680 {h}" xmlns="http://www.w3.org/2000/svg" '
-        'style="display:block;font-family:ui-monospace,JetBrains Mono,monospace">'
+        'preserveAspectRatio="xMidYMid meet" overflow="hidden" '
+        'style="display:block;font-family:ui-monospace,JetBrains Mono,monospace;max-width:100%;">'
         f'{ARROW_DEFS}{inner}</svg>'
         '<div style="font-family:ui-monospace,monospace;font-size:10px;text-transform:uppercase;'
         'letter-spacing:0.6px;color:#555;padding:7px 14px;border-top:1px solid rgba(255,255,255,0.05)">'
