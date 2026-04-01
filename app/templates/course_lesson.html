@@ -1,464 +1,423 @@
 {% extends "base.html" %}
-{% block title %}{{ topic.title }} — Get Into Cybersecurity{% endblock %}
+{% block title %}Get Into Cybersecurity — BlizTech{% endblock %}
+
+{% block og_title %}Get Into Cybersecurity — BlizTech Academy{% endblock %}
+{% block og_description %}20 structured lessons, 4 labs, certificate included. From zero to job-ready. £11 one-time, lifetime access.{% endblock %}
+{% block og_image %}{{ url_for('static', filename='img/og-course.png', _external=True) }}{% endblock %}
+{% block twitter_title %}Get Into Cybersecurity — BlizTech Academy{% endblock %}
+{% block twitter_description %}20 structured lessons, 4 labs, certificate included. £11 one-time, lifetime access.{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='img/og-course.png', _external=True) }}{% endblock %}
 
 {% block content %}
-<div class="ll-wrap">
 
-  <!-- Left sidebar -->
-  <aside class="ll-sidebar">
-    <a href="{{ url_for('main.course_lessons') }}" class="ll-back">← All lessons</a>
-    <div class="ll-prog-block">
-      <div class="ll-prog-label">Lesson {{ topic.lesson_number }} of 20</div>
-      <div class="ll-prog-track"><div class="ll-prog-fill" style="width:{{ (topic.lesson_number / 20 * 100)|int }}%"></div></div>
-      <div class="ll-prog-pct">{{ (topic.lesson_number / 20 * 100)|int }}% complete</div>
-    </div>
-    <div class="ll-section-row">
-      <span class="ll-section-tag">Section {{ topic.section }}</span>
-      <span class="ll-done-pill" id="ll-done-pill"></span>
-    </div>
-    <nav id="ll-toc" class="ll-toc"></nav>
-  </aside>
+<!-- ===== HERO ===== -->
+<section class="course-hero">
+  <div class="course-hero-inner">
+    <div class="course-hero-left">
+      <div class="course-tag">Paid Course</div>
+      <h1 class="course-title">Get Into<br><span class="course-title-accent">Cybersecurity</span></h1>
+      <p class="course-subtitle">
+        20 structured lessons across four sections — from core concepts to career readiness.
+        Built for people who want to understand cybersecurity properly, not just pass a quiz.
+      </p>
 
-  <!-- Main content -->
-  <main class="ll-main">
-    <header class="ll-header">
-      <div class="ll-meta-row">
-        <span class="ll-tag-sec">Section {{ topic.section }}</span>
-        <span class="ll-tag-num">Lesson {{ topic.lesson_number }}</span>
-        {% if topic.lab %}<span class="ll-tag-lab">Lab included</span>{% endif %}
-      </div>
-      <h1 class="ll-title">{{ topic.title }}</h1>
-      <div class="ll-subrow">
-        <span class="ll-readtime" id="ll-readtime" style="display:none">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span id="ll-rt-text"></span>
-        </span>
-        <span class="ll-dot" id="ll-dot" style="display:none">·</span>
-        <button class="ll-mark-btn" id="ll-mark-btn">Mark as read</button>
-        <span class="ll-read-badge" id="ll-read-badge">✓ Read</span>
-      </div>
-      <div class="ll-rule"></div>
-    </header>
-
-    <article class="ll-prose" id="ll-prose">
-      {{ topic.body | safe }}
-    </article>
-
-    {% if topic.lab %}
-    <section class="ll-lab">
-      <div class="ll-lab-top">
-        <div class="ll-lab-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+      <div class="course-meta-row">
+        <div class="course-meta-item">
+          <span class="course-meta-num">20</span>
+          <span class="course-meta-label">Lessons</span>
         </div>
-        <div>
-          <div class="ll-lab-eyebrow">Practical Lab</div>
-          <div class="ll-lab-name">Hands-on exercise</div>
+        <div class="course-meta-div"></div>
+        <div class="course-meta-item">
+          <span class="course-meta-num">4</span>
+          <span class="course-meta-label">Sections</span>
+        </div>
+        <div class="course-meta-div"></div>
+        <div class="course-meta-item">
+          <span class="course-meta-num">Lifetime</span>
+          <span class="course-meta-label">Access</span>
+        </div>
+        <div class="course-meta-div"></div>
+        <div class="course-meta-item">
+          <span class="course-meta-num">Labs</span>
+          <span class="course-meta-label">Included</span>
         </div>
       </div>
-      <div class="ll-lab-body ll-prose">{{ topic.lab | safe }}</div>
-    </section>
-    {% endif %}
 
-    <nav class="ll-nav">
-      {% if prev_topic %}
-      <a class="ll-nav-card ll-nav-prev" href="{{ url_for('main.course_lesson', slug=prev_topic.slug) }}">
-        <span class="ll-nav-dir">← Previous</span>
-        <span class="ll-nav-title">{{ prev_topic.title }}</span>
-      </a>
-      {% else %}<span></span>{% endif %}
-      {% if next_topic %}
-      <a class="ll-nav-card ll-nav-next" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}">
-        <span class="ll-nav-dir">Next →</span>
-        <span class="ll-nav-title">{{ next_topic.title }}</span>
-      </a>
-      {% else %}
-      <a class="ll-nav-card ll-nav-next ll-nav-done" href="{{ url_for('main.course_lessons') }}">
-        <span class="ll-nav-dir">Done ✓</span>
-        <span class="ll-nav-title">Back to all lessons</span>
-      </a>
-      {% endif %}
-    </nav>
-  </main>
-
-  <!-- Right panel -->
-  <aside class="ll-right">
-
-    <div class="ll-panel-block">
-      <div class="ll-panel-label">Key terms</div>
-      <div class="ll-terms" id="ll-terms">
-        <div class="ll-terms-loading">Detecting terms...</div>
+      <div class="course-cta-row">
+        {% if has_access %}
+        <a href="{{ url_for('main.course_lessons') }}" class="btn course-btn-primary">Go to my lessons →</a>
+        <span class="course-one-time">You have full access · Lifetime</span>
+        {% else %}
+        <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="btn course-btn-primary">Enrol for £11</a>
+        <span class="course-one-time">One-time payment · Lifetime access</span>
+        {% endif %}
       </div>
     </div>
 
-    {% if next_topic %}
-    <div class="ll-panel-block">
-      <div class="ll-panel-label">Up next</div>
-      <a class="ll-next-card" href="{{ url_for('main.course_lesson', slug=next_topic.slug) }}">
-        <div class="ll-next-num">Lesson {{ next_topic.lesson_number }}</div>
-        <div class="ll-next-title">{{ next_topic.title }}</div>
-        <div class="ll-next-arrow">→</div>
-      </a>
-    </div>
-    {% endif %}
-
-    <div class="ll-panel-block ll-notes-block">
-      <div class="ll-panel-label-row">
-        <span class="ll-panel-label">My notes</span>
-        <span class="ll-saved-dot" id="ll-saved-dot"></span>
+    <div class="course-hero-right">
+      <div class="course-card-preview">
+        <div class="ccp-header">
+          <span class="ccp-tag">What you will learn</span>
+        </div>
+        <div class="ccp-list">
+          <div class="ccp-item">How the internet and networks actually work</div>
+          <div class="ccp-item">How attackers think and operate</div>
+          <div class="ccp-item">How to investigate phishing emails</div>
+          <div class="ccp-item">How to read logs and respond to incidents</div>
+          <div class="ccp-item">Linux and Windows security fundamentals</div>
+          <div class="ccp-item">Cloud security and data protection</div>
+          <div class="ccp-item">What cybersecurity jobs actually involve</div>
+          <div class="ccp-item">How to start your career in the field</div>
+        </div>
+        <div class="ccp-footer">
+          <span class="ccp-cert">Includes certificate of completion</span>
+        </div>
       </div>
-      <textarea class="ll-notes" id="ll-notes" placeholder="Jot anything down..."></textarea>
     </div>
+  </div>
+</section>
 
-  </aside>
+<!-- ===== FOR WHO ===== -->
+<section class="course-section course-for">
+  <div class="page-wrap">
+    <div class="cs-label">Who this is for</div>
+    <div class="course-for-grid">
+      <div class="course-for-item">
+        <div class="cfi-title">You completed the free course</div>
+        <div class="cfi-text">You know the basics. This takes you significantly further — into technical depth, real tools, and career-relevant skills.</div>
+      </div>
+      <div class="course-for-item">
+        <div class="cfi-title">You want to work in cybersecurity</div>
+        <div class="cfi-text">This course gives you the foundation every entry-level role expects — without the noise of certification prep materials.</div>
+      </div>
+      <div class="course-for-item">
+        <div class="cfi-title">You want practical knowledge</div>
+        <div class="cfi-text">Every section includes a hands-on lab. You will run real commands, use real tools, and produce real outputs.</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-</div>
+<!-- ===== CURRICULUM ===== -->
+<section class="course-section course-curriculum">
+  <div class="page-wrap">
+    <div class="cs-label">Curriculum</div>
+    <h2 class="cs-title">Four sections. Twenty lessons.</h2>
+
+    <div class="curriculum-grid">
+
+      <!-- Section A -->
+      <div class="curriculum-section">
+        <div class="curriculum-section-head">
+          <span class="curr-section-tag">Section A</span>
+          <span class="curr-section-name">Foundation</span>
+        </div>
+        <div class="curriculum-lessons">
+          <div class="curr-lesson">
+            <span class="curr-num">01</span>
+            <div>
+              <div class="curr-title">Introduction to modern cybersecurity</div>
+              <div class="curr-sub">The threat landscape, why it matters, who the attackers are</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">02</span>
+            <div>
+              <div class="curr-title">Types of threats and attackers</div>
+              <div class="curr-sub">Nation states, cybercriminals, insiders, and opportunists</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">03</span>
+            <div>
+              <div class="curr-title">CIA triad and security principles</div>
+              <div class="curr-sub">Confidentiality, integrity, availability — and why they conflict</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">04</span>
+            <div>
+              <div class="curr-title">Risk, vulnerabilities, and attack surface</div>
+              <div class="curr-sub">How risk is measured and where organisations are exposed</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">05</span>
+            <div>
+              <div class="curr-title">Defence in depth</div>
+              <div class="curr-sub">Layered security — why no single control is enough</div>
+            </div>
+          </div>
+          <div class="curr-lab">
+            <span class="curr-lab-tag">Lab</span>
+            Map your own attack surface — devices, accounts, and exposure points
+          </div>
+        </div>
+      </div>
+
+      <!-- Section B -->
+      <div class="curriculum-section">
+        <div class="curriculum-section-head">
+          <span class="curr-section-tag">Section B</span>
+          <span class="curr-section-name">Technical Core</span>
+        </div>
+        <div class="curriculum-lessons">
+          <div class="curr-lesson">
+            <span class="curr-num">06</span>
+            <div>
+              <div class="curr-title">Networking fundamentals for cyber</div>
+              <div class="curr-sub">How data moves — packets, switches, routers, firewalls</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">07</span>
+            <div>
+              <div class="curr-title">IP addresses, ports, and protocols</div>
+              <div class="curr-sub">TCP/IP, UDP, common ports and what runs on them</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">08</span>
+            <div>
+              <div class="curr-title">DNS, domains, and web traffic</div>
+              <div class="curr-sub">How a URL becomes a page — and where attacks happen</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">09</span>
+            <div>
+              <div class="curr-title">Windows and Linux basics</div>
+              <div class="curr-sub">File systems, terminal commands, and OS security</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">10</span>
+            <div>
+              <div class="curr-title">Users, permissions, and access control</div>
+              <div class="curr-sub">Least privilege, admin rights, and why it matters</div>
+            </div>
+          </div>
+          <div class="curr-lab">
+            <span class="curr-lab-tag">Lab</span>
+            Run network commands — traceroute, nslookup, netstat — and read the output
+          </div>
+        </div>
+      </div>
+
+      <!-- Section C -->
+      <div class="curriculum-section">
+        <div class="curriculum-section-head">
+          <span class="curr-section-tag">Section C</span>
+          <span class="curr-section-name">Defence &amp; Response</span>
+        </div>
+        <div class="curriculum-lessons">
+          <div class="curr-lesson">
+            <span class="curr-num">11</span>
+            <div>
+              <div class="curr-title">Password security, MFA, and identity</div>
+              <div class="curr-sub">Beyond basics — credential stuffing, MFA bypass, identity attacks</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">12</span>
+            <div>
+              <div class="curr-title">Email security and phishing investigation</div>
+              <div class="curr-sub">Header analysis, SPF/DKIM/DMARC, and spotting spoofed senders</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">13</span>
+            <div>
+              <div class="curr-title">Secure browsing and website trust</div>
+              <div class="curr-sub">HTTPS, certificates, browser security, and safe habits</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">14</span>
+            <div>
+              <div class="curr-title">Malware basics and how infections happen</div>
+              <div class="curr-sub">Ransomware, trojans, delivery methods, and what to do</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">15</span>
+            <div>
+              <div class="curr-title">Logging, alerts, and incident basics</div>
+              <div class="curr-sub">What logs tell you, how to read them, and first response steps</div>
+            </div>
+          </div>
+          <div class="curr-lab">
+            <span class="curr-lab-tag">Lab</span>
+            Investigate a real phishing email — analyse headers and identify the attack
+          </div>
+        </div>
+      </div>
+
+      <!-- Section D -->
+      <div class="curriculum-section">
+        <div class="curriculum-section-head">
+          <span class="curr-section-tag">Section D</span>
+          <span class="curr-section-name">Career Launchpad</span>
+        </div>
+        <div class="curriculum-lessons">
+          <div class="curr-lesson">
+            <span class="curr-num">16</span>
+            <div>
+              <div class="curr-title">Cloud security fundamentals</div>
+              <div class="curr-sub">AWS, Azure, shared responsibility, and common misconfigurations</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">17</span>
+            <div>
+              <div class="curr-title">Data protection and privacy basics</div>
+              <div class="curr-sub">GDPR, data handling, and what organisations must do</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">18</span>
+            <div>
+              <div class="curr-title">Cybersecurity job roles explained</div>
+              <div class="curr-sub">SOC analyst, pentester, GRC, cloud security — what each role does</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">19</span>
+            <div>
+              <div class="curr-title">Beginner tools and safe practice</div>
+              <div class="curr-sub">TryHackMe, VirusTotal, Wireshark — getting started safely</div>
+            </div>
+          </div>
+          <div class="curr-lesson">
+            <span class="curr-num">20</span>
+            <div>
+              <div class="curr-title">How to start a career in cybersecurity</div>
+              <div class="curr-sub">Certifications, CVs, portfolios, and your 90-day plan</div>
+            </div>
+          </div>
+          <div class="curr-lab">
+            <span class="curr-lab-tag">Lab</span>
+            Create a TryHackMe account and complete your first room
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== ENROL ===== -->
+<section class="course-section course-enrol" id="enrol">
+  <div class="page-wrap">
+    <div class="enrol-card">
+      <div class="enrol-left">
+        <div class="cs-label">{% if has_access %}Your course{% else %}Enrol today{% endif %}</div>
+        <h2 class="enrol-title">Get Into Cybersecurity</h2>
+        <p class="enrol-sub">20 lessons · 4 practical labs · Certificate of completion · Lifetime access</p>
+        <ul class="enrol-list">
+          <li>Full access to all 20 lessons immediately</li>
+          <li>Hands-on labs with step-by-step instructions</li>
+          <li>Certificate of completion to share or download</li>
+          <li>Access to all future updates at no extra cost</li>
+        </ul>
+      </div>
+      <div class="enrol-right">
+        <div class="enrol-price-card">
+          {% if has_access %}
+          <div class="enrol-price" style="font-size: 32px; color: var(--green);">✓ Enrolled</div>
+          <div class="enrol-price-sub">you have lifetime access</div>
+          <a href="{{ url_for('main.course_lessons') }}" class="btn enrol-btn">Go to my lessons →</a>
+          {% else %}
+          <div class="enrol-price">£11</div>
+          <div class="enrol-price-sub">one-time · lifetime access</div>
+          <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="btn enrol-btn">Enrol for £11</a>
+          <div class="enrol-secure">Secure payment via Gumroad</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <style>
-/* ── Layout ──────────────────────────────────── */
-.ll-wrap {
-  display: grid;
-  grid-template-columns: 220px 1fr 220px;
-  min-height: calc(100vh - 60px);
-  margin: 0 -80px;
-  align-items: start;
-}
-@media (max-width: 1280px) { .ll-wrap { grid-template-columns: 200px 1fr 200px; } }
-@media (max-width: 1100px) { .ll-wrap { grid-template-columns: 200px 1fr; margin: 0 -24px; } }
-@media (max-width: 960px)  { .ll-wrap { grid-template-columns: 1fr; margin: 0 -24px; } }
-@media (max-width: 480px)  { .ll-wrap { margin: 0 -16px; } }
-
-/* ── Left sidebar ────────────────────────────── */
-.ll-sidebar {
-  position: sticky;
-  top: 60px;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-  border-right: 1px solid var(--border);
+.course-hero {
   background: var(--bg-2);
-  padding: 22px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-@media (max-width: 960px) { .ll-sidebar { display: none; } }
-
-.ll-back { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); text-decoration: none; }
-.ll-back:hover { opacity: 0.7; }
-
-.ll-prog-block { display: flex; flex-direction: column; gap: 5px; }
-.ll-prog-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); }
-.ll-prog-track { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.ll-prog-fill { height: 100%; background: var(--green); border-radius: 2px; }
-.ll-prog-pct { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--green); opacity: 0.6; }
-
-.ll-section-row { display: flex; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-.ll-section-tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: var(--radius-xs); border: 1px solid var(--border-g); background: var(--green-dim); color: var(--green); }
-.ll-done-pill { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: var(--radius-xs); background: var(--green); color: #000; font-weight: 700; display: none; }
-
-.ll-toc { display: flex; flex-direction: column; gap: 1px; }
-.ll-toc a { display: block; font-size: 11px; color: var(--text-3); text-decoration: none; padding: 5px 8px; border-radius: 4px; border-left: 2px solid transparent; line-height: 1.4; transition: all 0.12s; }
-.ll-toc a:hover { color: var(--text); background: var(--bg-3); }
-.ll-toc a.active { color: var(--green); border-left-color: var(--green); background: var(--green-dim); }
-
-/* ── Main ────────────────────────────────────── */
-.ll-main { padding: 36px 44px 80px; min-width: 0; }
-@media (max-width: 1100px) { .ll-main { padding: 36px 32px 60px; } }
-@media (max-width: 960px)  { .ll-main { padding: 24px 24px 60px; } }
-@media (max-width: 480px)  { .ll-main { padding: 18px 16px 48px; } }
-
-/* Header */
-.ll-header { margin-bottom: 32px; }
-.ll-meta-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-.ll-tag-sec, .ll-tag-num, .ll-tag-lab { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: var(--radius-xs); border: 1px solid var(--border-g); background: var(--green-dim); color: var(--green); }
-.ll-tag-num { border-color: var(--border); background: var(--bg-3); color: var(--text-3); }
-.ll-tag-lab { border-color: rgba(0,217,126,0.2); background: rgba(0,217,126,0.06); }
-.ll-title { font-size: clamp(22px, 2.8vw, 32px); font-weight: 700; letter-spacing: -0.5px; line-height: 1.15; color: var(--text); margin: 0 0 12px; max-width: 580px; }
-.ll-subrow { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.ll-readtime { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-3); display: flex; align-items: center; gap: 5px; }
-.ll-dot { color: var(--border); }
-.ll-mark-btn { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-3); background: var(--bg-3); border: 1px solid var(--border); padding: 3px 10px; border-radius: var(--radius-xs); cursor: pointer; transition: all 0.12s; }
-.ll-mark-btn:hover { color: var(--green); border-color: var(--border-g); background: var(--green-dim); }
-.ll-read-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--green); background: var(--green-dim); border: 1px solid var(--border-g); padding: 3px 9px; border-radius: var(--radius-xs); display: none; }
-.ll-rule { height: 1px; background: linear-gradient(to right, var(--green), transparent); opacity: 0.3; width: 100px; }
-
-/* Prose */
-.ll-prose { max-width: 66ch; }
-.ll-prose h2 { font-size: 19px; font-weight: 700; color: var(--text); margin: 44px 0 12px; letter-spacing: -0.3px; padding-bottom: 8px; border-bottom: 1px solid var(--border); scroll-margin-top: 80px; }
-.ll-prose h2:first-child { margin-top: 0; }
-.ll-prose h3 { font-size: 15px; font-weight: 600; color: var(--text); margin: 24px 0 8px; scroll-margin-top: 80px; }
-.ll-prose p { margin: 0 0 16px; color: var(--text-2); line-height: 1.82; font-size: 15px; }
-.ll-prose ul, .ll-prose ol { margin: 0 0 18px; padding-left: 0; list-style: none; }
-.ll-prose ul li, .ll-prose ol li { position: relative; padding-left: 18px; margin-bottom: 7px; color: var(--text-2); line-height: 1.72; font-size: 15px; }
-.ll-prose ul li::before { content: '→'; position: absolute; left: 0; color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 11px; top: 4px; }
-.ll-prose ol { counter-reset: li; }
-.ll-prose ol li { counter-increment: li; }
-.ll-prose ol li::before { content: counter(li); position: absolute; left: 0; color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; top: 4px; }
-.ll-prose strong { color: var(--text); font-weight: 600; }
-.ll-prose a { color: var(--green); text-underline-offset: 3px; }
-.ll-prose code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg-3); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; color: var(--green); }
-.ll-prose pre { background: var(--bg-3); border: 1px solid var(--border); border-left: 2px solid var(--green); border-radius: var(--radius); padding: 16px 18px; overflow-x: auto; margin: 0 0 18px; }
-.ll-prose pre code { background: none; border: none; padding: 0; font-size: 12.5px; color: var(--text-2); }
-.ll-prose table { width: 100%; border-collapse: collapse; margin: 0 0 20px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.ll-prose thead { background: var(--bg-3); }
-.ll-prose th { text-align: left; padding: 9px 13px; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-3); }
-.ll-prose td { padding: 9px 13px; border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: top; line-height: 1.55; }
-.ll-prose tr:last-child td { border-bottom: none; }
-.ll-prose tbody tr:hover td { background: var(--bg-3); }
-
-/* Lab */
-.ll-lab { margin-top: 48px; border: 1px solid rgba(0,217,126,0.2); border-radius: var(--radius-lg); overflow: hidden; }
-.ll-lab-top { display: flex; align-items: center; gap: 12px; padding: 16px 22px; background: rgba(0,217,126,0.05); border-bottom: 1px solid rgba(0,217,126,0.15); }
-.ll-lab-icon { width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(0,217,126,0.25); background: rgba(0,217,126,0.08); display: flex; align-items: center; justify-content: center; color: var(--green); flex-shrink: 0; }
-.ll-lab-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--green); margin-bottom: 2px; }
-.ll-lab-name { font-size: 13px; font-weight: 600; color: var(--text); }
-.ll-lab-body { padding: 24px 24px 20px; }
-.ll-lab-body.ll-prose h2 { font-size: 16px; }
-.ll-lab-body.ll-prose h3 { color: var(--green); font-size: 13.5px; }
-
-/* Nav */
-.ll-nav { display: flex; gap: 10px; margin-top: 52px; padding-top: 24px; border-top: 1px solid var(--border); }
-.ll-nav-card { display: flex; flex-direction: column; gap: 3px; padding: 13px 16px; border: 1px solid var(--border); border-radius: var(--radius-lg); text-decoration: none; background: var(--bg-2); transition: all 0.12s; min-width: 160px; max-width: 260px; }
-.ll-nav-prev { align-items: flex-start; }
-.ll-nav-next { align-items: flex-end; margin-left: auto; }
-.ll-nav-card:hover { border-color: var(--green); background: var(--green-dim); }
-.ll-nav-done { border-color: var(--border-g); background: var(--green-dim); }
-.ll-nav-dir { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--green); }
-.ll-nav-title { font-size: 12.5px; font-weight: 500; color: var(--text); line-height: 1.3; }
-@media (max-width: 520px) { .ll-nav { flex-direction: column; } .ll-nav-next { align-items: flex-start; margin-left: 0; max-width: 100%; } .ll-nav-prev { max-width: 100%; } }
-
-/* ── Right panel ─────────────────────────────── */
-.ll-right {
-  position: sticky;
-  top: 60px;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-  border-left: 1px solid var(--border);
-  background: var(--bg-2);
-  padding: 22px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-@media (max-width: 1100px) { .ll-right { display: none; } }
-
-.ll-panel-block { display: flex; flex-direction: column; gap: 10px; }
-.ll-panel-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--text-3);
-}
-.ll-panel-label-row { display: flex; align-items: center; justify-content: space-between; }
-.ll-saved-dot {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  color: var(--green);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* Key terms */
-.ll-terms { display: flex; flex-direction: column; gap: 4px; }
-.ll-terms-loading { font-size: 11px; color: var(--text-3); font-style: italic; }
-.ll-term {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  color: var(--text-2);
-  padding: 5px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--bg-3);
-  cursor: default;
-  transition: all 0.12s;
-  line-height: 1.3;
-}
-.ll-term:hover { border-color: var(--border-g); background: var(--green-dim); color: var(--green); }
-.ll-term::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--green); flex-shrink: 0; opacity: 0.6; }
-
-/* Next lesson */
-.ll-next-card {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  text-decoration: none;
-  background: var(--bg-3);
-  transition: all 0.12s;
+  border-bottom: 1px solid var(--border);
+  padding: 72px 80px;
+  margin-left: -80px;
+  margin-right: -80px;
   position: relative;
+  overflow: hidden;
 }
-.ll-next-card:hover { border-color: var(--green); background: var(--green-dim); }
-.ll-next-num { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--green); text-transform: uppercase; letter-spacing: 0.4px; }
-.ll-next-title { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.35; padding-right: 16px; }
-.ll-next-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 13px; transition: all 0.12s; }
-.ll-next-card:hover .ll-next-arrow { color: var(--green); transform: translateY(-50%) translateX(2px); }
-
-/* Notes */
-.ll-notes-block { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
-.ll-notes {
-  flex: 1;
-  min-height: 120px;
-  max-height: 300px;
-  background: var(--bg-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  color: var(--text-2);
-  font-size: 12px;
-  line-height: 1.6;
-  resize: vertical;
-  font-family: inherit;
-  transition: border-color 0.12s;
+.course-hero::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(0,217,126,0.07) 0%, transparent 70%);
+  pointer-events: none;
 }
-.ll-notes:focus { outline: none; border-color: var(--border-g); }
-.ll-notes::placeholder { color: var(--text-3); }
+@media (max-width: 900px) { .course-hero { padding: 40px 24px; margin-left: -24px; margin-right: -24px; } }
+@media (max-width: 480px) { .course-hero { padding: 32px 16px; margin-left: -16px; margin-right: -16px; } }
+.course-hero-inner { display: grid; grid-template-columns: 1fr 0.85fr; gap: 60px; align-items: center; max-width: 1200px; margin: 0 auto; }
+@media (max-width: 900px) { .course-hero-inner { grid-template-columns: 1fr; gap: 36px; } }
+.course-tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: var(--radius-xs); border: 1px solid var(--border-g); background: var(--green-dim); color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.5px; margin-bottom: 16px; }
+.course-title { font-family: 'Space Grotesk', sans-serif; font-size: 54px; font-weight: 700; letter-spacing: -2px; line-height: 1.05; margin: 0 0 20px; }
+.course-title-accent { color: var(--green); }
+@media (max-width: 900px) { .course-title { font-size: 38px; } }
+@media (max-width: 480px) { .course-title { font-size: 30px; } }
+.course-subtitle { color: var(--text-2); font-size: 15px; line-height: 1.75; max-width: 48ch; margin: 0 0 28px; }
+.course-meta-row { display: flex; align-items: center; gap: 20px; padding: 18px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 28px; flex-wrap: wrap; }
+.course-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.course-meta-num { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+.course-meta-label { font-size: 10.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.4px; }
+.course-meta-div { width: 1px; height: 28px; background: var(--border); }
+.course-cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.course-btn-primary { font-size: 14px; padding: 10px 24px; min-height: 42px; }
+.course-one-time { font-size: 12px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
+.course-card-preview { border: 1px solid var(--border-g); border-radius: var(--radius-xl); background: var(--bg-3); overflow: hidden; }
+.ccp-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg-4); }
+.ccp-tag { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--green); }
+.ccp-list { padding: 16px 20px; display: grid; gap: 10px; }
+.ccp-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-2); line-height: 1.5; }
+.ccp-item::before { content: '→'; color: var(--green); flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-top: 1px; }
+.ccp-footer { padding: 12px 20px; border-top: 1px solid var(--border); background: var(--bg-4); }
+.ccp-cert { font-size: 11.5px; color: var(--green); font-family: 'JetBrains Mono', monospace; }
+.course-section { padding: 60px 0; border-bottom: 1px solid var(--border); }
+.cs-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--green); margin-bottom: 16px; }
+.cs-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 36px; }
+.course-for-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 800px) { .course-for-grid { grid-template-columns: 1fr; } }
+.course-for-item { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 24px; background: var(--bg-2); }
+.cfi-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.cfi-text { font-size: 13px; color: var(--text-3); line-height: 1.7; }
+.curriculum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 800px) { .curriculum-grid { grid-template-columns: 1fr; } }
+.curriculum-section { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-2); overflow: hidden; }
+.curriculum-section-head { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg-3); }
+.curr-section-tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: var(--radius-xs); border: 1px solid var(--border-g); background: var(--green-dim); color: var(--green); letter-spacing: 0.5px; }
+.curr-section-name { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
+.curriculum-lessons { padding: 8px 0; }
+.curr-lesson { display: flex; align-items: flex-start; gap: 14px; padding: 11px 20px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.curr-lesson:last-of-type { border-bottom: none; }
+.curr-lesson:hover { background: var(--bg-3); }
+.curr-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--green); flex-shrink: 0; margin-top: 2px; width: 20px; }
+.curr-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.curr-sub { font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
+.curr-lab { display: flex; align-items: center; gap: 10px; padding: 11px 20px; background: var(--green-dim); border-top: 1px solid var(--border-g); font-size: 12px; color: var(--text-2); }
+.curr-lab-tag { font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: var(--radius-xs); border: 1px solid var(--border-g); background: var(--bg-3); color: var(--green); flex-shrink: 0; }
+.enrol-card { display: grid; grid-template-columns: 1fr 0.6fr; gap: 60px; align-items: start; border: 1px solid var(--border-g); border-radius: var(--radius-xl); padding: 40px 44px; background: var(--bg-2); }
+@media (max-width: 800px) { .enrol-card { grid-template-columns: 1fr; gap: 32px; padding: 28px 24px; } }
+.enrol-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 8px; }
+.enrol-sub { font-size: 13px; color: var(--text-3); margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; }
+.enrol-list { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
+.enrol-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--text-2); line-height: 1.5; }
+.enrol-list li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+.enrol-price-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; background: var(--bg-3); text-align: center; }
+.enrol-price { font-family: 'Space Grotesk', sans-serif; font-size: 48px; font-weight: 700; color: var(--text); letter-spacing: -2px; line-height: 1; margin-bottom: 4px; }
+.enrol-price-sub { font-size: 11px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; margin-bottom: 20px; }
+.enrol-btn { width: 100%; font-size: 14px; min-height: 44px; }
+.enrol-secure { margin-top: 14px; font-size: 11px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
 </style>
 
-<script>
-var SLUG = '{{ topic.slug }}';
-var CK = 'bliztech_completed';
-var NK = 'bliztech_notes_' + SLUG;
-
-var KEY_TERMS = [
-  'ransomware','phishing','malware','zero-day','vulnerability','exploit',
-  'firewall','encryption','authentication','authorisation','MFA','SIEM',
-  'EDR','VPN','DNS','TLS','HTTPS','SQL injection','social engineering',
-  'lateral movement','credential stuffing','brute force','botnet',
-  'penetration testing','incident response','CIA triad','least privilege',
-  'zero trust','attack surface','threat actor','nation-state','GDPR',
-  'data breach','patch','ransomware-as-a-service','spear phishing',
-  'business email compromise','defence in depth','SPF','DKIM','DMARC'
-];
-
-function getC() { try { return JSON.parse(localStorage.getItem(CK)||'{}'); } catch(e) { return {}; } }
-function setC(d) { try { localStorage.setItem(CK, JSON.stringify(d)); } catch(e) {} }
-
-function syncUI() {
-  var done = getC()[SLUG];
-  var btn = document.getElementById('ll-mark-btn');
-  var badge = document.getElementById('ll-read-badge');
-  var pill = document.getElementById('ll-done-pill');
-  if (done) {
-    if (btn) btn.style.display = 'none';
-    if (badge) badge.style.display = 'inline-flex';
-    if (pill) { pill.textContent = '✓ Read'; pill.style.display = 'inline-block'; }
-  } else {
-    if (btn) btn.style.display = 'inline-block';
-    if (badge) badge.style.display = 'none';
-    if (pill) pill.style.display = 'none';
-  }
-}
-
-function markRead() {
-  var d = getC(); d[SLUG] = true; setC(d); syncUI();
-}
-
-function calcRT() {
-  var prose = document.getElementById('ll-prose');
-  if (!prose) return;
-  var words = (prose.textContent||'').trim().split(/\s+/).filter(function(w){return w.length>0;}).length;
-  var mins = Math.max(1, Math.round(words / 200));
-  var el = document.getElementById('ll-rt-text');
-  var rt = document.getElementById('ll-readtime');
-  var dot = document.getElementById('ll-dot');
-  if (el) el.textContent = mins + ' min read';
-  if (rt) rt.style.display = 'flex';
-  if (dot) dot.style.display = 'inline';
-}
-
-function buildTOC() {
-  var prose = document.getElementById('ll-prose');
-  var toc = document.getElementById('ll-toc');
-  if (!prose || !toc) return;
-  var h2s = prose.querySelectorAll('h2');
-  if (!h2s.length) return;
-  h2s.forEach(function(h, i) {
-    var id = 'sec-' + i;
-    h.id = id;
-    var a = document.createElement('a');
-    a.href = '#' + id;
-    a.textContent = h.textContent;
-    a.addEventListener('click', function(e) {
-      e.preventDefault();
-      h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    toc.appendChild(a);
-  });
-  var obs = new IntersectionObserver(function(entries) {
-    entries.forEach(function(en) {
-      var link = toc.querySelector('[href="#' + en.target.id + '"]');
-      if (!link) return;
-      if (en.isIntersecting) {
-        toc.querySelectorAll('a').forEach(function(a) { a.classList.remove('active'); });
-        link.classList.add('active');
-      }
-    });
-  }, { rootMargin: '-5% 0px -85% 0px' });
-  h2s.forEach(function(h) { obs.observe(h); });
-}
-
-function buildKeyTerms() {
-  var prose = document.getElementById('ll-prose');
-  var container = document.getElementById('ll-terms');
-  if (!prose || !container) return;
-  var text = (prose.textContent || prose.innerText || '').toLowerCase();
-  var found = KEY_TERMS.filter(function(term) {
-    return text.indexOf(term.toLowerCase()) !== -1;
-  }).slice(0, 10);
-  container.innerHTML = '';
-  if (found.length === 0) {
-    container.innerHTML = '<div class="ll-terms-loading">No specific terms detected</div>';
-    return;
-  }
-  found.forEach(function(term) {
-    var el = document.createElement('div');
-    el.className = 'll-term';
-    el.textContent = term;
-    container.appendChild(el);
-  });
-}
-
-function initNotes() {
-  var ta = document.getElementById('ll-notes');
-  var dot = document.getElementById('ll-saved-dot');
-  if (!ta) return;
-  try { ta.value = localStorage.getItem(NK) || ''; } catch(e) {}
-  var timer;
-  ta.addEventListener('input', function() {
-    clearTimeout(timer);
-    if (dot) { dot.textContent = 'saving...'; dot.style.opacity = '1'; }
-    timer = setTimeout(function() {
-      try { localStorage.setItem(NK, ta.value); } catch(e) {}
-      if (dot) { dot.textContent = 'saved ✓'; setTimeout(function() { dot.style.opacity = '0'; }, 1500); }
-    }, 800);
-  });
-}
-
-function autoMark() {
-  var done = false;
-  window.addEventListener('scroll', function() {
-    if (done) return;
-    if ((window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 150)) {
-      done = true; markRead();
-    }
-  }, { passive: true });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  calcRT(); syncUI(); autoMark(); initNotes();
-  var btn = document.getElementById('ll-mark-btn');
-  if (btn) btn.addEventListener('click', markRead);
-});
-window.addEventListener('load', function() {
-  buildTOC(); buildKeyTerms();
-});
-</script>
 {% endblock %}
