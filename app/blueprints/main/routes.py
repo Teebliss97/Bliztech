@@ -382,6 +382,27 @@ def course_thankyou():
 
 
 # -------------------------
+# DEBUG — temporary access check (remove after fixing)
+# -------------------------
+@main_bp.route('/debug/access')
+@login_required
+def debug_access():
+    from app.models import CourseAccess
+    from app.extensions import db
+    ca = CourseAccess.query.filter_by(user_id=current_user.id).first()
+    all_ca = db.session.execute(db.text("SELECT * FROM course_access")).fetchall()
+    return jsonify({
+        "current_user_id": current_user.id,
+        "current_user_email": current_user.email,
+        "has_course_access_flag": current_user.has_course_access,
+        "course_access_row_found": ca.id if ca else None,
+        "course_access_user_id": ca.user_id if ca else None,
+        "is_admin": current_user.is_admin,
+        "all_course_access_rows": [{"id": r[0], "user_id": r[1]} for r in all_ca],
+    })
+
+
+# -------------------------
 # PAID COURSE — check access (AJAX polling from thank you page)
 # -------------------------
 @main_bp.route('/course/check-access')
