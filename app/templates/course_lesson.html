@@ -225,9 +225,11 @@ function buildTOC() {
   var nav = document.getElementById('toc-nav');
   if (!content || !nav) return;
 
+  // Exclude h2s inside SVGs and diagram wrapper divs (which use inline border-radius:8px)
   var headings = Array.from(content.querySelectorAll('h2')).filter(function(h) {
-  return !h.closest('svg') && !h.closest('.diagram');
+    return !h.closest('svg') && !h.closest('[style*="border-radius:8px"]');
   });
+
   if (headings.length === 0) return;
 
   nav.innerHTML = '';
