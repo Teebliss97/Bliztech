@@ -3096,6 +3096,7 @@ code {
   max-width: none;
   padding: 42px 52px;
   transition: width 0.22s ease, max-width 0.22s ease, padding 0.22s ease;
+  overflow: hidden;
 }
 
 .lesson-layout-2col.sidebar-collapsed {
