@@ -79,9 +79,9 @@ main { width: 100%; padding-bottom: 80px; padding-left: 80px; padding-right: 80p
 main.container { padding-bottom: 80px; }
 
 .page-wrap {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 40px 80px;
+  padding: 40px 48px;
 }
 @media (max-width: 900px) { .page-wrap { padding: 32px 24px; } }
 @media (max-width: 480px) { .page-wrap { padding: 24px 16px; } }
@@ -718,25 +718,95 @@ h3 { font-size: 15px; font-weight: 600; }
 .course-bar-fill { height: 100%; border-radius: 999px; background: var(--green); box-shadow: 0 0 8px var(--green-glow); transition: width 0.6s ease; }
 
 /* -----------------------------
-   16) Lesson page
+   16) Lesson page  ← KEY SECTION
 ------------------------------ */
-.lesson-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 0 0 24px; }
-.lesson-time { display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; padding: 2px 8px; border-radius: var(--radius-xs); border: 1px solid var(--border); background: var(--bg-3); color: var(--text-3); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; }
+.lesson-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 24px;
+}
+.lesson-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+}
 .lesson-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.lesson-layout { display: grid; grid-template-columns: 1.45fr 0.55fr; gap: 16px; align-items: start; }
-@media (max-width: 900px) { .lesson-layout { grid-template-columns: 1fr; } }
-.lesson-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 30px 34px; background: var(--bg-2); line-height: 1.85; }
-.lesson-card h2 { font-size: 20px; margin: 0 0 16px; }
+
+/* 3-column lesson layout: TOC | content | right panel */
+.lesson-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr 240px;
+  gap: 20px;
+  align-items: start;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .lesson-layout {
+    grid-template-columns: 180px 1fr 220px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .lesson-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lesson-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 40px;
+  background: var(--bg-2);
+  line-height: 1.85;
+  min-width: 0; /* prevent grid blowout */
+}
+.lesson-card h2 { font-size: 20px; margin: 28px 0 14px; }
+.lesson-card h2:first-child { margin-top: 0; }
 .lesson-card h3 { margin: 20px 0 10px; }
 .lesson-card p  { margin: 0 0 14px; color: var(--text-2); }
-.lesson-card ul { margin: 0 0 14px 20px; }
+.lesson-card ul, .lesson-card ol { margin: 0 0 14px 20px; }
 .lesson-card li { margin: 6px 0; color: var(--text-2); }
-.lesson-side { display: grid; gap: 10px; position: sticky; top: 70px; }
+
+.lesson-side {
+  display: grid;
+  gap: 10px;
+  position: sticky;
+  top: 70px;
+  min-width: 0; /* prevent grid blowout */
+}
 @media (max-width: 900px) { .lesson-side { position: static; } }
-.side-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; background: var(--bg-2); }
-.side-title { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+
+.side-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  background: var(--bg-2);
+}
+.side-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 10px;
+}
 .side-list { margin: 0 0 0 14px; color: var(--text-3); line-height: 1.75; font-size: 12.5px; }
 .side-text { color: var(--text-3); line-height: 1.7; font-size: 12.5px; }
+
 .callout { border-radius: var(--radius); padding: 13px 15px; border: 1px solid var(--border); background: var(--bg-3); margin: 14px 0; }
 .callout-title { font-weight: 600; font-size: 13px; margin-bottom: 5px; }
 .callout-text  { color: var(--text-2); font-size: 13px; line-height: 1.65; }
@@ -884,7 +954,7 @@ code { display: inline-flex; align-items: center; padding: 2px 6px; border-radiu
 }
 
 /* Stats card */
-.hero-mid { display: flex; align-items: flex-start; justify-content: center; } /* FIXED: was align-items: center */
+.hero-mid { display: flex; align-items: flex-start; justify-content: center; }
 
 .stats-card { border: 1px solid var(--border-g); border-radius: var(--radius-lg); background: var(--bg-3); padding: 20px; width: 100%; }
 .stats-card-title { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--green); margin-bottom: 16px; }
