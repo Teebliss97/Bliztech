@@ -1,51 +1,43 @@
 import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+import resend
 
 
-def _get_sendgrid_config():
-    """
-    Supports either env naming:
-      - SENDGRID_API_KEY
-      - MAIL_FROM  (recommended)
-      - or SENDGRID_FROM_EMAIL (your current naming)
-    """
-    api_key = os.getenv("SENDGRID_API_KEY")
+def _get_resend_config():
+    api_key = os.getenv("RESEND_API_KEY")
     from_email = os.getenv("MAIL_FROM") or os.getenv("SENDGRID_FROM_EMAIL")
     return api_key, from_email
 
 
 def send_email(to_email: str, subject: str, html_content: str) -> bool:
     """
-    Generic SendGrid email sender.
+    Generic Resend email sender.
     Returns True if sent, False otherwise.
     """
-    api_key, from_email = _get_sendgrid_config()
+    api_key, from_email = _get_resend_config()
 
     if not api_key or not from_email:
-        print("❌ SendGrid not configured: missing SENDGRID_API_KEY or MAIL_FROM/SENDGRID_FROM_EMAIL")
+        print("❌ Resend not configured: missing RESEND_API_KEY or MAIL_FROM")
         return False
 
-    message = Mail(
-        from_email=from_email,
-        to_emails=to_email,
-        subject=subject,
-        html_content=html_content,
-    )
+    resend.api_key = api_key
 
     try:
-        sg = SendGridAPIClient(api_key)
-        response = sg.send(message)
-        print("✅ Email sent:", response.status_code)
+        response = resend.Emails.send({
+            "from": from_email,
+            "to": [to_email],
+            "subject": subject,
+            "html": html_content,
+        })
+        print("✅ Email sent:", response.get("id"))
         return True
     except Exception as e:
-        print("❌ SendGrid error:", e)
+        print("❌ Resend error:", e)
         return False
 
 
 def send_course_completion_email(to_email: str) -> bool:
     """
-    Sends course completion email using SendGrid.
+    Sends course completion email using Resend.
     Returns True if sent successfully, False otherwise.
     """
     subject = "🎉 Congratulations! You completed the BlizTech Cyber Awareness Course"
@@ -61,7 +53,7 @@ def send_course_completion_email(to_email: str) -> bool:
         </p>
 
         <p>
-          You’ve taken an important step toward staying safer online.
+          You've taken an important step toward staying safer online.
         </p>
 
         <hr style="border:1px solid #2c3e50">
