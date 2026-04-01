@@ -317,10 +317,11 @@ def course():
 @main_bp.route('/course/lessons')
 @login_required
 def course_lessons():
-    from app.models import CourseTopic, CourseAccess
+    from app.models import CourseTopic, CourseAccess, User
+    fresh_user = User.query.get(current_user.id)
     has_access = (
-        current_user.is_admin
-        or bool(current_user.has_course_access)
+        fresh_user.is_admin
+        or bool(fresh_user.has_course_access)
         or bool(CourseAccess.query.filter_by(user_id=current_user.id).first())
     )
     if not has_access:
@@ -351,12 +352,11 @@ def course_lessons():
 @main_bp.route('/course/lessons/<slug>')
 @login_required
 def course_lesson(slug):
-    import markdown as md_lib
-    from app.models import CourseTopic, CourseAccess
-
+    from app.models import CourseTopic, CourseAccess, User
+    fresh_user = User.query.get(current_user.id)
     has_access = (
-        current_user.is_admin
-        or bool(current_user.has_course_access)
+        fresh_user.is_admin
+        or bool(fresh_user.has_course_access)
         or bool(CourseAccess.query.filter_by(user_id=current_user.id).first())
     )
     if not has_access:

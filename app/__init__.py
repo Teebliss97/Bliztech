@@ -3,7 +3,6 @@ import uuid
 import json
 import time
 import logging
-import markdown as md
 from datetime import datetime
 from logging.config import dictConfig
 from urllib.parse import urlsplit, urlunsplit
