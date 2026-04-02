@@ -2,37 +2,26 @@
 {% block title %}Quiz Result — Get Into Cybersecurity{% endblock %}
 
 {% block content %}
-<div class="page-wrap" style="max-width:640px;margin:0 auto;padding:60px 32px;">
+<div class="page-wrap" style="max-width:720px;margin:0 auto;padding:60px 32px;">
 
   {% if attempt.passed %}
   <!-- PASS -->
   <div style="text-align:center;margin-bottom:40px;">
     <div style="font-size:48px;margin-bottom:16px;">🎉</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--green);margin-bottom:10px;">
-      Quiz passed
-    </div>
-    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.04em;margin:0 0 12px;">
-      Well done!
-    </h1>
-    <p style="color:var(--text-2);font-size:15px;line-height:1.7;margin:0;">
-      You passed the Get Into Cybersecurity final assessment. Your certificate is ready.
-    </p>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--green);margin-bottom:10px;">Quiz passed</div>
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.04em;margin:0 0 12px;">Well done!</h1>
+    <p style="color:var(--text-2);font-size:15px;line-height:1.7;margin:0;">You passed the Get Into Cybersecurity final assessment. Your certificate is ready.</p>
   </div>
 
-  <!-- Score card -->
   <div style="border:1px solid var(--border-g);border-radius:20px;padding:28px 32px;background:var(--green-dim);margin-bottom:24px;text-align:center;">
-    <div style="font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:700;letter-spacing:-2px;color:var(--green);line-height:1;">
-      {{ attempt.percentage }}%
-    </div>
-    <div style="font-size:14px;color:var(--text-2);margin-top:6px;">
-      {{ attempt.score }} correct out of {{ attempt.total }} questions
-    </div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:700;letter-spacing:-2px;color:var(--green);line-height:1;">{{ attempt.percentage }}%</div>
+    <div style="font-size:14px;color:var(--text-2);margin-top:6px;">{{ attempt.score }} correct out of {{ attempt.total }} questions</div>
     <div style="margin-top:16px;height:4px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;">
       <div style="height:100%;width:{{ attempt.percentage }}%;background:var(--green);border-radius:999px;box-shadow:0 0 10px var(--green-glow);"></div>
     </div>
   </div>
 
-  <a class="btn" href="{{ url_for('cert.paid_certificate_home') }}" style="width:100%;justify-content:center;font-size:15px;padding:12px;">
+  <a class="btn" href="{{ url_for('cert.paid_certificate_home') }}" style="width:100%;justify-content:center;font-size:15px;padding:12px;margin-bottom:32px;">
     Get your certificate →
   </a>
 
@@ -40,49 +29,108 @@
   <!-- FAIL -->
   <div style="text-align:center;margin-bottom:40px;">
     <div style="font-size:48px;margin-bottom:16px;">📝</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#F59E0B;margin-bottom:10px;">
-      Not quite
-    </div>
-    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.04em;margin:0 0 12px;">
-      Keep going
-    </h1>
-    <p style="color:var(--text-2);font-size:15px;line-height:1.7;margin:0;">
-      You need {{ pass_threshold }}% to pass. Review the lessons and try again — you can retake as many times as you need.
-    </p>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#F59E0B;margin-bottom:10px;">Not quite</div>
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.04em;margin:0 0 12px;">Keep going</h1>
+    <p style="color:var(--text-2);font-size:15px;line-height:1.7;margin:0;">You need {{ pass_threshold }}% to pass. Review the questions below, go back to the lessons, and try again.</p>
   </div>
 
-  <!-- Score card -->
   <div style="border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:28px 32px;background:rgba(245,158,11,0.04);margin-bottom:24px;text-align:center;">
-    <div style="font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:700;letter-spacing:-2px;color:#F59E0B;line-height:1;">
-      {{ attempt.percentage }}%
-    </div>
-    <div style="font-size:14px;color:var(--text-2);margin-top:6px;">
-      {{ attempt.score }} correct out of {{ attempt.total }} questions
-    </div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:700;letter-spacing:-2px;color:#F59E0B;line-height:1;">{{ attempt.percentage }}%</div>
+    <div style="font-size:14px;color:var(--text-2);margin-top:6px;">{{ attempt.score }} correct out of {{ attempt.total }} questions</div>
     <div style="margin-top:16px;height:4px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;">
       <div style="height:100%;width:{{ attempt.percentage }}%;background:#F59E0B;border-radius:999px;"></div>
     </div>
-    <div style="margin-top:10px;font-size:12px;color:var(--text-3);">
-      You need {{ pass_threshold }}% — just {{ [0, ((attempt.total * pass_threshold / 100) | int) - attempt.score + 1] | max }} more correct answers
-    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-3);">You need {{ pass_threshold }}% to pass</div>
   </div>
 
-  <div style="display:grid;gap:10px;">
-    <a class="btn" href="{{ url_for('quiz.quiz_home') }}" style="width:100%;justify-content:center;">
-      Retake quiz →
-    </a>
-    <a class="btn btn-outline" href="{{ url_for('main.course_lessons') }}" style="width:100%;justify-content:center;">
-      ← Review lessons
-    </a>
+  <div style="display:grid;gap:10px;margin-bottom:32px;">
+    <a class="btn" href="{{ url_for('quiz.quiz_home') }}" style="width:100%;justify-content:center;">Retake quiz →</a>
+    <a class="btn btn-outline" href="{{ url_for('main.course_lessons') }}" style="width:100%;justify-content:center;">← Review lessons</a>
   </div>
+  {% endif %}
+
+  <!-- ── Missed questions review ── -->
+  {% if wrong %}
+  <div style="margin-top:8px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-3);margin-bottom:16px;">
+      {{ wrong | length }} question{{ 's' if wrong | length != 1 else '' }} to review
+    </div>
+
+    {% for item in wrong %}
+    <div style="border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px 24px;background:rgba(255,255,255,0.015);margin-bottom:12px;">
+
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);margin-bottom:8px;">
+        Question {{ item.index + 1 }}
+      </div>
+
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:14px;">
+        {{ item.q }}
+      </div>
+
+      {% for opt in item.options %}
+      {% set j = loop.index0 %}
+      <div style="
+        display:flex;align-items:flex-start;gap:10px;
+        padding:10px 14px;border-radius:10px;margin-bottom:6px;
+        {% if j == item.answer %}
+          border:1px solid rgba(0,217,126,0.3);background:rgba(0,217,126,0.06);
+        {% elif item.chosen is not none and j == item.chosen %}
+          border:1px solid rgba(244,63,94,0.3);background:rgba(244,63,94,0.06);
+        {% else %}
+          border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.01);
+        {% endif %}
+      ">
+        <span style="
+          flex-shrink:0;width:18px;height:18px;border-radius:50%;
+          display:flex;align-items:center;justify-content:center;
+          font-size:10px;font-weight:700;margin-top:1px;
+          {% if j == item.answer %}
+            background:var(--green);color:#000;
+          {% elif item.chosen is not none and j == item.chosen %}
+            background:rgba(244,63,94,0.8);color:#fff;
+          {% else %}
+            background:rgba(255,255,255,0.06);color:var(--text-3);
+          {% endif %}
+        ">
+          {{ ['A','B','C','D'][j] }}
+        </span>
+        <span style="
+          font-size:13.5px;line-height:1.5;
+          {% if j == item.answer %}color:var(--text);font-weight:500;
+          {% elif item.chosen is not none and j == item.chosen %}color:rgba(244,63,94,0.9);
+          {% else %}color:var(--text-3);{% endif %}
+        ">
+          {{ opt }}
+          {% if j == item.answer %}<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);margin-left:6px;">✓ correct</span>{% endif %}
+          {% if item.chosen is not none and j == item.chosen and j != item.answer %}<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,63,94,0.9);margin-left:6px;">✗ your answer</span>{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+
+      {% if item.chosen is none %}
+      <div style="font-size:12px;color:#F59E0B;margin-top:6px;font-family:'JetBrains Mono',monospace;">⚠ Not answered</div>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if attempt.passed %}
+  <div style="margin-top:24px;">
+    <a class="btn" href="{{ url_for('cert.paid_certificate_home') }}" style="width:100%;justify-content:center;">Get your certificate →</a>
+  </div>
+  {% else %}
+  <div style="margin-top:24px;display:grid;gap:10px;">
+    <a class="btn" href="{{ url_for('quiz.quiz_home') }}" style="width:100%;justify-content:center;">Retake quiz →</a>
+    <a class="btn btn-outline" href="{{ url_for('main.course_lessons') }}" style="width:100%;justify-content:center;">← Review lessons</a>
+  </div>
+  {% endif %}
   {% endif %}
 
   <!-- Attempt info -->
   <div style="margin-top:28px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-3);">
     Attempted {{ attempt.attempted_at.strftime('%d %b %Y at %H:%M') }} UTC
-    {% if best and best.id != attempt.id %}
-    · Best score: {{ best.score }}/{{ best.total }} ({{ best.percentage }}%)
-    {% endif %}
+    {% if best and best.id != attempt.id %}· Best score: {{ best.score }}/{{ best.total }} ({{ best.percentage }}%){% endif %}
   </div>
 
 </div>
