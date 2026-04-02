@@ -50,12 +50,14 @@
   <!-- Quiz form -->
   <form method="POST" action="{{ url_for('quiz.quiz_submit') }}" id="quiz-form">
 
-    {% for i, q in questions | enumerate %}
+    {% for q in questions %}
+    {% set i = loop.index0 %}
     <div class="quiz-q-card" id="q{{ i }}">
-      <div class="quiz-q-num">{{ i + 1 }} / {{ total_questions }}</div>
+      <div class="quiz-q-num">{{ loop.index }} / {{ total_questions }}</div>
       <div class="quiz-q-text">{{ q.q }}</div>
       <div class="quiz-q-options">
-        {% for j, opt in q.options | enumerate %}
+        {% for opt in q.options %}
+        {% set j = loop.index0 %}
         <label class="quiz-option">
           <input type="radio" name="q{{ i }}" value="{{ j }}" required>
           <span class="quiz-option-text">{{ opt }}</span>
@@ -88,9 +90,6 @@
   background: rgba(255,255,255,0.015);
   margin-bottom: 16px;
   transition: border-color 0.15s;
-}
-.quiz-q-card:has(input:checked) {
-  border-color: rgba(0,217,126,0.2);
 }
 .quiz-q-num {
   font-family: 'JetBrains Mono', monospace;
@@ -139,17 +138,9 @@
   color: var(--text-2);
   line-height: 1.5;
 }
-.quiz-option:has(input:checked) {
-  border-color: rgba(0,217,126,0.3);
-  background: rgba(0,217,126,0.06);
-}
-.quiz-option:has(input:checked) .quiz-option-text {
-  color: var(--text);
-}
 </style>
 
 <script>
-// Warn before leaving with unanswered questions
 var form = document.getElementById('quiz-form');
 var submitted = false;
 if (form) {
