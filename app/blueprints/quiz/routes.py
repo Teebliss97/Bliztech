@@ -1016,28 +1016,6 @@ QUESTIONS = [
         ],
         "answer": 1
     },
-    # C=2
-    {
-        "q": "What is GDPR?",
-        "options": [
-            "A US federal cybersecurity law for financial institutions",
-            "A global cloud security standard issued by ISO",
-            "A European Union regulation governing the protection of personal data",
-            "A framework for managing vulnerability disclosures"
-        ],
-        "answer": 2
-    },
-    # D=3
-    {
-        "q": "What is the purpose of a CSRF token in web applications?",
-        "options": [
-            "To speed up form submissions by caching user data",
-            "To encrypt form data before it is sent to the server",
-            "To validate email addresses entered into web forms",
-            "To prevent cross-site request forgery by ensuring requests originate from the legitimate site"
-        ],
-        "answer": 3
-    },
 ]
 
 
