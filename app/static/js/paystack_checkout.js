@@ -1,5 +1,5 @@
 // static/js/paystack_checkout.js
-document.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('load', function () {
   var btn = document.getElementById('pay-btn');
   if (!btn) return;
 
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.textContent = 'Pay ₦20,000 securely';
       },
       callback: function (response) {
-        // Redirect to server-side verification
         window.location.href = window.PAYSTACK_CALLBACK_URL + '?reference=' + response.reference;
       }
     });
