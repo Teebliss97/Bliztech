@@ -3425,3 +3425,10 @@ code {
   white-space: normal;
   word-break: break-word;
 }
+
+.lesson-card td:first-child,
+.lesson-card th:first-child {
+  white-space: normal;
+  word-break: break-word;
+  width: 40%;
+}
