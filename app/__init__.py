@@ -13,8 +13,6 @@ from dotenv import load_dotenv
 from app.extensions import db, login_manager, migrate, limiter
 
 
-
-
 class RequestIdFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         if has_request_context():
@@ -114,22 +112,25 @@ def create_app():
             "base-uri": ["'self'"],
             "object-src": ["'none'"],
             "frame-ancestors": ["'none'"],
-            "form-action": ["'self'", "https://js.paystack.co"],
-            "img-src": ["'self'", "data:", "https://www.google-analytics.com"],
+            "frame-src": ["https://js.paystack.co", "https://checkout.paystack.com"],
+            "form-action": ["'self'", "https://js.paystack.co", "https://checkout.paystack.com"],
+            "img-src": ["'self'", "data:", "https://www.google-analytics.com", "https://checkout.paystack.com"],
             "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
-            "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://checkout.paystack.com"],
             "script-src": [
                 "'self'",
                 "'unsafe-inline'",
                 "https://www.googletagmanager.com",
                 "https://www.google-analytics.com",
                 "https://js.paystack.co",
+                "https://checkout.paystack.com",
             ],
             "connect-src": [
                 "'self'",
                 "https://www.google-analytics.com",
                 "https://analytics.google.com",
                 "https://api.paystack.co",
+                "https://checkout.paystack.com",
             ],
             "upgrade-insecure-requests": [],
         }
@@ -147,7 +148,11 @@ def create_app():
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
-        resp.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        # Use unsafe-none for COOP on payment pages so Paystack popup can communicate
+        if request.path.startswith("/pay/"):
+            resp.headers["Cross-Origin-Opener-Policy"] = "unsafe-none"
+        else:
+            resp.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
         resp.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
         resp.headers.setdefault("X-Frame-Options", "DENY")
         if HSTS_ENABLED:
@@ -247,7 +252,6 @@ def create_app():
     @app.get("/healthz")
     def healthz():
         return jsonify({"status": "ok"})
-
 
     from app.blueprints.main.routes import main_bp
     from app.blueprints.topics.routes import topics_bp
