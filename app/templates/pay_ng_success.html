@@ -1,6 +1,88 @@
 {% extends "base.html" %}
+{% block title %}Payment Successful — BlizTech Academy{% endblock %}
 
-{% block title %}Payment Successful – BlizTech Academy{% endblock %}
+{% block head %}
+<style>
+  .success-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+  }
+  .success-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 3rem 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+  }
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--green-dim);
+    border: 2px solid var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--green);
+    margin: 0 auto 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .success-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 1rem;
+  }
+  .success-body {
+    color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+  .success-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .success-btn-primary {
+    background: var(--green);
+    color: #050f08;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .success-btn-primary:hover { opacity: 0.9; }
+  .success-btn-secondary {
+    background: transparent;
+    color: var(--green);
+    border: 1px solid var(--border-g);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+  .success-btn-secondary:hover { border-color: var(--green); }
+  .success-note {
+    color: var(--text-3);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  .success-note a { color: var(--green); text-decoration: none; }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="success-section">
@@ -17,7 +99,7 @@
 
     <div class="success-actions">
       <a href="{{ url_for('auth.login') }}" class="success-btn-primary">Go to login</a>
-      <a href="{{ url_for('main.index') }}" class="success-btn-secondary">Back to home</a>
+      <a href="{{ url_for('main.home') }}" class="success-btn-secondary">Back to home</a>
     </div>
 
     <p class="success-note">
@@ -28,100 +110,4 @@
 
   </div>
 </section>
-{% endblock %}
-
-{% block styles %}
-<style>
-  .success-section {
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1rem;
-  }
-
-  .success-card {
-    background: #0d1f17;
-    border: 1px solid #1a3a28;
-    border-radius: 12px;
-    padding: 3rem 2.5rem;
-    max-width: 480px;
-    width: 100%;
-    text-align: center;
-  }
-
-  .success-icon {
-    width: 64px;
-    height: 64px;
-    background: #00D97E22;
-    border: 2px solid #00D97E;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    color: #00D97E;
-    margin: 0 auto 1.5rem;
-  }
-
-  .success-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #f0f4f0;
-    margin: 0 0 1rem;
-  }
-
-  .success-body {
-    color: #b0c8b8;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-  }
-
-  .success-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .success-btn-primary {
-    background: #00D97E;
-    color: #050f08;
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-
-  .success-btn-primary:hover { background: #00f090; }
-
-  .success-btn-secondary {
-    background: transparent;
-    color: #00D97E;
-    border: 1px solid #00D97E44;
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    text-decoration: none;
-    transition: border-color 0.2s;
-  }
-
-  .success-btn-secondary:hover { border-color: #00D97E; }
-
-  .success-note {
-    color: #4a6a57;
-    font-size: 0.82rem;
-    line-height: 1.5;
-  }
-
-  .success-note a {
-    color: #00D97E;
-    text-decoration: none;
-  }
-</style>
 {% endblock %}

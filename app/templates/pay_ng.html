@@ -1,6 +1,137 @@
 {% extends "base.html" %}
-
 {% block title %}Pay with Paystack – BlizTech Academy{% endblock %}
+
+{% block head %}
+<style>
+  .pay-ng-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+  }
+  .pay-ng-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    max-width: 480px;
+    width: 100%;
+  }
+  .pay-ng-header {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .pay-ng-badge {
+    display: inline-block;
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--border-g);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .pay-ng-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 0.5rem;
+  }
+  .pay-ng-subtitle {
+    color: var(--text-3);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+  }
+  .pay-ng-price-block {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-3);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .pay-ng-currency {
+    font-size: 1.5rem;
+    color: var(--green);
+    vertical-align: top;
+    margin-top: 0.5rem;
+    display: inline-block;
+  }
+  .pay-ng-amount {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .pay-ng-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+  }
+  .pay-ng-features li {
+    padding: 0.5rem 0 0.5rem 1.2rem;
+    color: var(--text-2);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .pay-ng-features li:last-child { border-bottom: none; }
+  .pay-ng-features li::before {
+    content: '→';
+    color: var(--green);
+    position: absolute;
+    left: 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pay-ng-email-input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+  .pay-ng-email-input:focus {
+    outline: none;
+    border-color: var(--green);
+  }
+  .pay-ng-email-input::placeholder { color: var(--text-3); }
+  .pay-ng-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--green);
+    color: #050f08;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .pay-ng-btn:hover { opacity: 0.9; }
+  .pay-ng-btn:active { transform: scale(0.99); }
+  .pay-ng-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .pay-ng-trust {
+    text-align: center;
+    color: var(--text-3);
+    font-size: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 1.2rem 0 0;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="pay-ng-section">
@@ -39,7 +170,7 @@
     </form>
 
     <p class="pay-ng-trust">
-      Secured by <strong>Paystack</strong> · Cards, bank transfer, USSD accepted
+      Secured by Paystack · Cards, bank transfer, USSD accepted
     </p>
 
   </div>
@@ -52,161 +183,4 @@
   window.PAYSTACK_AMOUNT = {{ price_kobo }};
   window.PAYSTACK_CALLBACK_URL = "{{ url_for('paystack.pay_ng_verify', _external=True) }}";
 </script>
-{% endblock %}
-
-{% block styles %}
-<style>
-  .pay-ng-section {
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1rem;
-  }
-
-  .pay-ng-card {
-    background: #0d1f17;
-    border: 1px solid #1a3a28;
-    border-radius: 12px;
-    padding: 2.5rem;
-    max-width: 480px;
-    width: 100%;
-  }
-
-  .pay-ng-header {
-    margin-bottom: 2rem;
-    text-align: center;
-  }
-
-  .pay-ng-badge {
-    display: inline-block;
-    background: #00D97E22;
-    color: #00D97E;
-    border: 1px solid #00D97E44;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.08em;
-    padding: 0.2rem 0.6rem;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-  }
-
-  .pay-ng-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #f0f4f0;
-    margin: 0 0 0.5rem;
-  }
-
-  .pay-ng-subtitle {
-    color: #7a9a87;
-    font-size: 0.9rem;
-    margin: 0;
-  }
-
-  .pay-ng-price-block {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: #0a1a10;
-    border-radius: 8px;
-    border: 1px solid #1a3a28;
-  }
-
-  .pay-ng-currency {
-    font-size: 1.5rem;
-    color: #00D97E;
-    vertical-align: top;
-    margin-top: 0.5rem;
-    display: inline-block;
-  }
-
-  .pay-ng-amount {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 3rem;
-    font-weight: 700;
-    color: #00D97E;
-  }
-
-  .pay-ng-features {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2rem;
-  }
-
-  .pay-ng-features li {
-    padding: 0.5rem 0;
-    color: #b0c8b8;
-    font-size: 0.9rem;
-    border-bottom: 1px solid #1a3a2833;
-    padding-left: 1.2rem;
-    position: relative;
-  }
-
-  .pay-ng-features li::before {
-    content: '→';
-    color: #00D97E;
-    position: absolute;
-    left: 0;
-  }
-
-  .pay-ng-email-input {
-    width: 100%;
-    padding: 0.85rem 1rem;
-    background: #0a1a10;
-    border: 1px solid #1a3a28;
-    border-radius: 6px;
-    color: #f0f4f0;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
-    box-sizing: border-box;
-    transition: border-color 0.2s;
-  }
-
-  .pay-ng-email-input:focus {
-    outline: none;
-    border-color: #00D97E;
-  }
-
-  .pay-ng-email-input::placeholder {
-    color: #4a6a57;
-  }
-
-  .pay-ng-btn {
-    width: 100%;
-    padding: 0.9rem;
-    background: #00D97E;
-    color: #050f08;
-    border: none;
-    border-radius: 6px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .pay-ng-btn:hover {
-    background: #00f090;
-  }
-
-  .pay-ng-btn:active {
-    transform: scale(0.99);
-  }
-
-  .pay-ng-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .pay-ng-trust {
-    text-align: center;
-    color: #4a6a57;
-    font-size: 0.8rem;
-    margin: 1.2rem 0 0;
-  }
-</style>
 {% endblock %}
