@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Quiz Result — Get Into Cybersecurity{% endblock %}
+
+{% block content %}
+<div class="page-wrap" style="max-width:640px;margin:0 auto;padding:60px 32px;">
+
+  {% if attempt.passed %}
+  <!-- PASS -->
+  <div style="text-align:center;margin-bottom:40px;">
+    <div style="font-size:48px;margin-bottom:16px;">🎉</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--green);margin-bottom:10px;">
+      Quiz passed
+    </div>
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.04em;margin:0 0 12px;">
+      Well done!
+    </h1>
+    <p style="color:var(--text-2);font-size:15px;line-height:1.7;margin:0;">
+      You passed the Get Into Cybersecurity final assessment. Your certificate is ready.
+    </p>
+  </div>
+
+  <!-- Score card -->
+  <div style="border:1px solid var(--border-g);border-radius:20px;padding:28px 32px;background:var(--green-dim);margin-bottom:24px;text-align:center;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:700;letter-spacing:-2px;color:var(--green);line-height:1;">
+      {{ attempt.percentage }}%
+    </div>
+    <div style="font-size:14px;color:var(--text-2);margin-top:6px;">
+      {{ attempt.score }} correct out of {{ attempt.total }} questions
+    </div>
+    <div style="margin-top:16px;height:4px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;">
+      <div style="height:100%;width:{{ attempt.percentage }}%;background:var(--green);border-radius:999px;box-shadow:0 0 10px var(--green-glow);"></div>
+    </div>
+  </div>
+
+  <a class="btn" href="{{ url_for('cert.paid_certificate_home') }}" style="width:100%;justify-content:center;font-size:15px;padding:12px;">
+    Get your certificate →
+  </a>
+
+  {% else %}
+  <!-- FAIL -->
+  <div style="text-align:center;margin-bottom:40px;">
+    <div style="font-size:48px;margin-bottom:16px;">📝</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#F59E0B;margin-bottom:10px;">
+      Not quite
+    </div>
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-0.04em;margin:0 0 12px;">
+      Keep going
+    </h1>
+    <p style="color:var(--text-2);font-size:15px;line-height:1.7;margin:0;">
+      You need {{ pass_threshold }}% to pass. Review the lessons and try again — you can retake as many times as you need.
+    </p>
+  </div>
+
+  <!-- Score card -->
+  <div style="border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:28px 32px;background:rgba(245,158,11,0.04);margin-bottom:24px;text-align:center;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:700;letter-spacing:-2px;color:#F59E0B;line-height:1;">
+      {{ attempt.percentage }}%
+    </div>
+    <div style="font-size:14px;color:var(--text-2);margin-top:6px;">
+      {{ attempt.score }} correct out of {{ attempt.total }} questions
+    </div>
+    <div style="margin-top:16px;height:4px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;">
+      <div style="height:100%;width:{{ attempt.percentage }}%;background:#F59E0B;border-radius:999px;"></div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-3);">
+      You need {{ pass_threshold }}% — just {{ [0, ((attempt.total * pass_threshold / 100) | int) - attempt.score + 1] | max }} more correct answers
+    </div>
+  </div>
+
+  <div style="display:grid;gap:10px;">
+    <a class="btn" href="{{ url_for('quiz.quiz_home') }}" style="width:100%;justify-content:center;">
+      Retake quiz →
+    </a>
+    <a class="btn btn-outline" href="{{ url_for('main.course_lessons') }}" style="width:100%;justify-content:center;">
+      ← Review lessons
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Attempt info -->
+  <div style="margin-top:28px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-3);">
+    Attempted {{ attempt.attempted_at.strftime('%d %b %Y at %H:%M') }} UTC
+    {% if best and best.id != attempt.id %}
+    · Best score: {{ best.score }}/{{ best.total }} ({{ best.percentage }}%)
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

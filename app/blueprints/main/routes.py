@@ -9,6 +9,10 @@ from app.utils.ratelimit import rate_limit
 from flask import make_response
 from app.link_analyzer import analyze_url
 from flask_login import login_required
+from flask import jsonify
+from flask_login import login_required, current_user
+from app.models import LessonRead, CourseAccess, CourseTopic
+from app.extensions import db
 
 main_bp = Blueprint("main", __name__)
 
@@ -437,5 +441,32 @@ def admin_grant_course():
         .order_by(CourseAccess.granted_at.desc())
         .all()
     )
-
     return render_template("admin_grant_course.html", message=message, access_list=access_list)
+
+@main_bp.route("/course/lessons/<slug>/mark-read", methods=["POST"])
+@login_required
+def mark_lesson_read(slug):
+    """
+    Records that the current user has read this lesson.
+    Called from course_lesson.html when user marks a lesson as read.
+    """
+    # Verify lesson exists
+    topic = CourseTopic.query.filter_by(slug=slug).first()
+    if not topic:
+        return jsonify({"ok": False, "error": "lesson not found"}), 404
+ 
+    # Check course access
+    has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
+    if not has_access:
+        return jsonify({"ok": False, "error": "no access"}), 403
+ 
+    # Insert or ignore if already exists
+    existing = LessonRead.query.filter_by(user_id=current_user.id, slug=slug).first()
+    if not existing:
+        read = LessonRead(user_id=current_user.id, slug=slug)
+        db.session.add(read)
+        db.session.commit()
+ 
+    # Return total read count
+    count = LessonRead.query.filter_by(user_id=current_user.id).count()
+    return jsonify({"ok": True, "read_count": count, "all_done": count >= 20})

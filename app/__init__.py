@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 from app.extensions import db, login_manager, migrate, limiter
 
 
+
+
 class RequestIdFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         if has_request_context():
@@ -242,6 +244,7 @@ def create_app():
     from app.blueprints.auth import auth_bp
     from app.blueprints.cert import cert_bp
     from app.blueprints.admin.routes import admin_bp
+    from app.blueprints.quiz.routes import quiz_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(topics_bp)
@@ -249,6 +252,8 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(cert_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(quiz_bp)
+
 
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp

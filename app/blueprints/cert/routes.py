@@ -91,6 +91,17 @@ def paid_certificate_home():
         flash("You need to purchase the course to access a certificate.", "error")
         return redirect(url_for("main.course"))
 
+    # ── Quiz pass check ──────────────────────────────────────
+    from app.models import QuizAttempt
+    if not current_user.is_admin:
+        best = QuizAttempt.query.filter_by(
+            user_id=current_user.id, passed=True
+        ).first()
+        if not best:
+            flash("You must pass the final quiz (70%+) before claiming your certificate.", "error")
+            return redirect(url_for("quiz.quiz_home"))
+    # ─────────────────────────────────────────────────────────
+
     default_name = (current_user.email.split("@")[0] or "Student").replace(".", " ").title()
     existing = Certificate.query.filter_by(user_id=current_user.id).filter(
         Certificate.cert_id.like('P%')
@@ -118,6 +129,16 @@ def paid_certificate_home():
 def paid_certificate_pdf():
     if not _has_paid_access():
         abort(403)
+
+    # ── Quiz pass check ──────────────────────────────────────
+    from app.models import QuizAttempt
+    if not current_user.is_admin:
+        best = QuizAttempt.query.filter_by(
+            user_id=current_user.id, passed=True
+        ).first()
+        if not best:
+            abort(403)
+    # ─────────────────────────────────────────────────────────
 
     name = (request.form.get("name") or "").strip()
     if not name:
@@ -189,46 +210,34 @@ def _generate_certificate_pdf(cert):
 
     cx = W / 2
 
-    # ── Header — y positions from top ───────────────────────
-    # H = 595. Work top-down leaving good margins.
-
-    # Brand name
+    # ── Header ──────────────────────────────────────────────
     c.setFillColorRGB(1, 1, 1)
     c.setFont("Helvetica-Bold", 18)
     c.drawCentredString(cx, H - 68, "BLIZTECH ACADEMY")
 
-    # URL
     c.setFillColorRGB(0, 0.85, 0.49)
     c.setFont("Helvetica", 10)
     c.drawCentredString(cx, H - 88, "bliztechacademy.com")
 
-    # Thin divider
     c.setStrokeColorRGB(0.18, 0.18, 0.22)
     c.setLineWidth(0.5)
     c.line(cx - 220, H - 102, cx + 220, H - 102)
 
-    # "CERTIFICATE OF COMPLETION"
     c.setFillColorRGB(0.78, 0.78, 0.82)
     c.setFont("Helvetica-Bold", 13)
     title = "CERTIFICATE  OF  COMPLETION"
     c.drawCentredString(cx, H - 124, title)
 
-    # Green underline
     tw = c.stringWidth(title, "Helvetica-Bold", 13)
     c.setStrokeColorRGB(0, 0.85, 0.49)
     c.setLineWidth(1)
     c.line(cx - tw/2, H - 131, cx + tw/2, H - 131)
 
-    # ── Body — spread across middle of page ─────────────────
-    # Available vertical space: from H-150 down to ~160 (footer area)
-    # That's about 390pts — use it generously
-
-    # "This is to certify that"
+    # ── Body ────────────────────────────────────────────────
     c.setFillColorRGB(0.55, 0.55, 0.62)
     c.setFont("Helvetica-Oblique", 13)
     c.drawCentredString(cx, H - 175, "This is to certify that")
 
-    # Recipient name
     name_size = 46
     nw = c.stringWidth(cert.recipient_name, "Helvetica-Bold", name_size)
     while nw > W - 140 and name_size > 28:
@@ -239,29 +248,24 @@ def _generate_certificate_pdf(cert):
     c.setFont("Helvetica-Bold", name_size)
     c.drawCentredString(cx, H - 232, cert.recipient_name)
 
-    # Gold underline
     c.setStrokeColorRGB(0.85, 0.70, 0.25)
     c.setLineWidth(1.2)
     c.line(cx - nw/2, H - 242, cx + nw/2, H - 242)
 
-    # "has successfully completed"
     c.setFillColorRGB(0.55, 0.55, 0.62)
     c.setFont("Helvetica-Oblique", 13)
     c.drawCentredString(cx, H - 278, "has successfully completed")
 
-    # Course name
     c.setFillColorRGB(0, 0.85, 0.49)
     c.setFont("Helvetica-Bold", 28)
     c.drawCentredString(cx, H - 322, "Get Into Cybersecurity")
 
-    # Detail line
     c.setFillColorRGB(0.48, 0.48, 0.54)
     c.setFont("Helvetica", 12)
     c.drawCentredString(cx, H - 356,
         "20 structured lessons  \u00b7  4 sections  \u00b7  4 practical labs  \u00b7  Lifetime access")
 
     # ── Footer ──────────────────────────────────────────────
-    # Footer divider sits at y=148 — well above the bottom border
     footer_y = 155
     c.setStrokeColorRGB(0.16, 0.16, 0.20)
     c.setLineWidth(0.5)
@@ -271,14 +275,12 @@ def _generate_certificate_pdf(cert):
     col_c = cx
     col_r = W * 0.78
 
-    # Labels
     c.setFillColorRGB(0.38, 0.38, 0.44)
     c.setFont("Helvetica", 9)
     c.drawCentredString(col_l, footer_y - 20, "ISSUED BY")
     c.drawCentredString(col_c, footer_y - 20, "CERTIFICATE ID")
     c.drawCentredString(col_r, footer_y - 20, "DATE ISSUED")
 
-    # Values
     c.setFillColorRGB(0.82, 0.82, 0.88)
     c.setFont("Helvetica-Bold", 12)
     c.drawCentredString(col_l, footer_y - 40, "BlizTech Academy")
@@ -291,7 +293,6 @@ def _generate_certificate_pdf(cert):
     c.setFont("Helvetica-Bold", 12)
     c.drawCentredString(col_r, footer_y - 40, cert.issued_at.strftime("%d %B %Y"))
 
-    # Verify URL
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     if base_url:
         verify_url = f"{base_url}/certificate/verify/{cert.cert_id}"

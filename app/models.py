@@ -200,8 +200,8 @@ class CourseAccess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, unique=True, index=True)
     granted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    granted_by = db.Column(db.String(255), nullable=True)   # admin email who granted it
-    gumroad_sale_id = db.Column(db.String(100), nullable=True)  # for future webhook automation
+    granted_by = db.Column(db.String(255), nullable=True)
+    gumroad_sale_id = db.Column(db.String(100), nullable=True)
 
     user = db.relationship("User", backref=db.backref("course_access", uselist=False))
 
@@ -209,20 +209,69 @@ class CourseAccess(db.Model):
 class CourseTopic(db.Model):
     """
     A single lesson in the paid course.
-    Content is stored as Markdown in the body field.
     """
     __tablename__ = "course_topic"
 
     id = db.Column(db.Integer, primary_key=True)
     slug = db.Column(db.String(80), unique=True, nullable=False, index=True)
-    section = db.Column(db.String(2), nullable=False)       # A, B, C, D
-    lesson_number = db.Column(db.Integer, nullable=False)   # 1-20
+    section = db.Column(db.String(2), nullable=False)
+    lesson_number = db.Column(db.Integer, nullable=False)
     title = db.Column(db.String(200), nullable=False)
-    body = db.Column(db.Text, nullable=False)               # Markdown content
-    lab = db.Column(db.Text, nullable=True)                 # Optional lab content
+    body = db.Column(db.Text, nullable=False)
+    lab = db.Column(db.Text, nullable=True)
     order = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
         return f"<CourseTopic {self.lesson_number}: {self.title}>"
+
+
+# ─────────────────────────────────────────────
+#  LESSON READ TRACKING (server-side)
+# ─────────────────────────────────────────────
+
+class LessonRead(db.Model):
+    """
+    Records that a paid user has marked a lesson as read.
+    Used to gate the final quiz — all 20 lessons must be read first.
+    """
+    __tablename__ = "lesson_read"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    slug = db.Column(db.String(80), nullable=False, index=True)
+    read_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "slug", name="uq_lesson_read_user_slug"),
+    )
+
+    user = db.relationship("User", backref=db.backref("lessons_read", lazy="dynamic"))
+
+
+# ─────────────────────────────────────────────
+#  QUIZ ATTEMPT
+# ─────────────────────────────────────────────
+
+class QuizAttempt(db.Model):
+    """
+    Records each attempt at the final 90-question quiz.
+    A passing score (70%+) unlocks the certificate.
+    """
+    __tablename__ = "quiz_attempt"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    score = db.Column(db.Integer, nullable=False)        # number of correct answers
+    total = db.Column(db.Integer, nullable=False)        # total questions (90)
+    passed = db.Column(db.Boolean, nullable=False)       # score >= 70%
+    attempted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    user = db.relationship("User", backref=db.backref("quiz_attempts", lazy="dynamic"))
+
+    @property
+    def percentage(self):
+        if self.total == 0:
+            return 0
+        return round(self.score / self.total * 100)
