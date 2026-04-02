@@ -13,7 +13,7 @@ paystack_bp = Blueprint('paystack', __name__)
 
 PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY')
-COURSE_PRICE_NGN = 15000
+COURSE_PRICE_NGN = 20000
 COURSE_PRICE_KOBO = COURSE_PRICE_NGN * 100  # Paystack uses kobo (100 kobo = 1 naira)
 
 
@@ -131,3 +131,7 @@ def pay_ng_webhook():
 def pay_ng_success():
     email = request.args.get('email', '')
     return render_template('pay_ng_success.html', email=email)
+
+@paystack_bp.route('/pay/choose')
+def pay_choose():
+    return render_template('pay_choose.html')

@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
       label: 'Get Into Cybersecurity',
       onClose: function () {
         btn.disabled = false;
-        btn.textContent = 'Pay ₦15,000 securely';
+        btn.textContent = 'Pay ₦20,000 securely';
       },
       callback: function (response) {
         // Redirect to server-side verification

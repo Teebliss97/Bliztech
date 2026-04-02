@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Choose Payment Method — BlizTech Academy{% endblock %}
+
+{% block content %}
+<section class="choose-section">
+  <div class="choose-card">
+
+    <div class="choose-header">
+      <span class="choose-badge">Get Into Cybersecurity</span>
+      <h1 class="choose-title">Choose how to pay</h1>
+      <p class="choose-sub">One-time payment · Lifetime access · 20 lessons</p>
+    </div>
+
+    <div class="choose-options">
+
+      <!-- Paystack — Nigeria -->
+      <a href="{{ url_for('paystack.pay_ng') }}" class="choose-option">
+        <div class="choose-option-left">
+          <div class="choose-option-label">Paying from Nigeria</div>
+          <div class="choose-option-name">Card, Bank Transfer, USSD</div>
+          <div class="choose-option-provider">Secured by Paystack</div>
+        </div>
+        <div class="choose-option-right">
+          <div class="choose-option-price">₦20,000</div>
+          <div class="choose-option-arrow">→</div>
+        </div>
+      </a>
+
+      <!-- Gumroad — International -->
+      <a href="https://atinuke2.gumroad.com/l/bgokgo" target="_blank" rel="noopener" class="choose-option">
+        <div class="choose-option-left">
+          <div class="choose-option-label">Paying internationally</div>
+          <div class="choose-option-name">Credit / Debit Card</div>
+          <div class="choose-option-provider">Secured by Gumroad</div>
+        </div>
+        <div class="choose-option-right">
+          <div class="choose-option-price">£11</div>
+          <div class="choose-option-arrow">→</div>
+        </div>
+      </a>
+
+    </div>
+
+    <p class="choose-note">
+      Not sure which to pick? Use <strong>Nigeria</strong> if your card or bank account is Nigerian.
+      Use <strong>International</strong> for all other cards.
+    </p>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block styles %}
+<style>
+  .choose-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+  }
+
+  .choose-card {
+    background: var(--bg-2, #0d1f17);
+    border: 1px solid var(--border, #1a3a28);
+    border-radius: 12px;
+    padding: 2.5rem;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .choose-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .choose-badge {
+    display: inline-block;
+    background: var(--green-dim, #00D97E22);
+    color: var(--green, #00D97E);
+    border: 1px solid var(--border-g, #00D97E44);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  .choose-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--text, #f0f4f0);
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.5px;
+  }
+
+  .choose-sub {
+    color: var(--text-3, #7a9a87);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+  }
+
+  .choose-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .choose-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-3, #0a1a10);
+    border: 1px solid var(--border, #1a3a28);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: pointer;
+  }
+
+  .choose-option:hover {
+    border-color: var(--green, #00D97E);
+    background: var(--green-dim, #00D97E0d);
+  }
+
+  .choose-option-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .choose-option-label {
+    font-size: 0.75rem;
+    color: var(--green, #00D97E);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .choose-option-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text, #f0f4f0);
+  }
+
+  .choose-option-provider {
+    font-size: 0.75rem;
+    color: var(--text-3, #7a9a87);
+  }
+
+  .choose-option-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .choose-option-price {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text, #f0f4f0);
+    letter-spacing: -0.5px;
+  }
+
+  .choose-option-arrow {
+    font-size: 0.9rem;
+    color: var(--green, #00D97E);
+    font-family: 'JetBrains Mono', monospace;
+    transition: transform 0.2s;
+  }
+
+  .choose-option:hover .choose-option-arrow {
+    transform: translateX(4px);
+  }
+
+  .choose-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-3, #7a9a87);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .choose-note strong {
+    color: var(--text-2, #b0c8b8);
+  }
+</style>
+{% endblock %}
