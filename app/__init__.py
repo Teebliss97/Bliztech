@@ -114,12 +114,23 @@ def create_app():
             "base-uri": ["'self'"],
             "object-src": ["'none'"],
             "frame-ancestors": ["'none'"],
-            "form-action": ["'self'"],
+            "form-action": ["'self'", "https://js.paystack.co"],
             "img-src": ["'self'", "data:", "https://www.google-analytics.com"],
             "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
             "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-            "script-src": ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
-            "connect-src": ["'self'", "https://www.google-analytics.com", "https://analytics.google.com"],
+            "script-src": [
+                "'self'",
+                "'unsafe-inline'",
+                "https://www.googletagmanager.com",
+                "https://www.google-analytics.com",
+                "https://js.paystack.co",
+            ],
+            "connect-src": [
+                "'self'",
+                "https://www.google-analytics.com",
+                "https://analytics.google.com",
+                "https://api.paystack.co",
+            ],
             "upgrade-insecure-requests": [],
         }
         parts = []
@@ -236,7 +247,7 @@ def create_app():
     @app.get("/healthz")
     def healthz():
         return jsonify({"status": "ok"})
-    
+
 
     from app.blueprints.main.routes import main_bp
     from app.blueprints.topics.routes import topics_bp
@@ -245,6 +256,7 @@ def create_app():
     from app.blueprints.cert import cert_bp
     from app.blueprints.admin.routes import admin_bp
     from app.blueprints.quiz.routes import quiz_bp
+    from app.paystack_routes import paystack_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(topics_bp)
@@ -253,7 +265,7 @@ def create_app():
     app.register_blueprint(cert_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(quiz_bp)
-
+    app.register_blueprint(paystack_bp)
 
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp
