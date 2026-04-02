@@ -467,6 +467,11 @@ QUESTIONS = [
         "options": ["Apply for senior roles immediately", "Build foundational knowledge, get CompTIA Security+, and start hands-on labs", "Wait until you have a computer science degree", "Focus only on networking certifications"],
         "answer": 1
     },
+    {
+        "q": "What is the purpose of a CSRF token in web applications?",
+        "options": ["To speed up form submissions", "To prevent cross-site request forgery attacks by validating that requests originate from the legitimate site", "To encrypt form data before sending", "To validate email addresses in forms"],
+        "answer": 1
+    },
 ]
 
 
