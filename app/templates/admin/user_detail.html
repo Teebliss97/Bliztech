@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}User {{ user.email }} — Admin{% endblock %}
+
+{% block head %}
+<style>
+  .ud-wrap { max-width: 720px; margin: 40px auto; padding: 0 1rem; }
+  .ud-back { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--green); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 1.5rem; }
+  .ud-back:hover { opacity: 0.8; }
+  .ud-header { margin-bottom: 2rem; }
+  .ud-email { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0 0 0.5rem; word-break: break-all; }
+  .ud-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .ud-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; border: 1px solid; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ud-badge-green { color: var(--green); border-color: var(--border-g); background: var(--green-dim); }
+  .ud-badge-red { color: #ff6b6b; border-color: #ff6b6b44; background: #ff6b6b11; }
+  .ud-badge-grey { color: var(--text-3); border-color: var(--border); background: var(--bg-3); }
+  .ud-section { background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+  .ud-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green); margin: 0 0 1rem; }
+  .ud-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+  .ud-row:last-child { border-bottom: none; }
+  .ud-row-label { color: var(--text-3); }
+  .ud-row-value { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+  .ud-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
+  .ud-btn { padding: 0.55rem 1.1rem; border-radius: 6px; font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; text-decoration: none; display: inline-block; transition: opacity 0.15s; }
+  .ud-btn:hover { opacity: 0.85; }
+  .ud-btn-green { background: var(--green); color: #050f08; }
+  .ud-btn-outline { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+  .ud-btn-red { background: #ff6b6b22; color: #ff6b6b; border: 1px solid #ff6b6b44; }
+  .ud-confirm { display: none; }
+  .ud-confirm.show { display: inline-block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ud-wrap">
+
+  <a href="{{ url_for('admin.users') }}" class="ud-back">← Back to users</a>
+
+  <div class="ud-header">
+    <div class="ud-email">{{ user.email }}</div>
+    <div class="ud-meta">
+      <span class="ud-badge {{ 'ud-badge-green' if user.email_verified else 'ud-badge-red' }}">
+        {{ 'Verified' if user.email_verified else 'Unverified / Banned' }}
+      </span>
+      <span class="ud-badge {{ 'ud-badge-green' if user.has_course_access else 'ud-badge-grey' }}">
+        {{ 'Course Access' if user.has_course_access else 'No Course Access' }}
+      </span>
+      {% if user.is_admin %}
+        <span class="ud-badge ud-badge-green">Admin</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Account Info -->
+  <div class="ud-section">
+    <div class="ud-section-title">Account</div>
+    <div class="ud-row"><span class="ud-row-label">ID</span><span class="ud-row-value">{{ user.id }}</span></div>
+    <div class="ud-row"><span class="ud-row-label">Email</span><span class="ud-row-value">{{ user.email }}</span></div>
+    <div class="ud-row"><span class="ud-row-label">Joined</span><span class="ud-row-value">{{ user.created_at.strftime('%d %b %Y, %H:%M') if user.created_at else '—' }}</span></div>
+    <div class="ud-row"><span class="ud-row-label">Email verified</span><span class="ud-row-value">{{ 'Yes' if user.email_verified else 'No' }}</span></div>
+    <div class="ud-row"><span class="ud-row-label">Referral code</span><span class="ud-row-value">{{ user.referral_code or '—' }}</span></div>
+    <div class="ud-row"><span class="ud-row-label">Referrals made</span><span class="ud-row-value">{{ referrals_made }}</span></div>
+  </div>
+
+  <!-- Course Access -->
+  <div class="ud-section">
+    <div class="ud-section-title">Course Access</div>
+    {% if course_access %}
+      <div class="ud-row"><span class="ud-row-label">Granted at</span><span class="ud-row-value">{{ course_access.granted_at.strftime('%d %b %Y, %H:%M') }}</span></div>
+      <div class="ud-row"><span class="ud-row-label">Granted by</span><span class="ud-row-value">{{ course_access.granted_by or '—' }}</span></div>
+      <div class="ud-row"><span class="ud-row-label">Sale ID</span><span class="ud-row-value">{{ course_access.gumroad_sale_id or '—' }}</span></div>
+      <div class="ud-actions">
+        <form method="POST" action="{{ url_for('admin.user_revoke_access', user_id=user.id) }}">
+          <button type="submit" class="ud-btn ud-btn-red" onclick="return confirm('Revoke course access for {{ user.email }}?')">Revoke access</button>
+        </form>
+      </div>
+    {% else %}
+      <div class="ud-row"><span class="ud-row-label">Status</span><span class="ud-row-value" style="color:#ff6b6b">No access</span></div>
+      <div class="ud-actions">
+        <form method="POST" action="{{ url_for('admin.user_grant_access', user_id=user.id) }}">
+          <button type="submit" class="ud-btn ud-btn-green">Grant course access</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Certificates -->
+  <div class="ud-section">
+    <div class="ud-section-title">Certificates ({{ certs|length }})</div>
+    {% if certs %}
+      {% for cert in certs %}
+        <div class="ud-row">
+          <span class="ud-row-label">{{ cert.cert_id }}</span>
+          <span class="ud-row-value">
+            {{ cert.recipient_name }} · {{ cert.issued_at.strftime('%d %b %Y') }}
+            {% if cert.revoked %}<span style="color:#ff6b6b"> · Revoked</span>{% endif %}
+          </span>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="ud-row"><span class="ud-row-label">No certificates issued</span></div>
+    {% endif %}
+  </div>
+
+  <!-- Actions -->
+  <div class="ud-section">
+    <div class="ud-section-title">Account Actions</div>
+    <div class="ud-actions">
+      {% if user.email_verified %}
+        <form method="POST" action="{{ url_for('admin.user_ban', user_id=user.id) }}">
+          <button type="submit" class="ud-btn ud-btn-red" onclick="return confirm('Ban {{ user.email }}? They will not be able to log in.')">Ban user</button>
+        </form>
+      {% else %}
+        <form method="POST" action="{{ url_for('admin.user_unban', user_id=user.id) }}">
+          <button type="submit" class="ud-btn ud-btn-outline">Unban / Verify user</button>
+        </form>
+      {% endif %}
+
+      {% if not user.is_admin %}
+        <form method="POST" action="{{ url_for('admin.user_delete', user_id=user.id) }}">
+          <button type="submit" class="ud-btn ud-btn-red" onclick="return confirm('Permanently delete {{ user.email }}? This cannot be undone.')">Delete user</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

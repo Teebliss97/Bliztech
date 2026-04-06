@@ -70,10 +70,6 @@ def _parse_int(name: str, default: int, min_v: int, max_v: int) -> int:
 
 
 def _grant_course_access(email: str, sale_id: str = None, granted_by: str = "webhook") -> tuple[bool, str]:
-    """
-    Core logic to grant paid course access to a user by email.
-    Returns (success: bool, message: str)
-    """
     email = email.strip().lower()
     user = User.query.filter_by(email=email).first()
 
@@ -82,6 +78,8 @@ def _grant_course_access(email: str, sale_id: str = None, granted_by: str = "web
 
     existing = CourseAccess.query.filter_by(user_id=user.id).first()
     if existing:
+        user.has_course_access = True
+        db.session.commit()
         return True, f"{email} already has access."
 
     access = CourseAccess(
@@ -125,9 +123,108 @@ def dashboard():
 @admin_required
 @limiter.limit("60 per minute")
 def users():
+    q = (request.args.get("q") or "").strip()
     order_col = getattr(User, "created_at", None) or User.id
-    users = User.query.order_by(order_col.desc()).all()
-    return render_template("admin/users.html", users=users)
+    query = User.query.order_by(order_col.desc())
+    if q:
+        query = query.filter(User.email.ilike(f"%{q}%"))
+    all_users = query.all()
+    return render_template("admin/users.html", users=all_users, q=q)
+
+
+@admin_bp.route("/users/<int:user_id>")
+@admin_required
+@limiter.limit("60 per minute")
+def user_detail(user_id: int):
+    user = User.query.get_or_404(user_id)
+    course_access = CourseAccess.query.filter_by(user_id=user.id).first()
+    certs = Certificate.query.filter_by(user_id=user.id).all()
+    referrals_made = Referral.query.filter_by(referrer_id=user.id).count()
+    return render_template(
+        "admin/user_detail.html",
+        user=user,
+        course_access=course_access,
+        certs=certs,
+        referrals_made=referrals_made,
+    )
+
+
+@admin_bp.route("/users/<int:user_id>/grant-access", methods=["POST"])
+@admin_required
+@limiter.limit("30 per minute")
+def user_grant_access(user_id: int):
+    user = User.query.get_or_404(user_id)
+    success, msg = _grant_course_access(
+        email=user.email,
+        granted_by=current_user.email,
+    )
+    _audit("COURSE_ACCESS_GRANT", "user", user.email, msg)
+    flash(msg, "success" if success else "error")
+    return redirect(url_for("admin.user_detail", user_id=user_id))
+
+
+@admin_bp.route("/users/<int:user_id>/revoke-access", methods=["POST"])
+@admin_required
+@limiter.limit("30 per minute")
+def user_revoke_access(user_id: int):
+    user = User.query.get_or_404(user_id)
+    access = CourseAccess.query.filter_by(user_id=user.id).first()
+    if access:
+        db.session.delete(access)
+    user.has_course_access = False
+    db.session.commit()
+    _audit("COURSE_ACCESS_REVOKE", "user", user.email, "revoked by admin")
+    flash(f"Course access revoked for {user.email}.", "success")
+    return redirect(url_for("admin.user_detail", user_id=user_id))
+
+
+@admin_bp.route("/users/<int:user_id>/ban", methods=["POST"])
+@admin_required
+@limiter.limit("30 per minute")
+def user_ban(user_id: int):
+    user = User.query.get_or_404(user_id)
+    if user.is_admin:
+        flash("Cannot ban an admin account.", "error")
+        return redirect(url_for("admin.user_detail", user_id=user_id))
+    user.email_verified = False
+    db.session.commit()
+    _audit("USER_BAN", "user", user.email, "banned by admin")
+    flash(f"{user.email} has been banned.", "success")
+    return redirect(url_for("admin.user_detail", user_id=user_id))
+
+
+@admin_bp.route("/users/<int:user_id>/unban", methods=["POST"])
+@admin_required
+@limiter.limit("30 per minute")
+def user_unban(user_id: int):
+    user = User.query.get_or_404(user_id)
+    user.email_verified = True
+    db.session.commit()
+    _audit("USER_UNBAN", "user", user.email, "unbanned by admin")
+    flash(f"{user.email} has been unbanned.", "success")
+    return redirect(url_for("admin.user_detail", user_id=user_id))
+
+
+@admin_bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@admin_required
+@limiter.limit("10 per minute")
+def user_delete(user_id: int):
+    user = User.query.get_or_404(user_id)
+    if user.is_admin:
+        flash("Cannot delete an admin account.", "error")
+        return redirect(url_for("admin.user_detail", user_id=user_id))
+    email = user.email
+    # Delete related records
+    CourseAccess.query.filter_by(user_id=user.id).delete()
+    Certificate.query.filter_by(user_id=user.id).delete()
+    Progress.query.filter_by(user_id=f"user:{user.id}").delete()
+    Referral.query.filter_by(referred_user_id=user.id).delete()
+    Referral.query.filter_by(referrer_id=user.id).delete()
+    db.session.delete(user)
+    db.session.commit()
+    _audit("USER_DELETE", "user", email, "deleted by admin")
+    flash(f"User {email} deleted.", "success")
+    return redirect(url_for("admin.users"))
 
 
 # -------------------------
@@ -195,24 +292,12 @@ def grant_course_access():
 
 
 # -------------------------
-# Gumroad Webhook (automatic access)
+# Gumroad Webhook
 # -------------------------
 
 @admin_bp.route("/gumroad/webhook", methods=["POST"])
 @limiter.limit("60 per minute")
 def gumroad_webhook():
-    """
-    Gumroad pings this URL after every sale.
-    Automatically grants paid course access to the buyer.
-
-    Setup in Gumroad:
-    Settings → Advanced → Ping URL → https://bliztechacademy.com/admin/gumroad/webhook
-
-    Optional: set GUMROAD_WEBHOOK_SECRET in Render env vars and add it
-    as a query param in the Gumroad ping URL for basic verification:
-    https://bliztechacademy.com/admin/gumroad/webhook?secret=YOUR_SECRET
-    """
-    # Optional secret verification
     webhook_secret = os.getenv("GUMROAD_WEBHOOK_SECRET", "")
     if webhook_secret:
         provided = request.args.get("secret", "") or request.form.get("secret", "")
@@ -220,7 +305,6 @@ def gumroad_webhook():
             _audit("GUMROAD_WEBHOOK_REJECTED", "webhook", "gumroad", "bad_secret")
             return jsonify({"error": "Unauthorized"}), 401
 
-    # Gumroad sends form data
     email = (request.form.get("email") or "").strip().lower()
     sale_id = (request.form.get("sale_id") or "").strip() or None
     product_id = (request.form.get("product_id") or "").strip()
@@ -229,7 +313,6 @@ def gumroad_webhook():
     if not email:
         return jsonify({"error": "No email in payload"}), 400
 
-    # Handle refunds — revoke access
     if refunded:
         user = User.query.filter_by(email=email).first()
         if user:
@@ -241,7 +324,6 @@ def gumroad_webhook():
                 _audit("GUMROAD_REFUND_REVOKE", "user", email, f"sale_id={sale_id}")
         return jsonify({"status": "access_revoked"}), 200
 
-    # Grant access
     success, msg = _grant_course_access(
         email=email,
         sale_id=sale_id,
