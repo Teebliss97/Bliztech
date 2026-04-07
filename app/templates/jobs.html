@@ -29,11 +29,11 @@
 
   .jobs-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
-  .job-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; transition: border-color 0.2s; }
+  .job-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; transition: border-color 0.2s; flex-wrap: wrap; }
   .job-card:hover { border-color: var(--green); }
 
   .job-card-left { flex: 1; min-width: 0; }
-  .job-card-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text); margin: 0 0 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .job-card-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text); margin: 0 0 0.3rem; word-break: break-word; white-space: normal; }
   .job-card-company { font-size: 0.875rem; color: var(--text-2); margin-bottom: 0.5rem; }
   .job-card-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
 
