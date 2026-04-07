@@ -19,6 +19,8 @@ main_bp = Blueprint("main", __name__)
 YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@Bliz_Tech"
 _REF_RE = re.compile(r"^[A-Za-z0-9]{4,64}$")
 
+BOOKING_RECIPIENT = "Toheebatinuke@gmail.com"
+
 
 @main_bp.app_context_processor
 def inject_globals():
@@ -147,6 +149,48 @@ def home():
     }
 
     return render_template("home.html", youtube_url=YOUTUBE_CHANNEL_URL, progress=progress, total_topics=stats["total"], course_done=stats["course_done"])
+
+
+# -------------------------
+# BOOK A SESSION
+# -------------------------
+@main_bp.route("/book-session", methods=["POST"])
+def book_session():
+    name    = (request.form.get("name") or "").strip()
+    email   = (request.form.get("email") or "").strip()
+    topic   = (request.form.get("topic") or "").strip()
+    message = (request.form.get("message") or "").strip()
+
+    if not name or not email or not topic:
+        return jsonify({"ok": False, "error": "Please fill in all required fields."}), 400
+
+    from app.email_utils import send_email
+
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2 style="color:#00D97E;">New Mentorship Booking Request</h2>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:8px 0;color:#666;width:120px;">Name</td><td style="padding:8px 0;font-weight:bold;">{name}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Email</td><td style="padding:8px 0;font-weight:bold;">{email}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Topic</td><td style="padding:8px 0;">{topic}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Message</td><td style="padding:8px 0;">{message or '—'}</td></tr>
+      </table>
+      <hr style="border:1px solid #eee;margin:16px 0;">
+      <p style="color:#666;font-size:13px;">Reply directly to <strong>{email}</strong> to confirm the session time and payment details.</p>
+      <p style="color:#666;font-size:13px;">Price: ₦20,000 (Africa) · £20 (International) · 30 minutes</p>
+    </div>
+    """
+
+    ok = send_email(
+        to=BOOKING_RECIPIENT,
+        subject=f"Mentorship Booking: {name} — {topic}",
+        html=html,
+    )
+
+    if ok:
+        return jsonify({"ok": True})
+    else:
+        return jsonify({"ok": False, "error": "Failed to send email. Please try again."}), 500
 
 
 # -------------------------
@@ -443,30 +487,23 @@ def admin_grant_course():
     )
     return render_template("admin_grant_course.html", message=message, access_list=access_list)
 
+
 @main_bp.route("/course/lessons/<slug>/mark-read", methods=["POST"])
 @login_required
 def mark_lesson_read(slug):
-    """
-    Records that the current user has read this lesson.
-    Called from course_lesson.html when user marks a lesson as read.
-    """
-    # Verify lesson exists
     topic = CourseTopic.query.filter_by(slug=slug).first()
     if not topic:
         return jsonify({"ok": False, "error": "lesson not found"}), 404
- 
-    # Check course access
+
     has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
     if not has_access:
         return jsonify({"ok": False, "error": "no access"}), 403
- 
-    # Insert or ignore if already exists
+
     existing = LessonRead.query.filter_by(user_id=current_user.id, slug=slug).first()
     if not existing:
         read = LessonRead(user_id=current_user.id, slug=slug)
         db.session.add(read)
         db.session.commit()
- 
-    # Return total read count
+
     count = LessonRead.query.filter_by(user_id=current_user.id).count()
     return jsonify({"ok": True, "read_count": count, "all_done": count >= 20})
