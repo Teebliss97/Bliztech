@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Cybersecurity Jobs — BlizTech Academy{% endblock %}
+
+{% block head %}
+<style>
+  .jobs-wrap { max-width: 960px; margin: 0 auto; padding: 2.5rem 1rem; }
+
+  .jobs-header { margin-bottom: 2rem; }
+  .jobs-title { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; color: var(--text); margin: 0 0 0.5rem; letter-spacing: -0.5px; }
+  .jobs-sub { color: var(--text-3); font-size: 0.875rem; font-family: 'JetBrains Mono', monospace; margin: 0 0 1.5rem; }
+
+  .jobs-stats { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .jobs-stat { display: flex; flex-direction: column; gap: 2px; }
+  .jobs-stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--green); }
+  .jobs-stat-label { font-size: 0.72rem; color: var(--text-3); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .jobs-filters { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem; align-items: center; }
+  .jobs-filter-select { padding: 0.5rem 0.85rem; background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; cursor: pointer; }
+  .jobs-filter-select:focus { outline: none; border-color: var(--green); }
+  .jobs-filter-select option { background: var(--bg-2); }
+  .jobs-search { padding: 0.5rem 0.85rem; background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; flex: 1; min-width: 180px; }
+  .jobs-search:focus { outline: none; border-color: var(--green); }
+  .jobs-search::placeholder { color: var(--text-3); }
+  .jobs-filter-btn { padding: 0.5rem 1rem; background: var(--green); color: #050f08; border: none; border-radius: 6px; font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .jobs-clear { padding: 0.5rem 0.85rem; background: transparent; color: var(--text-3); border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; cursor: pointer; text-decoration: none; }
+  .jobs-clear:hover { color: var(--text); border-color: var(--text-3); }
+
+  .jobs-count { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-3); margin-bottom: 1rem; }
+
+  .jobs-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .job-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; transition: border-color 0.2s; }
+  .job-card:hover { border-color: var(--green); }
+
+  .job-card-left { flex: 1; min-width: 0; }
+  .job-card-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text); margin: 0 0 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .job-card-company { font-size: 0.875rem; color: var(--text-2); margin-bottom: 0.5rem; }
+  .job-card-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+
+  .job-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 2px 7px; border-radius: 3px; border: 1px solid; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+  .job-badge-green { color: var(--green); border-color: var(--border-g); background: var(--green-dim); }
+  .job-badge-blue { color: #60a5fa; border-color: #60a5fa44; background: #60a5fa11; }
+  .job-badge-orange { color: #fb923c; border-color: #fb923c44; background: #fb923c11; }
+  .job-badge-grey { color: var(--text-3); border-color: var(--border); background: var(--bg-3); }
+  .job-badge-purple { color: #a78bfa; border-color: #a78bfa44; background: #a78bfa11; }
+
+  .job-card-location { font-size: 0.78rem; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
+  .job-card-date { font-size: 0.72rem; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
+
+  .job-card-right { flex-shrink: 0; }
+  .job-apply-btn { padding: 0.55rem 1.1rem; background: var(--green); color: #050f08; border: none; border-radius: 6px; font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-block; transition: opacity 0.15s; white-space: nowrap; }
+  .job-apply-btn:hover { opacity: 0.85; }
+
+  .jobs-empty { text-align: center; padding: 3rem 1rem; color: var(--text-3); }
+  .jobs-empty-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .jobs-empty-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; color: var(--text-2); margin-bottom: 0.5rem; }
+
+  .jobs-source-note { margin-top: 2rem; padding: 1rem 1.25rem; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; font-size: 0.8rem; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
+  .jobs-source-note a { color: var(--green); text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .job-card { flex-direction: column; align-items: flex-start; }
+    .job-apply-btn { width: 100%; text-align: center; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="jobs-wrap">
+
+  <div class="jobs-header">
+    <h1 class="jobs-title">Cybersecurity Jobs</h1>
+    <p class="jobs-sub">Live listings updated daily · Africa &amp; International</p>
+
+    <div class="jobs-stats">
+      <div class="jobs-stat">
+        <div class="jobs-stat-num">{{ total }}</div>
+        <div class="jobs-stat-label">Total listings</div>
+      </div>
+      <div class="jobs-stat">
+        <div class="jobs-stat-num">{{ africa_count }}</div>
+        <div class="jobs-stat-label">Africa</div>
+      </div>
+      <div class="jobs-stat">
+        <div class="jobs-stat-num">{{ international_count }}</div>
+        <div class="jobs-stat-label">International</div>
+      </div>
+    </div>
+  </div>
+
+  <form method="GET" action="{{ url_for('jobs.job_board') }}">
+    <div class="jobs-filters">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search jobs, companies…" class="jobs-search">
+      <select name="region" class="jobs-filter-select">
+        <option value="" {% if not region %}selected{% endif %}>All regions</option>
+        <option value="africa" {% if region == 'africa' %}selected{% endif %}>Africa</option>
+        <option value="international" {% if region == 'international' %}selected{% endif %}>International</option>
+      </select>
+      <select name="level" class="jobs-filter-select">
+        <option value="" {% if not level %}selected{% endif %}>All levels</option>
+        <option value="entry" {% if level == 'entry' %}selected{% endif %}>Entry level</option>
+        <option value="mid" {% if level == 'mid' %}selected{% endif %}>Mid level</option>
+        <option value="senior" {% if level == 'senior' %}selected{% endif %}>Senior</option>
+      </select>
+      <select name="type" class="jobs-filter-select">
+        <option value="" {% if not job_type %}selected{% endif %}>All types</option>
+        <option value="remote" {% if job_type == 'remote' %}selected{% endif %}>Remote</option>
+        <option value="hybrid" {% if job_type == 'hybrid' %}selected{% endif %}>Hybrid</option>
+        <option value="onsite" {% if job_type == 'onsite' %}selected{% endif %}>On-site</option>
+      </select>
+      <button type="submit" class="jobs-filter-btn">Filter</button>
+      {% if region or level or job_type or q %}
+        <a href="{{ url_for('jobs.job_board') }}" class="jobs-clear">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+
+  <div class="jobs-count">
+    {{ jobs|length }} job{{ 's' if jobs|length != 1 else '' }}
+    {% if region or level or job_type or q %} matching your filters{% endif %}
+  </div>
+
+  {% if jobs %}
+    <div class="jobs-list">
+      {% for job in jobs %}
+      <div class="job-card">
+        <div class="job-card-left">
+          <div class="job-card-title">{{ job.title }}</div>
+          <div class="job-card-company">{{ job.company }}</div>
+          <div class="job-card-meta">
+            {% if job.region == 'africa' %}
+              <span class="job-badge job-badge-orange">Africa</span>
+            {% else %}
+              <span class="job-badge job-badge-blue">International</span>
+            {% endif %}
+            {% if job.level == 'entry' %}
+              <span class="job-badge job-badge-green">Entry level</span>
+            {% elif job.level == 'mid' %}
+              <span class="job-badge job-badge-purple">Mid level</span>
+            {% else %}
+              <span class="job-badge job-badge-grey">Senior</span>
+            {% endif %}
+            {% if job.job_type == 'remote' %}
+              <span class="job-badge job-badge-green">Remote</span>
+            {% elif job.job_type == 'hybrid' %}
+              <span class="job-badge job-badge-grey">Hybrid</span>
+            {% else %}
+              <span class="job-badge job-badge-grey">On-site</span>
+            {% endif %}
+            {% if job.location %}
+              <span class="job-card-location">📍 {{ job.location }}</span>
+            {% endif %}
+            <span class="job-card-date">{{ job.posted_at.strftime('%d %b %Y') }}</span>
+          </div>
+        </div>
+        <div class="job-card-right">
+          <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer" class="job-apply-btn">Apply →</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="jobs-source-note">
+      International listings sourced from <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a> · African listings curated by BlizTech · Updated daily
+    </div>
+
+  {% else %}
+    <div class="jobs-empty">
+      <div class="jobs-empty-icon">🔍</div>
+      <div class="jobs-empty-title">No jobs found</div>
+      <p>Try clearing your filters or check back later for new listings.</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

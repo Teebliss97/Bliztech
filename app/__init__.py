@@ -261,6 +261,7 @@ def create_app():
     from app.blueprints.admin.routes import admin_bp
     from app.blueprints.quiz.routes import quiz_bp
     from app.paystack_routes import paystack_bp
+    from app.jobs_routes import jobs_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(topics_bp)
@@ -270,6 +271,7 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(quiz_bp)
     app.register_blueprint(paystack_bp)
+    app.register_blueprint(jobs_bp)
 
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp

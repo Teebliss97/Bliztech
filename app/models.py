@@ -30,7 +30,6 @@ class User(db.Model, UserMixin):
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
     email_verified_at = db.Column(db.DateTime, nullable=True)
 
-    # ✅ Paid course access flag
     has_course_access = db.Column(db.Boolean, default=False, nullable=False)
 
     def set_password(self, raw_password: str) -> None:
@@ -191,10 +190,6 @@ class SecurityEvent(db.Model):
 # ─────────────────────────────────────────────
 
 class CourseAccess(db.Model):
-    """
-    Records that a user has purchased the paid course.
-    Admin grants this manually after a Gumroad sale.
-    """
     __tablename__ = "course_access"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -207,9 +202,6 @@ class CourseAccess(db.Model):
 
 
 class CourseTopic(db.Model):
-    """
-    A single lesson in the paid course.
-    """
     __tablename__ = "course_topic"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -227,15 +219,7 @@ class CourseTopic(db.Model):
         return f"<CourseTopic {self.lesson_number}: {self.title}>"
 
 
-# ─────────────────────────────────────────────
-#  LESSON READ TRACKING (server-side)
-# ─────────────────────────────────────────────
-
 class LessonRead(db.Model):
-    """
-    Records that a paid user has marked a lesson as read.
-    Used to gate the final quiz — all 20 lessons must be read first.
-    """
     __tablename__ = "lesson_read"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -250,22 +234,14 @@ class LessonRead(db.Model):
     user = db.relationship("User", backref=db.backref("lessons_read", lazy="dynamic"))
 
 
-# ─────────────────────────────────────────────
-#  QUIZ ATTEMPT
-# ─────────────────────────────────────────────
-
 class QuizAttempt(db.Model):
-    """
-    Records each attempt at the final 90-question quiz.
-    A passing score (70%+) unlocks the certificate.
-    """
     __tablename__ = "quiz_attempt"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
-    score = db.Column(db.Integer, nullable=False)        # number of correct answers
-    total = db.Column(db.Integer, nullable=False)        # total questions (90)
-    passed = db.Column(db.Boolean, nullable=False)       # score >= 70%
+    score = db.Column(db.Integer, nullable=False)
+    total = db.Column(db.Integer, nullable=False)
+    passed = db.Column(db.Boolean, nullable=False)
     attempted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
     user = db.relationship("User", backref=db.backref("quiz_attempts", lazy="dynamic"))
@@ -275,3 +251,32 @@ class QuizAttempt(db.Model):
         if self.total == 0:
             return 0
         return round(self.score / self.total * 100)
+
+
+# ─────────────────────────────────────────────
+#  JOB BOARD
+# ─────────────────────────────────────────────
+
+class Job(db.Model):
+    """
+    A cybersecurity job listing.
+    Source: 'manual' (admin posted) or 'remotive' (auto-fetched).
+    """
+    __tablename__ = "job"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False, index=True)
+    company = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200), nullable=True)
+    region = db.Column(db.String(20), nullable=False, default="international")  # 'africa' or 'international'
+    level = db.Column(db.String(20), nullable=False, default="entry")           # 'entry', 'mid', 'senior'
+    job_type = db.Column(db.String(20), nullable=False, default="remote")       # 'remote', 'hybrid', 'onsite'
+    url = db.Column(db.String(500), nullable=False)
+    source = db.Column(db.String(20), nullable=False, default="manual")         # 'manual' or 'remotive'
+    external_id = db.Column(db.String(100), nullable=True, unique=True, index=True)  # prevents duplicates from API
+    is_active = db.Column(db.Boolean, default=True, nullable=False, index=True)
+    posted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<Job {self.title} @ {self.company}>"

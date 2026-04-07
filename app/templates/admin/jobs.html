@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Job Board Admin — BlizTech{% endblock %}
+
+{% block head %}
+<style>
+  .aj-wrap { max-width: 900px; margin: 40px auto; padding: 0 1rem; }
+  .aj-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .aj-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0; }
+
+  .aj-form { background: var(--bg-2); border: 1px solid var(--border-g); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
+  .aj-form-title { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green); margin: 0 0 1.25rem; }
+  .aj-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .aj-form-grid { grid-template-columns: 1fr; } }
+  .aj-field { display: flex; flex-direction: column; gap: 0.35rem; }
+  .aj-field label { font-size: 0.75rem; color: var(--text-3); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+  .aj-field input, .aj-field select { padding: 0.65rem 0.85rem; background: var(--bg-3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; box-sizing: border-box; }
+  .aj-field input:focus, .aj-field select:focus { outline: none; border-color: var(--green); }
+  .aj-field input::placeholder { color: var(--text-3); }
+  .aj-field select option { background: var(--bg-2); }
+  .aj-field-full { grid-column: 1 / -1; }
+  .aj-submit { margin-top: 1rem; padding: 0.7rem 1.5rem; background: var(--green); color: #050f08; border: none; border-radius: 6px; font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+  .aj-submit:hover { opacity: 0.9; }
+
+  .aj-table { width: 100%; border-collapse: collapse; }
+  .aj-table th { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); text-align: left; }
+  .aj-table td { padding: 0.75rem 0.85rem; border-bottom: 1px solid var(--border); font-size: 0.875rem; color: var(--text-2); }
+  .aj-table tr:last-child td { border-bottom: none; }
+  .aj-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; border: 1px solid; text-transform: uppercase; }
+  .aj-badge-green { color: var(--green); border-color: var(--border-g); background: var(--green-dim); }
+  .aj-badge-grey { color: var(--text-3); border-color: var(--border); background: var(--bg-3); }
+  .aj-badge-orange { color: #fb923c; border-color: #fb923c44; background: #fb923c11; }
+  .aj-btn-del { padding: 0.3rem 0.7rem; background: #ff6b6b22; color: #ff6b6b; border: 1px solid #ff6b6b44; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-family: 'JetBrains Mono', monospace; }
+  .aj-btn-del:hover { background: #ff6b6b33; }
+  .aj-msg { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem; }
+  .aj-msg-success { background: var(--green-dim); color: var(--green); border: 1px solid var(--border-g); }
+  .aj-msg-error { background: #ff6b6b11; color: #ff6b6b; border: 1px solid #ff6b6b44; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="aj-wrap">
+
+  <div class="aj-header">
+    <h1 class="aj-title">Job Board</h1>
+    <a href="{{ url_for('jobs.job_board') }}" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--green);text-decoration:none;">View public board →</a>
+  </div>
+
+  {% if message %}
+    <div class="aj-msg aj-msg-{{ message.type }}">{{ message.text }}</div>
+  {% endif %}
+
+  <!-- Add job form -->
+  <div class="aj-form">
+    <div class="aj-form-title">Post a new job</div>
+    <form method="POST" action="{{ url_for('admin.jobs_create') }}">
+      <div class="aj-form-grid">
+        <div class="aj-field">
+          <label>Job title *</label>
+          <input type="text" name="title" placeholder="e.g. SOC Analyst" required>
+        </div>
+        <div class="aj-field">
+          <label>Company *</label>
+          <input type="text" name="company" placeholder="e.g. CrowdStrike" required>
+        </div>
+        <div class="aj-field">
+          <label>Location</label>
+          <input type="text" name="location" placeholder="e.g. Lagos, Nigeria or Remote">
+        </div>
+        <div class="aj-field">
+          <label>Apply URL *</label>
+          <input type="url" name="url" placeholder="https://..." required>
+        </div>
+        <div class="aj-field">
+          <label>Region *</label>
+          <select name="region" required>
+            <option value="africa">Africa</option>
+            <option value="international">International</option>
+          </select>
+        </div>
+        <div class="aj-field">
+          <label>Level *</label>
+          <select name="level" required>
+            <option value="entry">Entry level</option>
+            <option value="mid">Mid level</option>
+            <option value="senior">Senior</option>
+          </select>
+        </div>
+        <div class="aj-field">
+          <label>Type *</label>
+          <select name="job_type" required>
+            <option value="remote">Remote</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="onsite">On-site</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="aj-submit">Post job</button>
+    </form>
+  </div>
+
+  <!-- Job list -->
+  <table class="aj-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Company</th>
+        <th>Region</th>
+        <th>Level</th>
+        <th>Source</th>
+        <th>Posted</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">
+          <a href="{{ job.url }}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;">{{ job.title }}</a>
+        </td>
+        <td>{{ job.company }}</td>
+        <td>
+          {% if job.region == 'africa' %}
+            <span class="aj-badge aj-badge-orange">Africa</span>
+          {% else %}
+            <span class="aj-badge" style="color:#60a5fa;border-color:#60a5fa44;background:#60a5fa11;">Intl</span>
+          {% endif %}
+        </td>
+        <td><span class="aj-badge aj-badge-grey">{{ job.level }}</span></td>
+        <td><span class="aj-badge {% if job.source == 'manual' %}aj-badge-green{% else %}aj-badge-grey{% endif %}">{{ job.source }}</span></td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-3)">{{ job.posted_at.strftime('%d %b %Y') }}</td>
+        <td>
+          {% if job.is_active %}
+            <span class="aj-badge aj-badge-green">Active</span>
+          {% else %}
+            <span class="aj-badge aj-badge-grey">Inactive</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('admin.jobs_delete', job_id=job.id) }}" style="display:inline;">
+            <button type="submit" class="aj-btn-del" onclick="return confirm('Delete this job?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}

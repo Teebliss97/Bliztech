@@ -627,3 +627,67 @@ def bootstrap_admin():
         flash(f"{email} is now an admin ✅", "success")
         return redirect(url_for("auth.login"))
     return render_template("admin/bootstrap.html")
+
+
+# -------------------------
+# Job Board Admin
+# -------------------------
+
+@admin_bp.route("/jobs")
+@admin_required
+@limiter.limit("60 per minute")
+def jobs():
+    from app.models import Job
+    message = None
+    all_jobs = Job.query.order_by(Job.posted_at.desc()).all()
+    return render_template("admin/jobs.html", jobs=all_jobs, message=message)
+
+
+@admin_bp.route("/jobs/create", methods=["POST"])
+@admin_required
+@limiter.limit("30 per minute")
+def jobs_create():
+    from app.models import Job
+    title    = (request.form.get("title") or "").strip()
+    company  = (request.form.get("company") or "").strip()
+    location = (request.form.get("location") or "").strip()
+    url      = (request.form.get("url") or "").strip()
+    region   = (request.form.get("region") or "international").strip()
+    level    = (request.form.get("level") or "entry").strip()
+    job_type = (request.form.get("job_type") or "remote").strip()
+
+    if not title or not company or not url:
+        flash("Title, company and URL are required.", "error")
+        return redirect(url_for("admin.jobs"))
+
+    job = Job(
+        title=title[:200],
+        company=company[:200],
+        location=location[:200] or None,
+        region=region,
+        level=level,
+        job_type=job_type,
+        url=url[:500],
+        source="manual",
+        is_active=True,
+        posted_at=datetime.utcnow(),
+    )
+    db.session.add(job)
+    db.session.commit()
+    _audit("JOB_CREATE", "job", title, f"company={company}, region={region}")
+    flash(f"Job '{title}' posted successfully.", "success")
+    return redirect(url_for("admin.jobs"))
+
+
+@admin_bp.route("/jobs/<int:job_id>/delete", methods=["POST"])
+@admin_required
+@limiter.limit("30 per minute")
+def jobs_delete(job_id: int):
+    from app.models import Job
+    job = Job.query.get_or_404(job_id)
+    title = job.title
+    db.session.delete(job)
+    db.session.commit()
+    _audit("JOB_DELETE", "job", title, f"id={job_id}")
+    flash(f"Job '{title}' deleted.", "success")
+    return redirect(url_for("admin.jobs"))
