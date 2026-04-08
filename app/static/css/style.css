@@ -3499,3 +3499,173 @@ code {
     min-height: auto;
   }
 }
+
+/* ===== EMERGENCY HOMEPAGE RESCUE PATCH ===== */
+
+.hero.hero-premium {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 32px !important;
+  padding: 48px 48px !important;
+  align-items: center !important;
+  justify-content: normal !important;
+}
+
+.hero-left {
+  max-width: 560px !important;
+}
+
+.hero-title {
+  font-size: 42px !important;
+  max-width: 10ch !important;
+  line-height: 1.02 !important;
+}
+
+.hero-subtitle {
+  max-width: 42ch !important;
+  font-size: 14px !important;
+}
+
+.hero-shell {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+}
+
+.hero-shell-top {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr) !important;
+}
+
+.hero-shell-bottom {
+  min-height: 220px !important;
+  max-height: 320px !important;
+}
+
+.hero-shell-bottom svg {
+  max-height: 320px !important;
+}
+
+/* features */
+.feature {
+  min-height: auto !important;
+  padding: 24px 20px !important;
+}
+
+/* how it works */
+.how-card {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 32px !important;
+  padding: 44px 48px !important;
+  justify-content: normal !important;
+}
+
+.how-left {
+  max-width: none !important;
+}
+
+.score-card {
+  position: static !important;
+  top: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  padding: 24px !important;
+}
+
+.score-ring-wrap {
+  width: 130px !important;
+  height: 130px !important;
+}
+
+/* course promo */
+.course-promo {
+  padding: 44px 48px !important;
+}
+
+.course-promo-inner {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 32px !important;
+  max-width: 1180px !important;
+  justify-content: normal !important;
+}
+
+.course-promo-left {
+  max-width: none !important;
+}
+
+.course-promo-card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+}
+
+.course-promo-title {
+  font-size: 30px !important;
+}
+
+.course-promo-sub {
+  max-width: 44ch !important;
+}
+
+/* support */
+.cta {
+  padding: 32px 48px !important;
+}
+
+.cta-inner {
+  max-width: 980px !important;
+}
+
+/* booking button */
+.book-float {
+  padding: 0.6rem 1rem !important;
+  font-size: 0.78rem !important;
+  bottom: 18px !important;
+  right: 18px !important;
+}
+
+/* responsive */
+@media (max-width: 1100px) {
+  .hero.hero-premium,
+  .how-card,
+  .course-promo-inner {
+    grid-template-columns: 1fr !important;
+  }
+
+  .hero-left,
+  .hero-shell,
+  .how-left,
+  .score-card,
+  .course-promo-left,
+  .course-promo-card {
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero.hero-premium,
+  .how-card,
+  .course-promo,
+  .cta {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .hero-title {
+    font-size: 34px !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero.hero-premium,
+  .how-card,
+  .course-promo,
+  .cta {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .hero-title {
+    font-size: 28px !important;
+  }
+}
