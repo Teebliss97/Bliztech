@@ -24,7 +24,18 @@ BOOKING_RECIPIENT = "Toheebatinuke@gmail.com"
 
 @main_bp.app_context_processor
 def inject_globals():
-    return {"current_year": datetime.utcnow().year}
+    has_cert = False
+    if current_user.is_authenticated:
+        from app.models import Certificate
+        has_cert = current_user.is_admin or bool(
+            Certificate.query.filter_by(
+                user_id=current_user.id, revoked=False
+            ).first()
+        )
+    return {
+        "current_year": datetime.utcnow().year,
+        "has_certificate": has_cert,
+    }
 
 
 def _login_required_redirect(message: str):

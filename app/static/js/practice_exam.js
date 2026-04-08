@@ -2,8 +2,10 @@
  * BlizTech Academy — CompTIA Security+ Practice Exam
  * app/static/js/practice_exam.js
  *
- * Fetches questions from /practice-exam/questions (certificate-gated endpoint).
- * POSTs completed attempt to /practice-exam/submit.
+ * Supports two 90-question exam sets.
+ * Set 1: /practice-exam/questions
+ * Set 2: /practice-exam/questions/set2
+ * Submit: /practice-exam/submit  (POST, includes "set" field)
  */
 
 "use strict";
@@ -11,6 +13,7 @@
 /* ── State ────────────────────────────────────────────────────────────────── */
 let QS          = [];
 let DOMAIN_META = {};
+let selectedSet = 1;  // 1 or 2, chosen on start screen
 
 let state = {
   current      : 0,
@@ -21,6 +24,7 @@ let state = {
   timerHandle  : null,
   submitted    : false,
   showAllReview: false,
+  examSet      : 1,
 };
 
 const PASS_PCT      = 75;
@@ -28,7 +32,16 @@ const DURATION_SECS = 5400; // 90 minutes
 
 /* ── Boot ─────────────────────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
-  fetch("/practice-exam/questions", { credentials: "same-origin" })
+  // Pre-load Set 1 questions so domain cards appear immediately
+  loadQuestions(1);
+});
+
+function loadQuestions(set) {
+  const url = set === 2
+    ? "/practice-exam/questions/set2"
+    : "/practice-exam/questions";
+
+  fetch(url, { credentials: "same-origin" })
     .then(r => {
       if (!r.ok) throw new Error("not_authorised");
       return r.json();
@@ -50,12 +63,23 @@ document.addEventListener("DOMContentLoaded", () => {
            </p>`;
       }
     });
-});
+}
 
-/* ── Start screen cards ───────────────────────────────────────────────────── */
+/* ── Set selector ─────────────────────────────────────────────────────────── */
+function selectSet(set) {
+  selectedSet = set;
+  const c1 = document.getElementById("set1-card");
+  const c2 = document.getElementById("set2-card");
+  if (c1) c1.classList.toggle("selected", set === 1);
+  if (c2) c2.classList.toggle("selected", set === 2);
+  loadQuestions(set);
+}
+
+/* ── Start screen domain cards ────────────────────────────────────────────── */
 function buildStartCards() {
   const container = document.getElementById("domain-cards-start");
   if (!container) return;
+  container.innerHTML = "";
 
   const counts = {};
   QS.forEach(q => { counts[q.d] = (counts[q.d] || 0) + 1; });
@@ -82,6 +106,7 @@ function startExam() {
     timerHandle  : null,
     submitted    : false,
     showAllReview: false,
+    examSet      : selectedSet,
   };
   showScreen("exam");
   renderQuestion();
@@ -101,10 +126,7 @@ function startTimer() {
       el.textContent = `${m}:${s < 10 ? "0" : ""}${s}`;
       el.classList.toggle("warn", remaining < 600);
     }
-    if (remaining <= 0) {
-      clearInterval(state.timerHandle);
-      finishExam();
-    }
+    if (remaining <= 0) { clearInterval(state.timerHandle); finishExam(); }
   }, 1000);
 }
 
@@ -118,75 +140,56 @@ function renderQuestion() {
   const chosen   = state.answers[idx];
   const dm       = DOMAIN_META[q.d] || {};
 
-  // Progress bar
   document.getElementById("progress-fill").style.width =
     Math.round((idx / QS.length) * 100) + "%";
 
-  // Topbar
-  document.getElementById("q-current").textContent     = idx + 1;
+  document.getElementById("q-current").textContent      = idx + 1;
   document.getElementById("q-domain-short").textContent = dm.name || "";
 
-  // Flag button
   const flagBtn   = document.getElementById("flag-btn");
   const isFlagged = state.flagged.has(idx);
   flagBtn.textContent = isFlagged ? "Flagged ★" : "Flag for review";
   flagBtn.classList.toggle("flagged", isFlagged);
 
-  // Domain pill + question number
   document.getElementById("q-domain-pill").textContent =
     `Domain ${q.d} — ${dm.name || ""}`;
   document.getElementById("q-num").textContent =
     `Question ${idx + 1} of ${QS.length}`;
 
-  // Scenario box
   const scEl = document.getElementById("scenario-box");
-  if (q.scenario) {
-    scEl.style.display = "block";
-    scEl.textContent   = q.scenario;
-  } else {
-    scEl.style.display = "none";
-  }
+  if (q.scenario) { scEl.style.display = "block"; scEl.textContent = q.scenario; }
+  else            { scEl.style.display = "none"; }
 
-  // Question stem
   document.getElementById("q-stem").textContent = q.text;
 
-  // Options
   const list = document.getElementById("options-list");
   list.innerHTML = "";
   q.opts.forEach((opt, i) => {
     const btn = document.createElement("button");
     btn.className = "opt-btn";
     btn.disabled  = answered;
-
     if (answered) {
       if (i === q.ans)                     btn.classList.add("correct");
       else if (i === chosen)               btn.classList.add("wrong");
       if (i === q.ans && chosen !== q.ans) btn.classList.add("reveal");
     }
-
     btn.innerHTML =
       `<span class="opt-letter">${String.fromCharCode(65 + i)}</span>
        <span>${opt}</span>`;
-
-    if (!answered) {
-      btn.addEventListener("click", () => selectAnswer(i));
-    }
+    if (!answered) btn.addEventListener("click", () => selectAnswer(i));
     list.appendChild(btn);
   });
 
-  // Explanation
   const expEl = document.getElementById("explanation");
   if (answered) {
     expEl.style.display = "block";
     const ok = chosen === q.ans;
-    // CSS classes: .verdict.pass and .verdict.fail (defined in template)
     expEl.innerHTML =
       `<span class="verdict ${ok ? "pass" : "fail"}">${ok ? "Correct." : "Incorrect."}</span>${q.exp}`;
   } else {
     expEl.style.display = "none";
   }
 
-  // Navigation buttons
   document.getElementById("prev-btn").disabled = idx === 0;
 
   const nextBtn = document.getElementById("next-btn");
@@ -200,31 +203,21 @@ function renderQuestion() {
     nextBtn.onclick     = nextQ;
   }
 
-  // Answered / flagged counter
   document.getElementById("answered-count").textContent =
     `${Object.keys(state.answers).length} answered · ${state.flagged.size} flagged`;
 }
 
-/* ── Answer selection ─────────────────────────────────────────────────────── */
+/* ── Answer / navigation ──────────────────────────────────────────────────── */
 function selectAnswer(i) {
   if (state.answers[state.current] !== undefined) return;
   state.answers[state.current] = i;
   renderQuestion();
 }
-
-/* ── Navigation ───────────────────────────────────────────────────────────── */
-function prevQ() {
-  if (state.current > 0) { state.current--; renderQuestion(); }
-}
-
-function nextQ() {
-  if (state.current < QS.length - 1) { state.current++; renderQuestion(); }
-}
-
+function prevQ()      { if (state.current > 0) { state.current--; renderQuestion(); } }
+function nextQ()      { if (state.current < QS.length - 1) { state.current++; renderQuestion(); } }
 function toggleFlag() {
   const idx = state.current;
-  if (state.flagged.has(idx)) state.flagged.delete(idx);
-  else state.flagged.add(idx);
+  state.flagged.has(idx) ? state.flagged.delete(idx) : state.flagged.add(idx);
   renderQuestion();
 }
 
@@ -238,7 +231,6 @@ function finishExam() {
   const pct     = Math.round((correct / QS.length) * 100);
   const passed  = pct >= PASS_PCT;
 
-  // POST result to server — fire and forget
   fetch("/practice-exam/submit", {
     method      : "POST",
     credentials : "same-origin",
@@ -246,6 +238,7 @@ function finishExam() {
     body        : JSON.stringify({
       answers         : state.answers,
       elapsed_seconds : state.elapsed,
+      set             : state.examSet,
     }),
   }).catch(() => {});
 
@@ -253,13 +246,12 @@ function finishExam() {
   showScreen("results");
 }
 
-/* ── Render results ───────────────────────────────────────────────────────── */
+/* ── Results ─────────────────────────────────────────────────────────────── */
 function renderResults(correct, pct, passed) {
   const elapsed    = Math.min(state.elapsed, DURATION_SECS);
   const timeTaken  = `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`;
   const unanswered = QS.length - Object.keys(state.answers).length;
 
-  // Score hero
   const scoreEl = document.getElementById("result-score");
   scoreEl.textContent = pct + "%";
   scoreEl.className   = `result-score ${passed ? "pass" : "fail"}`;
@@ -269,16 +261,14 @@ function renderResults(correct, pct, passed) {
   verdictEl.className   = `result-verdict ${passed ? "pass" : "fail"}`;
 
   document.getElementById("result-sub").textContent =
-    `${correct} of ${QS.length} correct · Time: ${timeTaken} · Pass mark: ${PASS_PCT}%`;
+    `Set ${state.examSet} · ${correct} of ${QS.length} correct · Time: ${timeTaken} · Pass mark: ${PASS_PCT}%`;
 
-  // Stat tiles
   document.getElementById("stats-row").innerHTML =
     tile(correct,             "Correct")    +
     tile(QS.length - correct, "Incorrect")  +
     tile(unanswered,          "Unanswered") +
     tile(timeTaken,           "Time used");
 
-  // Domain breakdown
   const ds = {};
   Object.keys(DOMAIN_META).forEach(id => {
     ds[id] = { correct: 0, total: 0, name: DOMAIN_META[id].name };
@@ -295,20 +285,17 @@ function renderResults(correct, pct, passed) {
       const col = dp >= 75 ? "#3fb950" : dp >= 60 ? "#d29922" : "#f85149";
       return `<div class="db-row">
         <div class="db-name">${d.name}</div>
-        <div class="db-track">
-          <div class="db-bar" style="width:${dp}%;background:${col}"></div>
-        </div>
+        <div class="db-track"><div class="db-bar" style="width:${dp}%;background:${col}"></div></div>
         <div class="db-pct">${dp}%</div>
       </div>`;
     }).join("");
 
-  // Incorrect question review
   const wrongQs = QS
     .map((q, i) => ({ ...q, idx: i }))
     .filter(q => state.answers[q.idx] !== undefined && state.answers[q.idx] !== q.ans);
 
   const reviewEl = document.getElementById("review-section");
-  if (wrongQs.length === 0) { reviewEl.innerHTML = ""; return; }
+  if (!wrongQs.length) { reviewEl.innerHTML = ""; return; }
 
   const visible  = state.showAllReview ? wrongQs : wrongQs.slice(0, 8);
   const showMore = !state.showAllReview && wrongQs.length > 8;
@@ -332,8 +319,7 @@ function renderResults(correct, pct, passed) {
       </div>`;
     }).join("") +
     (showMore
-      ? `<button class="btn btn-outline btn-sm" onclick="showAllReview()"
-           style="margin-top:8px">
+      ? `<button class="btn btn-outline btn-sm" onclick="showAllReview()" style="margin-top:8px">
            Show all ${wrongQs.length} incorrect answers
          </button>`
       : "");
@@ -357,9 +343,11 @@ function tile(val, lbl) {
 function restartExam() {
   clearInterval(state.timerHandle);
   showScreen("start");
+  // Reset to set 1 selection
+  selectSet(1);
 }
 
-/* ── Screen switcher ──────────────────────────────────────────────────────── */
+/* ── Screen helper ────────────────────────────────────────────────────────── */
 function showScreen(name) {
   ["start", "exam", "results"].forEach(id => {
     const el = document.getElementById(`screen-${id}`);
