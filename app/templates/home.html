@@ -5,87 +5,109 @@
   /* ── Floating booking button ── */
   .book-float {
     position: fixed;
-    bottom: 28px;
-    right: 28px;
+    bottom: 22px;
+    right: 22px;
     z-index: 999;
-    background: var(--green);
+    background: rgba(0, 217, 126, 0.92);
     color: #050f08;
     border: none;
-    border-radius: 50px;
-    padding: 0.7rem 1.3rem;
+    border-radius: 999px;
+    padding: 0.65rem 1.1rem;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 24px rgba(0,217,126,0.35);
+    box-shadow: 0 8px 24px rgba(0, 217, 126, 0.22);
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
     text-decoration: none;
   }
+
   .book-float:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0,217,126,0.45);
+    box-shadow: 0 10px 30px rgba(0, 217, 126, 0.30);
   }
+
   .book-float-dot {
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     background: #050f08;
     border-radius: 50%;
     animation: bookpulse 1.8s ease-in-out infinite;
   }
-  @keyframes bookpulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+
+  @keyframes bookpulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.5; transform:scale(1.4); }
+  }
 
   /* ── Modal overlay ── */
   .book-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.72);
     z-index: 1000;
     align-items: center;
     justify-content: center;
     padding: 1rem;
   }
+
   .book-overlay.open { display: flex; }
 
   /* ── Modal card ── */
   .book-modal {
     background: var(--bg-2);
     border: 1px solid var(--border-g);
-    border-radius: 12px;
+    border-radius: 18px;
     padding: 2rem;
     max-width: 480px;
     width: 100%;
     position: relative;
     animation: bookslide 0.2s ease;
+    box-shadow: var(--shadow-card);
   }
-  @keyframes bookslide { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+  @keyframes bookslide {
+    from { transform:translateY(16px); opacity:0; }
+    to { transform:translateY(0); opacity:1; }
+  }
 
   .book-close {
     position: absolute;
-    top: 1rem; right: 1rem;
-    background: none; border: none;
-    color: var(--text-3); font-size: 1.2rem;
-    cursor: pointer; line-height: 1;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-3);
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
-  .book-close:hover { color: var(--text); background: var(--bg-3); }
+
+  .book-close:hover {
+    color: var(--text);
+    background: var(--bg-3);
+  }
 
   .book-badge {
     display: inline-block;
     background: var(--green-dim);
     color: var(--green);
     border: 1px solid var(--border-g);
-    border-radius: 4px;
-    font-size: 0.7rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
     font-family: 'JetBrains Mono', monospace;
     letter-spacing: 0.08em;
-    padding: 2px 8px;
-    margin-bottom: 0.75rem;
+    padding: 4px 10px;
+    margin-bottom: 0.9rem;
     text-transform: uppercase;
   }
+
   .book-title {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 1.4rem;
@@ -93,21 +115,24 @@
     color: var(--text);
     margin: 0 0 0.4rem;
   }
+
   .book-sub {
     color: var(--text-3);
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     margin: 0 0 1.5rem;
-    line-height: 1.5;
+    line-height: 1.6;
   }
+
   .book-price {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
     padding: 1rem;
-    background: var(--bg-3);
-    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 14px;
     border: 1px solid var(--border);
   }
+
   .book-price-item {
     display: flex;
     flex-direction: column;
@@ -115,81 +140,99 @@
     flex: 1;
     text-align: center;
   }
+
   .book-price-amount {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 1.2rem;
     font-weight: 700;
     color: var(--green);
   }
+
   .book-price-label {
     font-size: 0.72rem;
     color: var(--text-3);
     font-family: 'JetBrains Mono', monospace;
     text-transform: uppercase;
   }
+
   .book-price-divider {
     width: 1px;
     background: var(--border);
   }
+
   .book-field {
     margin-bottom: 1rem;
   }
+
   .book-field label {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     color: var(--text-3);
     font-family: 'JetBrains Mono', monospace;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.45rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+
   .book-field input,
   .book-field select,
   .book-field textarea {
     width: 100%;
-    padding: 0.75rem 0.9rem;
+    padding: 0.8rem 0.95rem;
     background: var(--bg-3);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 10px;
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     box-sizing: border-box;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
     resize: vertical;
   }
+
   .book-field input:focus,
   .book-field select:focus,
   .book-field textarea:focus {
     outline: none;
     border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(0,217,126,0.08);
   }
+
   .book-field input::placeholder,
   .book-field textarea::placeholder { color: var(--text-3); }
+
   .book-field select option { background: var(--bg-2); }
 
   .book-submit {
     width: 100%;
-    padding: 0.85rem;
+    padding: 0.9rem;
     background: var(--green);
     color: #050f08;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     font-family: 'Space Grotesk', sans-serif;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, transform 0.2s;
     margin-top: 0.5rem;
   }
-  .book-submit:hover { opacity: 0.9; }
-  .book-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .book-submit:hover {
+    opacity: 0.94;
+    transform: translateY(-1px);
+  }
+
+  .book-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
   .book-note {
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     color: var(--text-3);
-    margin-top: 0.75rem;
+    margin-top: 0.9rem;
     font-family: 'JetBrains Mono', monospace;
   }
 
@@ -197,10 +240,12 @@
     text-align: center;
     padding: 1.5rem 0;
   }
+
   .book-success-icon {
     font-size: 2.5rem;
     margin-bottom: 1rem;
   }
+
   .book-success-title {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 1.3rem;
@@ -208,6 +253,7 @@
     color: var(--text);
     margin-bottom: 0.5rem;
   }
+
   .book-success-sub {
     color: var(--text-3);
     font-size: 0.875rem;
@@ -217,7 +263,8 @@
 {% endblock %}
 
 {% block content %}
-<section class="hero">
+
+<section class="hero hero-premium">
   <div class="hero-left">
 
     <div class="hero-pill">
@@ -235,6 +282,13 @@
       and unlock the next topic — step by step.
     </p>
 
+    <div class="hero-trust-row">
+      <span class="hero-trust-chip">10 topics</span>
+      <span class="hero-trust-chip">5-question quizzes</span>
+      <span class="hero-trust-chip">3–6 min lessons</span>
+      <span class="hero-trust-chip">Free certificate</span>
+    </div>
+
     {% if current_user.is_authenticated and progress %}
       <div class="continue-card pop-in">
         <div class="continue-top">
@@ -247,9 +301,11 @@
           </div>
           <a class="btn btn-outline btn-sm" href="{{ url_for('main.dashboard') }}">Dashboard</a>
         </div>
+
         <div class="bar">
           <div class="bar-fill" style="width: {{ progress.percent }}%;"></div>
         </div>
+
         <div class="continue-body">
           {% if progress.course_done %}
             <p class="muted">🎉 You've completed the full course. Your certificate is ready.</p>
@@ -261,6 +317,7 @@
             <p class="muted">Start with Topic 1 and build your way up.</p>
           {% endif %}
         </div>
+
         <div class="hero-actions" style="margin-top:14px;">
           {% if progress.course_done %}
             <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
@@ -277,100 +334,82 @@
           {% endif %}
         </div>
       </div>
-
     {% else %}
       <div class="hero-actions">
         <a class="btn" href="{{ url_for('topics.list_topics') }}">Start Learning</a>
         <a class="btn btn-outline" href="{{ youtube_url }}" target="_blank" rel="noopener">▶ Watch on YouTube</a>
       </div>
-      <p class="muted" style="font-size:13.5px;">
+      <p class="muted hero-note">
         Free to start — create an account to track progress and earn a certificate.
       </p>
     {% endif %}
-
-    <div class="hero-stats">
-      <div class="stat">
-        <div class="stat-num">10</div>
-        <div class="stat-label">Topics</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">5</div>
-        <div class="stat-label">Questions per quiz</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">3–6 min</div>
-        <div class="stat-label">Per lesson</div>
-      </div>
-    </div>
-
   </div>
 
-  <!-- HERO STATS CARD -->
-  <div class="hero-mid">
-    <div class="stats-card">
-      <div class="stats-card-title">Platform stats</div>
-      <div class="stats-card-row">
-        <div class="stats-card-item">
-          <div class="stats-card-num">2,400+</div>
-          <div class="stats-card-label">Learners</div>
+  <div class="hero-shell">
+    <div class="hero-shell-top">
+      <div class="stats-card">
+        <div class="stats-card-title">Platform stats</div>
+        <div class="stats-card-row">
+          <div class="stats-card-item">
+            <div class="stats-card-num">2,400+</div>
+            <div class="stats-card-label">Learners</div>
+          </div>
+          <div class="stats-card-item">
+            <div class="stats-card-num">10</div>
+            <div class="stats-card-label">Topics</div>
+          </div>
         </div>
-        <div class="stats-card-item">
-          <div class="stats-card-num">10</div>
-          <div class="stats-card-label">Topics</div>
+        <div class="stats-card-row">
+          <div class="stats-card-item">
+            <div class="stats-card-num">98%</div>
+            <div class="stats-card-label">Completion rate</div>
+          </div>
+          <div class="stats-card-item">
+            <div class="stats-card-num">Free</div>
+            <div class="stats-card-label">Always</div>
+          </div>
+        </div>
+        <div class="stats-card-bar-wrap">
+          <div class="stats-card-bar-label">
+            <span>Course progress</span>
+            <span style="color:var(--green);">78% avg</span>
+          </div>
+          <div class="stats-card-bar">
+            <div class="stats-card-bar-fill" style="width:78%"></div>
+          </div>
+        </div>
+        <div class="stats-card-footer">
+          <span class="stats-live-dot"></span> Live platform data
         </div>
       </div>
-      <div class="stats-card-row">
-        <div class="stats-card-item">
-          <div class="stats-card-num">98%</div>
-          <div class="stats-card-label">Completion rate</div>
-        </div>
-        <div class="stats-card-item">
-          <div class="stats-card-num">Free</div>
-          <div class="stats-card-label">Always</div>
-        </div>
-      </div>
-      <div class="stats-card-bar-wrap">
-        <div class="stats-card-bar-label">
-          <span>Course progress</span>
-          <span style="color:var(--green);">78% avg</span>
-        </div>
-        <div class="stats-card-bar">
-          <div class="stats-card-bar-fill" style="width:78%"></div>
-        </div>
-      </div>
-      <div class="stats-card-footer">
-        <span class="stats-live-dot"></span> Live platform data
-      </div>
-    </div>
-  </div>
 
-  <!-- HERO RIGHT -->
-  <div class="hero-right" style="display:flex;flex-direction:column;gap:16px;min-width:0;">
-    <div class="terminal">
-      <div class="terminal-bar">
-        <span class="t-dot" style="background:#FF5F57"></span>
-        <span class="t-dot" style="background:#FFBD2E"></span>
-        <span class="t-dot" style="background:#28CA41"></span>
-        <span class="terminal-title">bliztech ~ security-audit</span>
-      </div>
-      <div class="terminal-body">
-        <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">phishing-check</span></div>
-        <div class="t-line t-out">&gt; Scanning email headers...</div>
-        <div class="t-line t-out t-warn">&gt; &#9888; Spoofed sender detected</div>
-        <div class="t-line t-out t-warn">&gt; &#9888; Suspicious link found</div>
-        <div class="t-line" style="margin-top:8px;"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">password-audit</span></div>
-        <div class="t-line t-out">&gt; Checking entropy...</div>
-        <div class="t-line t-out t-good">&gt; &#10003; Strong passphrase detected</div>
-        <div class="t-line t-out t-good">&gt; &#10003; 2FA enabled</div>
-        <div class="t-line" style="margin-top:8px;"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">device-scan</span></div>
-        <div class="t-line t-out">&gt; Checking software versions...</div>
-        <div class="t-line t-out t-warn">&gt; &#9888; 3 updates pending</div>
-        <div class="t-line t-out t-good">&gt; &#10003; Firewall active</div>
-        <div class="t-line" style="margin-top:12px;"><span class="t-prompt">$</span> <span class="t-cursor">&#9608;</span></div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="t-dot" style="background:#FF5F57"></span>
+          <span class="t-dot" style="background:#FFBD2E"></span>
+          <span class="t-dot" style="background:#28CA41"></span>
+          <span class="terminal-title">bliztech ~ security-audit</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">phishing-check</span></div>
+          <div class="t-line t-out">&gt; Scanning email headers...</div>
+          <div class="t-line t-out t-warn">&gt; &#9888; Spoofed sender detected</div>
+          <div class="t-line t-out t-warn">&gt; &#9888; Suspicious link found</div>
+          <div class="t-line" style="margin-top:8px;"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">password-audit</span></div>
+          <div class="t-line t-out">&gt; Checking entropy...</div>
+          <div class="t-line t-out t-good">&gt; &#10003; Strong passphrase detected</div>
+          <div class="t-line t-out t-good">&gt; &#10003; 2FA enabled</div>
+          <div class="t-line" style="margin-top:8px;"><span class="t-prompt">$</span> <span class="t-cmd">run</span> <span class="t-arg">device-scan</span></div>
+          <div class="t-line t-out">&gt; Checking software versions...</div>
+          <div class="t-line t-out t-warn">&gt; &#9888; 3 updates pending</div>
+          <div class="t-line t-out t-good">&gt; &#10003; Firewall active</div>
+          <div class="t-line" style="margin-top:12px;"><span class="t-prompt">$</span> <span class="t-cursor">&#9608;</span></div>
+        </div>
       </div>
     </div>
-    <div style="flex:1;min-height:200px;display:flex;align-items:stretch;">
-      <svg width="100%" viewBox="80 40 520 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="display:block;background:#0a0a0a;border-radius:12px;border:1px solid rgba(0,217,126,0.2)">
+
+    <div class="hero-shell-bottom">
+      <svg width="100%" viewBox="80 40 520 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="display:block;background:#0a0a0a;">
         <defs>
           <style>
             @keyframes hscan{0%{transform:translateY(0)}100%{transform:translateY(180px)}}
@@ -456,7 +495,6 @@
   </div>
 </section>
 
-<!-- FEATURES -->
 <section class="section-grid">
   <div class="feature">
     <div class="feature-icon"><img src="{{ url_for('static', filename='img/icon-lesson.svg') }}" alt=""></div>
@@ -480,7 +518,6 @@
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
 <section class="how-card">
   <div class="how-left">
     <h2>How it works</h2>
@@ -499,11 +536,13 @@
       {% endif %}
     </div>
   </div>
+
   <div class="score-card">
     <div class="score-card-header">
       <span class="score-card-title">Security score</span>
       <span class="score-badge">SAMPLE</span>
     </div>
+
     <div class="score-ring-wrap">
       <svg class="score-ring" viewBox="0 0 120 120">
         <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
@@ -516,6 +555,7 @@
         <div class="score-label">/ 100</div>
       </div>
     </div>
+
     <div class="score-checks">
       <div class="score-check good"><span>&#10003;</span> Strong password</div>
       <div class="score-check good"><span>&#10003;</span> 2FA enabled</div>
@@ -523,11 +563,11 @@
       <div class="score-check good"><span>&#10003;</span> Phishing aware</div>
       <div class="score-check warn"><span>&#9888;</span> Public Wi-Fi risks</div>
     </div>
+
     <a class="btn" style="width:100%; margin-top:16px;" href="{{ url_for('topics.list_topics') }}">Improve your score</a>
   </div>
 </section>
 
-<!-- COURSE PROMO -->
 <section class="course-promo">
   <div class="course-promo-inner">
     <div class="course-promo-left">
@@ -545,6 +585,7 @@
         <span class="course-promo-pill">Lifetime access</span>
       </div>
     </div>
+
     <div class="course-promo-right">
       <div class="course-promo-card">
         <div class="course-promo-sections">
@@ -562,7 +603,6 @@
   </div>
 </section>
 
-<!-- CTA -->
 <section class="cta">
   <div class="cta-inner">
     <div>
@@ -577,14 +617,11 @@
   </div>
 </section>
 
-
-<!-- ── Floating booking button ── -->
 <button class="book-float" id="bookBtn">
   <span class="book-float-dot"></span>
   Book a Session
 </button>
 
-<!-- ── Booking modal ── -->
 <div class="book-overlay" id="bookOverlay">
   <div class="book-modal">
     <button class="book-close" id="bookClose">✕</button>
@@ -646,7 +683,6 @@
       <div class="book-success-title">Request sent!</div>
       <p class="book-success-sub">I'll get back to you within 24 hours to confirm your session time and payment details.</p>
     </div>
-
   </div>
 </div>
 

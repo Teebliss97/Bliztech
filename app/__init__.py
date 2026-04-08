@@ -148,7 +148,6 @@ def create_app():
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
-        # Use unsafe-none for COOP on payment pages so Paystack popup can communicate
         if request.path.startswith("/pay/"):
             resp.headers["Cross-Origin-Opener-Policy"] = "unsafe-none"
         else:
@@ -262,6 +261,7 @@ def create_app():
     from app.blueprints.quiz.routes import quiz_bp
     from app.paystack_routes import paystack_bp
     from app.jobs_routes import jobs_bp
+    from app.blueprints.practice_exam.routes import practice_exam_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(topics_bp)
@@ -272,6 +272,7 @@ def create_app():
     app.register_blueprint(quiz_bp)
     app.register_blueprint(paystack_bp)
     app.register_blueprint(jobs_bp)
+    app.register_blueprint(practice_exam_bp)
 
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp

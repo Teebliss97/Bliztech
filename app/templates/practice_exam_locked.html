@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Practice Exam Locked — BlizTech Academy{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #0d1117;
+    --surface:    #161b22;
+    --surface2:   #1c2330;
+    --border2:    #21262d;
+    --accent:     #00D97E;
+    --accent-bg:  rgba(0,217,126,0.08);
+    --text:       #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim:   #6e7681;
+    --warning:    #d29922;
+    --warning-bg: rgba(210,153,34,0.08);
+    --font-head:  'Space Grotesk', sans-serif;
+    --font-body:  'DM Sans', sans-serif;
+    --radius:     8px;
+    --radius-lg:  12px;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+  }
+  .card {
+    max-width: 560px;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2.5rem 2rem;
+    text-align: center;
+  }
+  .lock-ring {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 1.75rem;
+    background: var(--warning-bg);
+    border: 1px solid rgba(210,153,34,0.25);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  h1 {
+    font-family: var(--font-head);
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+    line-height: 1.25;
+  }
+  .sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 2rem;
+    max-width: 430px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .sub strong { color: var(--text); font-weight: 500; }
+  .steps-box {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    margin-bottom: 2rem;
+  }
+  .steps-label {
+    font-family: var(--font-head);
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 1rem;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .num {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-head);
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 1px;
+  }
+  .num.done    { background: var(--accent-bg); border: 1px solid rgba(0,217,126,0.3); color: var(--accent); }
+  .num.pending { background: var(--warning-bg); border: 1px solid rgba(210,153,34,0.3); color: var(--warning); }
+  .step-body { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; }
+  .step-body strong { color: var(--text); font-weight: 500; }
+  .done-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-family: var(--font-head);
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 1px solid rgba(0,217,126,0.2);
+    padding: 2px 9px;
+    border-radius: 20px;
+    margin-left: 7px;
+    vertical-align: middle;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--accent);
+    color: #0d1117;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-head);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.87; }
+  .footer {
+    margin-top: 1.5rem;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border2);
+    padding-top: 1.25rem;
+    line-height: 1.65;
+  }
+  .footer a { color: var(--text-muted); text-decoration: none; }
+  .footer a:hover { color: var(--accent); }
+  @media (max-width: 500px) {
+    .card { padding: 2rem 1.25rem 1.5rem; }
+    h1 { font-size: 1.3rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+
+  <div class="lock-ring">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+         stroke="#d29922" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+  </div>
+
+  <h1>CompTIA Practice Exam Locked</h1>
+
+  <p class="sub">
+    This resource is only available to students who have
+    <strong>completed the Get Into Cybersecurity course and earned their BlizTech certificate.</strong>
+    Finish the course first — it unlocks automatically the moment your certificate is issued.
+  </p>
+
+  <div class="steps-box">
+    <div class="steps-label">How to unlock this</div>
+
+    <div class="step">
+      <div class="num done">1</div>
+      <div class="step-body">
+        <strong>Purchase the course</strong>
+        <span class="done-tag">Done</span><br>
+        You already have full access to all course content.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num pending">2</div>
+      <div class="step-body">
+        <strong>Complete all 20 lessons</strong><br>
+        Work through every lesson across all four sections —
+        Foundation, Technical Core, Defence &amp; Response, and Career Launchpad.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num pending">3</div>
+      <div class="step-body">
+        <strong>Pass the course quiz</strong><br>
+        Score the required pass mark on the final course quiz
+        to confirm your understanding of the material.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="num pending">4</div>
+      <div class="step-body">
+        <strong>Earn your BlizTech certificate</strong><br>
+        Your certificate is generated automatically once you pass the quiz.
+        The CompTIA Security+ practice exam unlocks the moment it is issued.
+      </div>
+    </div>
+
+  </div>
+
+  <a href="{{ url_for('main.course_lessons') }}" class="btn">
+    Continue the course
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"/>
+    </svg>
+  </a>
+
+  <div class="footer">
+    Already earned your certificate but still seeing this page?
+    <a href="mailto:support@bliztechacademy.com">Contact support</a>
+    and we will sort it out.
+  </div>
+
+</div>
+{% endblock %}

@@ -258,25 +258,48 @@ class QuizAttempt(db.Model):
 # ─────────────────────────────────────────────
 
 class Job(db.Model):
-    """
-    A cybersecurity job listing.
-    Source: 'manual' (admin posted) or 'remotive' (auto-fetched).
-    """
     __tablename__ = "job"
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False, index=True)
     company = db.Column(db.String(200), nullable=False)
     location = db.Column(db.String(200), nullable=True)
-    region = db.Column(db.String(20), nullable=False, default="international")  # 'africa' or 'international'
-    level = db.Column(db.String(20), nullable=False, default="entry")           # 'entry', 'mid', 'senior'
-    job_type = db.Column(db.String(20), nullable=False, default="remote")       # 'remote', 'hybrid', 'onsite'
+    region = db.Column(db.String(20), nullable=False, default="international")
+    level = db.Column(db.String(20), nullable=False, default="entry")
+    job_type = db.Column(db.String(20), nullable=False, default="remote")
     url = db.Column(db.String(500), nullable=False)
-    source = db.Column(db.String(20), nullable=False, default="manual")         # 'manual' or 'remotive'
-    external_id = db.Column(db.String(100), nullable=True, unique=True, index=True)  # prevents duplicates from API
+    source = db.Column(db.String(20), nullable=False, default="manual")
+    external_id = db.Column(db.String(100), nullable=True, unique=True, index=True)
     is_active = db.Column(db.Boolean, default=True, nullable=False, index=True)
     posted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     def __repr__(self):
         return f"<Job {self.title} @ {self.company}>"
+
+
+# ─────────────────────────────────────────────
+#  COMPTIA PRACTICE EXAM
+# ─────────────────────────────────────────────
+
+class ExamAttempt(db.Model):
+    __tablename__ = "exam_attempt"
+
+    id           = db.Column(db.Integer, primary_key=True)
+    user_id      = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    exam_set     = db.Column(db.String(64), nullable=False, default="security_plus_set1")
+    score_pct    = db.Column(db.Integer, nullable=False)
+    correct      = db.Column(db.Integer, nullable=False)
+    total        = db.Column(db.Integer, nullable=False)
+    passed       = db.Column(db.Boolean, nullable=False)
+    elapsed_secs = db.Column(db.Integer, nullable=True)
+    completed_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    user = db.relationship("User", backref=db.backref("exam_attempts", lazy="dynamic"))
+
+    @property
+    def percentage(self):
+        return self.score_pct
+
+    def __repr__(self):
+        return f"<ExamAttempt user={self.user_id} score={self.score_pct}% passed={self.passed}>"

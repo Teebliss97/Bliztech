@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+{% block title %}Security+ Practice Exam — BlizTech Academy{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2330;
+    --border:    #30363d;
+    --border2:   #21262d;
+    --accent:    #00D97E;
+    --accent-bg: rgba(0,217,126,0.08);
+    --text:      #e6edf3;
+    --text-muted:#8b949e;
+    --text-dim:  #6e7681;
+    --danger:    #f85149;
+    --danger-bg: rgba(248,81,73,0.10);
+    --warning:   #d29922;
+    --warning-bg:rgba(210,153,34,0.10);
+    --info:      #388bfd;
+    --green:     #3fb950;
+    --green-bg:  rgba(63,185,80,0.08);
+    --font-head: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .exam-shell {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 5rem;
+  }
+
+  /* ── Screens ── */
+  .screen         { display: none; }
+  .screen.active  { display: block; }
+
+  /* ── Start screen ── */
+  .start-hero     { text-align: center; padding: 2.5rem 0 2rem; }
+  .start-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,217,126,.3);
+    background: var(--accent-bg);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+  }
+  .start-title {
+    font-family: var(--font-head);
+    font-size: 2.3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: .75rem;
+    letter-spacing: -.02em;
+  }
+  .start-title span { color: var(--accent); }
+  .start-sub {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    max-width: 480px;
+    margin: 0 auto 2.25rem;
+    line-height: 1.75;
+  }
+  .meta-strip {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2.25rem;
+  }
+  .meta-item  { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .meta-val   { font-family: var(--font-head); font-size: 1.7rem; font-weight: 700; color: var(--accent); }
+  .meta-lbl   { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
+  .domain-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 2.25rem;
+  }
+  .domain-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    text-align: left;
+    transition: border-color .2s;
+  }
+  .domain-card:hover { border-color: var(--border); }
+  .dc-pct { font-family: var(--font-head); font-size: 1.5rem; font-weight: 700; color: var(--accent); line-height: 1; margin-bottom: 5px; }
+  .dc-name { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+  .dc-qs   { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 26px;
+    border-radius: var(--radius);
+    font-family: var(--font-head);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: opacity .15s, transform .1s;
+    letter-spacing: .01em;
+  }
+  .btn:active           { transform: scale(.98); }
+  .btn-accent           { background: var(--accent); color: #0d1117; }
+  .btn-accent:hover     { opacity: .88; }
+  .btn-outline          { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover    { background: var(--surface2); }
+  .btn-sm               { padding: 7px 16px; font-size: 13px; }
+  .btn:disabled         { opacity: .35; cursor: default; pointer-events: none; }
+
+  /* ── Exam topbar ── */
+  .exam-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 13px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.25rem;
+  }
+  .exam-progress-text { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+  .exam-progress-text strong { color: var(--accent); font-weight: 500; }
+  .timer-box {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    padding: 5px 14px;
+    border-radius: 20px;
+    transition: all .3s;
+    min-width: 72px;
+    text-align: center;
+  }
+  .timer-box.warn { color: var(--danger); border-color: rgba(248,81,73,.4); background: var(--danger-bg); }
+  .flag-btn {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border2);
+    padding: 5px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .flag-btn:hover   { border-color: var(--warning); color: var(--warning); }
+  .flag-btn.flagged { border-color: var(--warning); color: var(--warning); background: var(--warning-bg); }
+
+  .progress-track { height: 3px; background: var(--border2); border-radius: 2px; margin-bottom: 1.5rem; overflow: hidden; }
+  .progress-fill  { height: 3px; background: var(--accent); border-radius: 2px; transition: width .4s ease; }
+
+  /* ── Question card ── */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.75rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .domain-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 1px solid rgba(0,217,126,.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .q-num       { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; font-family: var(--font-mono); }
+  .scenario-box {
+    background: var(--surface2);
+    border-left: 3px solid var(--info);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+  }
+  .q-stem {
+    font-family: var(--font-head);
+    font-size: 15.5px;
+    font-weight: 500;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── Answer options ── */
+  .options-list { display: flex; flex-direction: column; gap: 9px; }
+  .opt-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    padding: 12px 15px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .opt-btn:hover:not(:disabled):not(.correct):not(.wrong):not(.reveal) {
+    border-color: var(--border);
+    background: #1e2530;
+  }
+  .opt-letter {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+    transition: all .15s;
+  }
+  /* correct answer */
+  .opt-btn.correct               { border-color: var(--green); background: var(--green-bg); }
+  .opt-btn.correct .opt-letter   { background: var(--green); border-color: var(--green); color: #0d1117; }
+  /* wrong answer chosen */
+  .opt-btn.wrong                 { border-color: var(--danger); background: var(--danger-bg); }
+  .opt-btn.wrong .opt-letter     { background: var(--danger); border-color: var(--danger); color: #fff; }
+  /* reveal correct when user was wrong — same style as .correct */
+  .opt-btn.reveal                { border-color: var(--green); background: var(--green-bg); }
+  .opt-btn.reveal .opt-letter    { background: var(--green); border-color: var(--green); color: #0d1117; }
+
+  .opt-btn:disabled { cursor: default; }
+
+  /* ── Explanation box ── */
+  .explanation {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 13px 16px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-top: 1rem;
+  }
+  /* JS writes: <span class="verdict pass"> or <span class="verdict fail"> */
+  .verdict      { font-weight: 600; margin-right: 4px; }
+  .verdict.pass { color: var(--green); }
+  .verdict.fail { color: var(--danger); }
+
+  /* ── Nav row ── */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 1rem;
+  }
+  .answered-count { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+
+  /* ── Results screen ── */
+  .results-hero   { text-align: center; padding: 2rem 0 1.5rem; }
+  .result-score   { font-family: var(--font-head); font-size: 5rem; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+  .result-score.pass { color: var(--accent); }
+  .result-score.fail { color: var(--danger); }
+  .result-verdict { font-family: var(--font-head); font-size: 1.1rem; font-weight: 600; margin: 8px 0 4px; }
+  .result-verdict.pass { color: var(--accent); }
+  .result-verdict.fail { color: var(--danger); }
+  .result-sub     { font-size: 13px; color: var(--text-muted); }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 10px;
+    margin: 1.5rem 0;
+  }
+  .stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 13px 10px;
+    text-align: center;
+  }
+  .st-val { font-family: var(--font-head); font-size: 1.55rem; font-weight: 700; color: var(--text); }
+  .st-lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .07em; margin-top: 3px; }
+
+  .domain-breakdown {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin: 1rem 0 1.5rem;
+  }
+  .db-title { font-family: var(--font-head); font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .09em; margin-bottom: 1rem; }
+  .db-row   { display: flex; align-items: center; gap: 12px; margin-bottom: 11px; }
+  .db-row:last-child { margin-bottom: 0; }
+  .db-name  { font-size: 12.5px; color: var(--text-muted); width: 195px; flex-shrink: 0; }
+  .db-track { flex: 1; height: 6px; background: var(--border2); border-radius: 3px; overflow: hidden; }
+  .db-bar   { height: 6px; border-radius: 3px; transition: width .5s ease; }
+  .db-pct   { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); width: 34px; text-align: right; flex-shrink: 0; }
+
+  /* ── Incorrect review ── */
+  .review-section  { margin-top: 1.5rem; }
+  .review-header   { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .review-title    { font-family: var(--font-head); font-size: 15px; font-weight: 600; color: var(--text); }
+  .review-item {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 13px 16px;
+    margin-bottom: 10px;
+  }
+  .ri-domain   { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-bottom: 5px; }
+  .ri-q        { font-size: 13.5px; color: var(--text); line-height: 1.55; margin-bottom: 7px; }
+  .ri-answers  { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+  .correct-ans { color: var(--green); font-weight: 500; }
+  .wrong-ans   { color: var(--danger); }
+  .ri-exp      { font-size: 12.5px; color: var(--text-dim); line-height: 1.6; border-top: 1px solid var(--border2); padding-top: 8px; margin-top: 4px; }
+
+  .results-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border2);
+  }
+
+  @media (max-width: 600px) {
+    .start-title { font-size: 1.75rem; }
+    .stats-row   { grid-template-columns: repeat(2,1fr); }
+    .db-name     { width: 130px; font-size: 11px; }
+    .meta-strip  { gap: 1.25rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="exam-shell">
+
+  {# ── START SCREEN ── #}
+  <div id="screen-start" class="screen active">
+    <div class="start-hero">
+      <div class="start-badge">SY0-701 &nbsp;·&nbsp; Practice Exam</div>
+      <h1 class="start-title">CompTIA <span>Security+</span><br>Practice Exam</h1>
+      <p class="start-sub">
+        90 questions weighted to match the official exam domain distribution.
+        Complete this test to maximise your real-exam readiness.
+      </p>
+      <div class="meta-strip">
+        <div class="meta-item"><div class="meta-val">90</div><div class="meta-lbl">Questions</div></div>
+        <div class="meta-item"><div class="meta-val">90</div><div class="meta-lbl">Minutes</div></div>
+        <div class="meta-item"><div class="meta-val">75%</div><div class="meta-lbl">Pass mark</div></div>
+        <div class="meta-item"><div class="meta-val">5</div><div class="meta-lbl">Domains</div></div>
+      </div>
+    </div>
+
+    <div class="domain-cards" id="domain-cards-start"></div>
+
+    <div style="text-align:center">
+      <button class="btn btn-accent" onclick="startExam()">Begin exam</button>
+      <p style="font-size:12px;color:var(--text-dim);margin-top:12px;">
+        Timer starts when you click Begin exam
+      </p>
+    </div>
+  </div>
+
+  {# ── EXAM SCREEN ── #}
+  <div id="screen-exam" class="screen">
+    <div class="exam-topbar">
+      <div class="exam-progress-text">
+        Question <strong id="q-current">1</strong> of <strong>90</strong>
+        &nbsp;·&nbsp;
+        <span id="q-domain-short" style="color:var(--text-muted)"></span>
+      </div>
+      <div id="timer-display" class="timer-box">90:00</div>
+      <button class="flag-btn" id="flag-btn" onclick="toggleFlag()">Flag for review</button>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="q-card">
+      <div class="domain-pill"  id="q-domain-pill"></div>
+      <div class="q-num"        id="q-num"></div>
+      <div class="scenario-box" id="scenario-box" style="display:none"></div>
+      <div class="q-stem"       id="q-stem"></div>
+      <div class="options-list" id="options-list"></div>
+      <div class="explanation"  id="explanation"  style="display:none"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-outline btn-sm" id="prev-btn" onclick="prevQ()" disabled>← Previous</button>
+      <span class="answered-count" id="answered-count">0 answered · 0 flagged</span>
+      <button class="btn btn-outline btn-sm" id="next-btn" onclick="nextQ()">Next →</button>
+    </div>
+  </div>
+
+  {# ── RESULTS SCREEN ── #}
+  <div id="screen-results" class="screen">
+    <div class="results-hero">
+      <div class="result-score"   id="result-score">—</div>
+      <div class="result-verdict" id="result-verdict"></div>
+      <div class="result-sub"     id="result-sub"></div>
+    </div>
+
+    <div class="stats-row" id="stats-row"></div>
+
+    <div class="domain-breakdown">
+      <div class="db-title">Domain breakdown</div>
+      <div id="domain-breakdown-rows"></div>
+    </div>
+
+    <div class="review-section" id="review-section"></div>
+
+    <div class="results-actions">
+      <button class="btn btn-accent" onclick="restartExam()">Retake exam</button>
+      <a href="{{ url_for('main.course_lessons') }}" class="btn btn-outline">Back to lessons</a>
+    </div>
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/practice_exam.js') }}"></script>
+{% endblock %}
