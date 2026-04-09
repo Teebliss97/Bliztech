@@ -585,19 +585,20 @@ h3 { font-size: 15px; font-weight: 600; }
 }
 
 .hero-shell-row .stats-card {
-  border-radius: 0;
-  border: none;
-  border-right: 1px solid var(--border);
-  background: var(--bg-2);
-  padding: 20px 22px;
+  border-radius: 0 !important;
+  border: none !important;
+  border-right: 1px solid var(--border) !important;
+  background: var(--bg-2) !important;
+  padding: 20px 22px !important;
   min-height: 300px;
+  box-shadow: none !important;
 }
 
 .hero-shell-row .terminal {
-  border-radius: 0;
-  border: none;
-  border-right: 1px solid var(--border);
-  box-shadow: none;
+  border-radius: 0 !important;
+  border: none !important;
+  border-right: 1px solid var(--border) !important;
+  box-shadow: none !important;
   min-height: 300px;
 }
 
