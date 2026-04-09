@@ -418,6 +418,7 @@ h3 { font-size: 15px; font-weight: 600; }
   margin-left: -48px;
   margin-right: -48px;
   padding: 52px 48px;
+  min-height: calc(100vh - 62px);
   border: none;
   border-bottom: 1px solid var(--border);
   background: var(--bg-2);
@@ -658,6 +659,7 @@ h3 { font-size: 15px; font-weight: 600; }
   .hero.hero-premium {
     grid-template-columns: 1fr;
     gap: 24px;
+    min-height: auto;
   }
   .hero-left { max-width: none; }
   .hero-shell-top { grid-template-columns: 1fr; }
@@ -1719,7 +1721,7 @@ code {
   background: var(--bg);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 44px 48px;
+  padding: 0;
   margin-left: -48px;
   margin-right: -48px;
   position: relative;
@@ -1742,8 +1744,7 @@ code {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 32px;
   align-items: center;
-  max-width: 1180px;
-  margin: 0 auto;
+  padding: 44px 48px;
 }
 
 .course-promo-tag {
@@ -1851,11 +1852,13 @@ code {
 @media (max-width: 1100px) { .course-promo-inner { grid-template-columns: 1fr; } }
 
 @media (max-width: 900px) {
-  .course-promo { padding: 36px 24px; margin-left: -24px; margin-right: -24px; }
+  .course-promo { margin-left: -24px; margin-right: -24px; }
+  .course-promo-inner { padding: 36px 24px; }
 }
 
 @media (max-width: 480px) {
-  .course-promo { padding: 28px 16px; margin-left: -16px; margin-right: -16px; }
+  .course-promo { margin-left: -16px; margin-right: -16px; }
+  .course-promo-inner { padding: 28px 16px; }
 }
 
 /* -----------------------------
