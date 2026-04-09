@@ -34,6 +34,101 @@
     50% { opacity:0.5; transform:scale(1.4); }
   }
 
+  /* ── Course mini card ── */
+  .hero-course-mini {
+    border: 1px solid var(--border-g);
+    border-radius: 14px;
+    background: var(--green-dim);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hero-course-mini-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green);
+  }
+
+  .hero-course-mini-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .hero-course-mini-desc {
+    font-size: 12.5px;
+    color: var(--text-2);
+    line-height: 1.65;
+  }
+
+  .hero-course-mini-sections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .hero-course-mini-sec {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-2);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+
+  .hero-course-mini-sec span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--green);
+    background: var(--green-dim);
+    border: 1px solid var(--border-g);
+    border-radius: 3px;
+    padding: 1px 5px;
+  }
+
+  .hero-course-mini-link {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--green);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: gap 0.15s;
+  }
+
+  .hero-course-mini-link:hover { gap: 8px; }
+
+  /* ── Testimonial ── */
+  .hero-testimonial {
+    border-left: 2px solid var(--border-g);
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.015);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .hero-testimonial-text {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.7;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .hero-testimonial-author {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-3);
+  }
+
   /* ── Hero overrides for full-height premium feel ── */
   .hero.hero-premium {
     align-items: stretch;
@@ -278,6 +373,24 @@
         Free to start — create an account to track progress and earn a certificate.
       </p>
     {% endif %}
+
+    <div class="hero-course-mini">
+      <div class="hero-course-mini-tag">Paid Course</div>
+      <div class="hero-course-mini-title">Get Into Cybersecurity</div>
+      <div class="hero-course-mini-desc">20 structured lessons, 4 hands-on labs, and a certificate — from zero to job-ready. £11 one-time, lifetime access.</div>
+      <div class="hero-course-mini-sections">
+        <span class="hero-course-mini-sec"><span>A</span> Foundation</span>
+        <span class="hero-course-mini-sec"><span>B</span> Technical Core</span>
+        <span class="hero-course-mini-sec"><span>C</span> Defence & Response</span>
+        <span class="hero-course-mini-sec"><span>D</span> Career Launchpad</span>
+      </div>
+      <a href="{{ url_for('main.course') }}" class="hero-course-mini-link">View course →</a>
+    </div>
+
+    <div class="hero-testimonial">
+      <div class="hero-testimonial-text">"BlizTech helped me understand cybersecurity in a way no other platform could. I passed my first interview because of this course."</div>
+      <div class="hero-testimonial-author">— Course graduate, Lagos</div>
+    </div>
 
     <div class="hero-divider"></div>
 
