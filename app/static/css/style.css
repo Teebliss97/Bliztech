@@ -88,7 +88,7 @@ img { display: block; max-width: 100%; }
 
 main {
   width: 100%;
-  padding-bottom: 80px;
+  padding-bottom: 0;
   padding-left: 48px;
   padding-right: 48px;
 }
@@ -432,11 +432,11 @@ h3 { font-size: 15px; font-weight: 600; }
   pointer-events: none;
 }
 
-/* Row 1: text — two columns */
+/* Row 1: text — 60/40 columns */
 .hero-top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 48px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 56px;
   align-items: start;
   padding: 40px 48px;
   border-bottom: 1px solid var(--border);
@@ -456,6 +456,8 @@ h3 { font-size: 15px; font-weight: 600; }
   gap: 18px;
   width: 100%;
   min-width: 0;
+  padding-left: 40px;
+  border-left: 1px solid var(--border);
 }
 
 /* Row 2: widgets — three columns */
@@ -698,7 +700,8 @@ h3 { font-size: 15px; font-weight: 600; }
   min-width: 0;
 }
 
-.hero-shell-top {
+/* hero-shell-top for old .hero-shell (non-home pages) */
+.hero-shell .hero-shell-top {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
   gap: 12px;
@@ -891,7 +894,7 @@ h3 { font-size: 15px; font-weight: 600; }
 }
 
 .feature {
-  padding: 24px 20px;
+  padding: 28px 24px;
   background: var(--bg-2);
   transition: background 0.18s, transform 0.18s;
   min-height: auto;
@@ -903,24 +906,24 @@ h3 { font-size: 15px; font-weight: 600; }
 }
 
 .feature-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
   background: var(--green-dim);
   border: 1px solid var(--border-g);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
-.feature-icon img { width: 16px; height: 16px; }
-.feature h3 { margin: 0 0 6px; font-size: 13px; color: var(--text); }
+.feature-icon img { width: 18px; height: 18px; }
+.feature h3 { margin: 0 0 8px; font-size: 14px; color: var(--text); font-weight: 600; }
 
 .feature p {
   margin: 0;
   color: var(--text-3);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 @media (max-width: 900px) {
@@ -1121,7 +1124,7 @@ h3 { font-size: 15px; font-weight: 600; }
   margin-top: 0;
   border-top: 1px solid var(--border);
   background: rgba(255,255,255,0.02);
-  padding: 32px 48px;
+  padding: 32px 48px 64px;
   margin-left: -48px;
   margin-right: -48px;
 }
