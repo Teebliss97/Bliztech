@@ -6,10 +6,11 @@ import requests
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
-from app.extensions import db
+from app.extensions import db, csrf
 from app.models import User, CourseAccess
 
 paystack_bp = Blueprint('paystack', __name__)
+csrf.exempt(paystack_bp)
 
 PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY')

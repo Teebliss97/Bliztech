@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, abort, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import current_user
 
-from app.extensions import db, limiter
+from app.extensions import db, limiter, csrf
 from app.models import (
     User,
     Progress,
@@ -296,6 +296,7 @@ def grant_course_access():
 
 @admin_bp.route("/gumroad/webhook", methods=["POST"])
 @limiter.limit("60 per minute")
+@csrf.exempt
 def gumroad_webhook():
     webhook_secret = os.getenv("GUMROAD_WEBHOOK_SECRET", "")
     if not webhook_secret:

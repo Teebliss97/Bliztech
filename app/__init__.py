@@ -286,12 +286,6 @@ def create_app():
     app.register_blueprint(jobs_bp)
     app.register_blueprint(practice_exam_bp)
 
-    # ── Exempt webhook blueprints/routes from CSRF ───────────
-    # These receive POST requests from external servers (Paystack, Gumroad)
-    # that cannot include CSRF tokens.
-    csrf.exempt(paystack_bp)
-    csrf.exempt(admin_bp.view_functions["gumroad_webhook"])
-
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp
         app.register_blueprint(test_bp)
