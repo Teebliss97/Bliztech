@@ -290,7 +290,7 @@ def create_app():
     # These receive POST requests from external servers (Paystack, Gumroad)
     # that cannot include CSRF tokens.
     csrf.exempt(paystack_bp)
-    csrf.exempt(admin_bp.view_functions["admin.gumroad_webhook"])
+    csrf.exempt(admin_bp.view_functions["gumroad_webhook"])
 
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp
