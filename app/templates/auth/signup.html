@@ -5,6 +5,7 @@
   <p class="page-subtitle">Free to join — track progress and earn a certificate.</p>
 
   <form method="POST" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="next" value="{{ next or '' }}">
 
     <div class="form-group">

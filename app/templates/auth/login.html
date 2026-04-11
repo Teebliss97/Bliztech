@@ -5,6 +5,7 @@
   <p class="page-subtitle">Welcome back. Continue your learning.</p>
 
   <form method="POST" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="next" value="{{ next or '' }}">
 
     <div class="form-group">
@@ -32,6 +33,7 @@
   <div class="form-divider">
     <div class="form-divider-label">Didn't get the verification email?</div>
     <form method="POST" action="{{ url_for('auth.resend_verification') }}" class="form" style="gap:12px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="form-group">
         <label for="resend-email">Email</label>
         <input id="resend-email" name="email" type="email" value="{{ email_prefill or '' }}" required autocomplete="email">
