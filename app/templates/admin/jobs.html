@@ -6,7 +6,6 @@
   .aj-wrap { max-width: 900px; margin: 40px auto; padding: 0 1rem; }
   .aj-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
   .aj-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0; }
-
   .aj-form { background: var(--bg-2); border: 1px solid var(--border-g); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
   .aj-form-title { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green); margin: 0 0 1.25rem; }
   .aj-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -20,7 +19,6 @@
   .aj-field-full { grid-column: 1 / -1; }
   .aj-submit { margin-top: 1rem; padding: 0.7rem 1.5rem; background: var(--green); color: #050f08; border: none; border-radius: 6px; font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
   .aj-submit:hover { opacity: 0.9; }
-
   .aj-table { width: 100%; border-collapse: collapse; }
   .aj-table th { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); text-align: left; }
   .aj-table td { padding: 0.75rem 0.85rem; border-bottom: 1px solid var(--border); font-size: 0.875rem; color: var(--text-2); }
@@ -49,10 +47,10 @@
     <div class="aj-msg aj-msg-{{ message.type }}">{{ message.text }}</div>
   {% endif %}
 
-  <!-- Add job form -->
   <div class="aj-form">
     <div class="aj-form-title">Post a new job</div>
     <form method="POST" action="{{ url_for('admin.jobs_create') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="aj-form-grid">
         <div class="aj-field">
           <label>Job title *</label>
@@ -98,7 +96,6 @@
     </form>
   </div>
 
-  <!-- Job list -->
   <table class="aj-table">
     <thead>
       <tr>
@@ -138,6 +135,7 @@
         </td>
         <td>
           <form method="POST" action="{{ url_for('admin.jobs_delete', job_id=job.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="aj-btn-del" onclick="return confirm('Delete this job?')">Delete</button>
           </form>
         </td>

@@ -16,7 +16,6 @@
     </div>
   </div>
 
-  <!-- Phase 5.3: Retention cleanup -->
   <div style="margin-top:14px; border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px;">
     <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;">
       <div>
@@ -32,18 +31,17 @@
 
     <form method="post" action="{{ url_for('admin.monitoring_cleanup') }}"
           style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-top:12px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div style="display:flex; flex-direction:column; gap:6px;">
         <label style="font-size:12px; opacity:0.8;">Keep Security Events (days)</label>
         <input name="keep_security_days" value="30"
                style="width:180px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
       </div>
-
       <div style="display:flex; flex-direction:column; gap:6px;">
         <label style="font-size:12px; opacity:0.8;">Keep Admin Audit Logs (days)</label>
         <input name="keep_audit_days" value="180"
                style="width:200px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
       </div>
-
       <button class="btn" type="submit"
               onclick="return confirm('This will delete old records. Continue?');">
         Run cleanup
@@ -51,7 +49,6 @@
     </form>
   </div>
 
-  <!-- Filters -->
   <div style="margin-top:14px; border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px;">
     <form method="get" action="{{ url_for('admin.monitoring') }}" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
       <div style="display:flex; flex-direction:column; gap:6px;">
@@ -59,31 +56,26 @@
         <input name="event" value="{{ event or '' }}" placeholder="auth_login_failed, rate_limited..."
                style="min-width:220px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
       </div>
-
       <div style="display:flex; flex-direction:column; gap:6px;">
         <label style="font-size:12px; opacity:0.8;">IP</label>
         <input name="ip" value="{{ ip or '' }}" placeholder="90.214..."
                style="min-width:180px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
       </div>
-
       <div style="display:flex; flex-direction:column; gap:6px;">
         <label style="font-size:12px; opacity:0.8;">Path</label>
         <input name="path" value="{{ path or '' }}" placeholder="/admin/users"
                style="min-width:200px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
       </div>
-
       <div style="display:flex; flex-direction:column; gap:6px;">
         <label style="font-size:12px; opacity:0.8;">Status</label>
         <input name="status" value="{{ status or '' }}" placeholder="429"
                style="width:120px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
       </div>
-
       <div style="display:flex; flex-direction:column; gap:6px;">
         <label style="font-size:12px; opacity:0.8;">Text contains</label>
         <input name="q" value="{{ q or '' }}" placeholder="detail / endpoint contains..."
                style="min-width:220px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:inherit;">
       </div>
-
       <div style="display:flex; gap:10px;">
         <button class="btn" type="submit">Filter</button>
         <a class="btn btn-outline" href="{{ url_for('admin.monitoring') }}">Reset</a>
@@ -91,7 +83,6 @@
     </form>
   </div>
 
-  <!-- Events table -->
   <div style="margin-top:16px;">
     <div style="border:1px solid rgba(255,255,255,0.12); border-radius:14px; overflow:hidden;">
       <div style="overflow:auto;">
@@ -115,9 +106,7 @@
           {% else %}
             {% for e in events %}
             <tr style="border-top: 1px solid rgba(255,255,255,0.10);">
-              <td style="padding:12px; white-space:nowrap;">
-                {{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') if e.created_at else '' }}
-              </td>
+              <td style="padding:12px; white-space:nowrap;">{{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') if e.created_at else '' }}</td>
               <td style="padding:12px; font-weight:600;">{{ e.event }}</td>
               <td style="padding:12px;">{{ e.ip or '' }}</td>
               <td style="padding:12px;">{{ e.method or '' }}</td>
@@ -125,9 +114,7 @@
               <td style="padding:12px;">{{ e.endpoint or '' }}</td>
               <td style="padding:12px;">{{ e.status if e.status is not none else '' }}</td>
               <td style="padding:12px;">{{ e.duration_ms if e.duration_ms is not none else '' }}</td>
-              <td style="padding:12px; max-width: 420px; word-break: break-word; opacity:0.9;">
-                {{ e.detail or '' }}
-              </td>
+              <td style="padding:12px; max-width: 420px; word-break: break-word; opacity:0.9;">{{ e.detail or '' }}</td>
             </tr>
             {% endfor %}
           {% endif %}
@@ -136,33 +123,23 @@
       </div>
     </div>
 
-    <!-- Pagination -->
     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px;">
       <div style="opacity:0.75; font-size:12px;">
         Page {{ page }} of {{ pages }} • Showing {{ events|length }} items
       </div>
-
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         {% if has_prev %}
-          <a class="btn btn-outline"
-             href="{{ url_for('admin.monitoring', page=prev_num, q=q, event=event, ip=ip, path=path, status=status) }}">
-             ← Prev
-          </a>
+          <a class="btn btn-outline" href="{{ url_for('admin.monitoring', page=prev_num, q=q, event=event, ip=ip, path=path, status=status) }}">← Prev</a>
         {% else %}
           <span class="btn btn-outline" style="opacity:0.5; pointer-events:none;">← Prev</span>
         {% endif %}
-
         {% if has_next %}
-          <a class="btn btn-outline"
-             href="{{ url_for('admin.monitoring', page=next_num, q=q, event=event, ip=ip, path=path, status=status) }}">
-             Next →
-          </a>
+          <a class="btn btn-outline" href="{{ url_for('admin.monitoring', page=next_num, q=q, event=event, ip=ip, path=path, status=status) }}">Next →</a>
         {% else %}
           <span class="btn btn-outline" style="opacity:0.5; pointer-events:none;">Next →</span>
         {% endif %}
       </div>
     </div>
-
   </div>
 
 </div>

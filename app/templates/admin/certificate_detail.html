@@ -41,16 +41,19 @@
           <h3 style="margin:0 0 10px;">Actions</h3>
 
           <form method="POST" action="{{ url_for('admin.certificate_reissue', cert_id=cert.cert_id) }}" style="margin-bottom:10px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-outline" type="submit">Reissue (new ID)</button>
           </form>
 
           {% if not cert.revoked %}
             <form method="POST" action="{{ url_for('admin.certificate_revoke', cert_id=cert.cert_id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <input name="reason" placeholder="Reason (optional)" />
               <button class="btn" type="submit" style="margin-top:10px;">Revoke</button>
             </form>
           {% else %}
             <form method="POST" action="{{ url_for('admin.certificate_unrevoke', cert_id=cert.cert_id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="btn" type="submit">Un-revoke</button>
             </form>
           {% endif %}

@@ -192,6 +192,7 @@
     <details>
       <summary class="muted" style="cursor:pointer;">Reset course progress</summary>
       <form method="POST" action="{{ url_for('main.reset_progress') }}" class="form" style="max-width:420px; margin-top:10px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <p class="page-subtitle">Type <strong>RESET</strong> to clear your progress.</p>
         <input name="confirm" placeholder="Type RESET to confirm" required>
         <button class="btn btn-outline" type="submit" style="margin-top:10px;">Reset progress</button>

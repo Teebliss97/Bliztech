@@ -25,8 +25,6 @@
   .ud-btn-green { background: var(--green); color: #050f08; }
   .ud-btn-outline { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
   .ud-btn-red { background: #ff6b6b22; color: #ff6b6b; border: 1px solid #ff6b6b44; }
-  .ud-confirm { display: none; }
-  .ud-confirm.show { display: inline-block; }
 </style>
 {% endblock %}
 
@@ -50,7 +48,6 @@
     </div>
   </div>
 
-  <!-- Account Info -->
   <div class="ud-section">
     <div class="ud-section-title">Account</div>
     <div class="ud-row"><span class="ud-row-label">ID</span><span class="ud-row-value">{{ user.id }}</span></div>
@@ -61,7 +58,6 @@
     <div class="ud-row"><span class="ud-row-label">Referrals made</span><span class="ud-row-value">{{ referrals_made }}</span></div>
   </div>
 
-  <!-- Course Access -->
   <div class="ud-section">
     <div class="ud-section-title">Course Access</div>
     {% if course_access %}
@@ -70,6 +66,7 @@
       <div class="ud-row"><span class="ud-row-label">Sale ID</span><span class="ud-row-value">{{ course_access.gumroad_sale_id or '—' }}</span></div>
       <div class="ud-actions">
         <form method="POST" action="{{ url_for('admin.user_revoke_access', user_id=user.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="ud-btn ud-btn-red" onclick="return confirm('Revoke course access for {{ user.email }}?')">Revoke access</button>
         </form>
       </div>
@@ -77,13 +74,13 @@
       <div class="ud-row"><span class="ud-row-label">Status</span><span class="ud-row-value" style="color:#ff6b6b">No access</span></div>
       <div class="ud-actions">
         <form method="POST" action="{{ url_for('admin.user_grant_access', user_id=user.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="ud-btn ud-btn-green">Grant course access</button>
         </form>
       </div>
     {% endif %}
   </div>
 
-  <!-- Certificates -->
   <div class="ud-section">
     <div class="ud-section-title">Certificates ({{ certs|length }})</div>
     {% if certs %}
@@ -101,22 +98,24 @@
     {% endif %}
   </div>
 
-  <!-- Actions -->
   <div class="ud-section">
     <div class="ud-section-title">Account Actions</div>
     <div class="ud-actions">
       {% if user.email_verified %}
         <form method="POST" action="{{ url_for('admin.user_ban', user_id=user.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="ud-btn ud-btn-red" onclick="return confirm('Ban {{ user.email }}? They will not be able to log in.')">Ban user</button>
         </form>
       {% else %}
         <form method="POST" action="{{ url_for('admin.user_unban', user_id=user.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="ud-btn ud-btn-outline">Unban / Verify user</button>
         </form>
       {% endif %}
 
       {% if not user.is_admin %}
         <form method="POST" action="{{ url_for('admin.user_delete', user_id=user.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="ud-btn ud-btn-red" onclick="return confirm('Permanently delete {{ user.email }}? This cannot be undone.')">Delete user</button>
         </form>
       {% endif %}
