@@ -19,6 +19,9 @@
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="{{ seo_url }}">
 
+  {# CSRF token for AJAX requests #}
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="BlizTech">
   <meta property="og:locale" content="en_GB">

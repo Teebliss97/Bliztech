@@ -10,7 +10,7 @@ from urllib.parse import urlsplit, urlunsplit
 from flask import Flask, session, jsonify, g, has_request_context, request, redirect, Response
 from dotenv import load_dotenv
 
-from app.extensions import db, login_manager, migrate, limiter
+from app.extensions import db, login_manager, migrate, limiter, csrf
 
 
 class RequestIdFilter(logging.Filter):
@@ -60,7 +60,14 @@ def create_app():
     def inject_current_year():
         return {"current_year": datetime.utcnow().year}
 
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
+    # ── Hard fail if SECRET_KEY not set in production ────────
+    secret_key = os.getenv("SECRET_KEY")
+    if not secret_key:
+        if os.getenv("FLASK_ENV") == "production":
+            raise RuntimeError("SECRET_KEY environment variable is not set. Refusing to start in production.")
+        secret_key = "dev-secret-change-me"
+
+    app.config["SECRET_KEY"] = secret_key
     app.config["YOUTUBE_CHANNEL_URL"] = os.getenv("YOUTUBE_CHANNEL_URL", "https://www.youtube.com/@Bliz_Tech")
 
     db_url = os.getenv("DATABASE_URL", "sqlite:///bliztech.db")
@@ -77,6 +84,10 @@ def create_app():
     app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
     if os.getenv("FLASK_ENV") == "production":
         app.config["SESSION_COOKIE_SECURE"] = True
+
+    # ── WTF / CSRF config ────────────────────────────────────
+    app.config["WTF_CSRF_TIME_LIMIT"] = 3600  # 1 hour token expiry
+    app.config["WTF_CSRF_SSL_STRICT"] = False  # allow same-site non-HTTPS in dev
 
     CANONICAL_HOST = os.getenv("CANONICAL_HOST", "bliztechacademy.com")
 
@@ -168,6 +179,7 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    csrf.init_app(app)
 
     limiter_storage = os.getenv("RATELIMIT_STORAGE_URI")
     if limiter_storage:
@@ -273,6 +285,12 @@ def create_app():
     app.register_blueprint(paystack_bp)
     app.register_blueprint(jobs_bp)
     app.register_blueprint(practice_exam_bp)
+
+    # ── Exempt webhook blueprints/routes from CSRF ───────────
+    # These receive POST requests from external servers (Paystack, Gumroad)
+    # that cannot include CSRF tokens.
+    csrf.exempt(paystack_bp)
+    csrf.exempt(admin_bp.view_functions["admin.gumroad_webhook"])
 
     if os.getenv("ENABLE_EMAIL_TEST_ROUTE") == "1":
         from app.blueprints.main.test_email import test_bp

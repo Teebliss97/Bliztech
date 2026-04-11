@@ -2,7 +2,7 @@ import os
 from functools import wraps
 from datetime import datetime, timedelta
 
-from flask import Blueprint, abort, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, abort, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import current_user
 
 from app.extensions import db, limiter
@@ -214,7 +214,6 @@ def user_delete(user_id: int):
         flash("Cannot delete an admin account.", "error")
         return redirect(url_for("admin.user_detail", user_id=user_id))
     email = user.email
-    # Delete related records
     CourseAccess.query.filter_by(user_id=user.id).delete()
     Certificate.query.filter_by(user_id=user.id).delete()
     Progress.query.filter_by(user_id=f"user:{user.id}").delete()
@@ -299,11 +298,15 @@ def grant_course_access():
 @limiter.limit("60 per minute")
 def gumroad_webhook():
     webhook_secret = os.getenv("GUMROAD_WEBHOOK_SECRET", "")
-    if webhook_secret:
-        provided = request.args.get("secret", "") or request.form.get("secret", "")
-        if provided != webhook_secret:
-            _audit("GUMROAD_WEBHOOK_REJECTED", "webhook", "gumroad", "bad_secret")
-            return jsonify({"error": "Unauthorized"}), 401
+    if not webhook_secret:
+        # Hard fail — never allow webhook processing without a secret configured
+        current_app.logger.error("GUMROAD_WEBHOOK_SECRET is not set — rejecting all webhook requests")
+        return jsonify({"error": "Webhook not configured"}), 500
+
+    provided = request.args.get("secret", "") or request.form.get("secret", "")
+    if provided != webhook_secret:
+        _audit("GUMROAD_WEBHOOK_REJECTED", "webhook", "gumroad", "bad_secret")
+        return jsonify({"error": "Unauthorized"}), 401
 
     email = (request.form.get("email") or "").strip().lower()
     sale_id = (request.form.get("sale_id") or "").strip() or None

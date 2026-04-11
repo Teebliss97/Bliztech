@@ -12,7 +12,8 @@ from flask_login import login_required
 from flask import jsonify
 from flask_login import login_required, current_user
 from app.models import LessonRead, CourseAccess, CourseTopic
-from app.extensions import db
+from app.extensions import db, limiter
+from markupsafe import escape
 
 main_bp = Blueprint("main", __name__)
 
@@ -166,11 +167,13 @@ def home():
 # BOOK A SESSION
 # -------------------------
 @main_bp.route("/book-session", methods=["POST"])
+@limiter.limit("5 per hour")
 def book_session():
-    name    = (request.form.get("name") or "").strip()
-    email   = (request.form.get("email") or "").strip()
-    topic   = (request.form.get("topic") or "").strip()
-    message = (request.form.get("message") or "").strip()
+    # Escape all user input before using in HTML to prevent XSS
+    name    = escape((request.form.get("name") or "").strip())
+    email   = escape((request.form.get("email") or "").strip())
+    topic   = escape((request.form.get("topic") or "").strip())
+    message = escape((request.form.get("message") or "").strip())
 
     if not name or not email or not topic:
         return jsonify({"ok": False, "error": "Please fill in all required fields."}), 400
@@ -244,7 +247,7 @@ def my_progress():
 
 
 @main_bp.route("/progress/reset", methods=["POST"])
-@rate_limit(limit=3, window_seconds=60, key_prefix="reset")
+@rate_limit("3 per minute")
 def reset_progress():
     gate = _require_login("Please log in to reset your progress.")
     if gate:
@@ -451,52 +454,6 @@ def course_check_access():
         CourseAccess.query.filter_by(user_id=current_user.id).first()
     )
     return jsonify({"has_access": has_access})
-
-
-# -------------------------
-# ADMIN — grant course access
-# -------------------------
-@main_bp.route('/admin/course/grant', methods=['GET', 'POST'])
-@login_required
-def admin_grant_course():
-    if not current_user.is_admin:
-        flash("Access denied.", "error")
-        return redirect(url_for("main.home"))
-
-    from app.models import User, CourseAccess
-    from app.extensions import db
-
-    message = None
-
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
-        user = User.query.filter_by(email=email).first()
-
-        if not user:
-            message = {"type": "error", "text": f"No user found with email: {email}"}
-        else:
-            existing = CourseAccess.query.filter_by(user_id=user.id).first()
-            if existing:
-                message = {"type": "info", "text": f"{email} already has course access (granted {existing.granted_at.strftime('%d %b %Y')})."}
-            else:
-                access = CourseAccess(
-                    user_id=user.id,
-                    granted_by=current_user.email,
-                    gumroad_sale_id=request.form.get('sale_id', '').strip() or None,
-                )
-                db.session.add(access)
-                user.has_course_access = True
-                db.session.commit()
-                message = {"type": "success", "text": f"Course access granted to {email}."}
-
-    access_list = (
-        CourseAccess.query
-        .join(User, CourseAccess.user_id == User.id)
-        .add_columns(User.email, CourseAccess.granted_at, CourseAccess.granted_by, CourseAccess.gumroad_sale_id)
-        .order_by(CourseAccess.granted_at.desc())
-        .all()
-    )
-    return render_template("admin_grant_course.html", message=message, access_list=access_list)
 
 
 @main_bp.route("/course/lessons/<slug>/mark-read", methods=["POST"])

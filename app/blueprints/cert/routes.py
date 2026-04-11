@@ -110,8 +110,9 @@ def paid_certificate_home():
     base_url = current_app.config.get("RENDER_EXTERNAL_URL") or ""
     verify_url = f"{base_url}/certificate/verify/{existing.cert_id}" if existing and base_url else None
 
-    from app.models import CourseTopic
+    from app.models import CourseTopic, LessonRead
     total_lessons = CourseTopic.query.count()
+    completed_count = LessonRead.query.filter_by(user_id=current_user.id).count()
 
     return render_template(
         "cert/paid_certificate.html",
@@ -120,6 +121,7 @@ def paid_certificate_home():
         verify_url=verify_url,
         is_admin=current_user.is_admin,
         total_lessons=total_lessons,
+        completed_count=completed_count,
     )
 
 
@@ -145,12 +147,17 @@ def paid_certificate_pdf():
         flash("Please enter your name for the certificate.", "error")
         return redirect(url_for("cert.paid_certificate_home"))
 
+    # ── Server-side lesson completion check (not client-supplied) ──
     if not current_user.is_admin:
-        completed_count = int(request.form.get("completed_count", "0") or "0")
-        from app.models import CourseTopic
+        from app.models import CourseTopic, LessonRead
         total = CourseTopic.query.count()
+        completed_count = LessonRead.query.filter_by(user_id=current_user.id).count()
         if completed_count < total:
-            flash(f"Complete all {total} lessons to download your certificate. You have completed {completed_count}.", "error")
+            flash(
+                f"Complete all {total} lessons to download your certificate. "
+                f"You have completed {completed_count}.",
+                "error",
+            )
             return redirect(url_for("cert.paid_certificate_home"))
 
     cert = get_or_create_paid_certificate(name)

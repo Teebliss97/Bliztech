@@ -10,3 +10,4 @@ reportlab
 Flask-Limiter==3.8.0
 markdown
 requests
+Flask-WTF

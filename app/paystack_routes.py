@@ -103,6 +103,9 @@ def pay_ng_webhook():
     paystack_signature = request.headers.get('X-Paystack-Signature', '')
     payload = request.get_data()
 
+    if not PAYSTACK_SECRET_KEY:
+        return jsonify({'status': 'webhook not configured'}), 500
+
     expected = hmac.new(
         PAYSTACK_SECRET_KEY.encode('utf-8'),
         payload,
@@ -131,6 +134,7 @@ def pay_ng_webhook():
 def pay_ng_success():
     email = request.args.get('email', '')
     return render_template('pay_ng_success.html', email=email)
+
 
 @paystack_bp.route('/pay/choose')
 def pay_choose():

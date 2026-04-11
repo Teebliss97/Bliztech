@@ -1164,6 +1164,16 @@ QUESTIONS_SET2 = [
 ]
 
 
+# ── Helper ────────────────────────────────────────────────────────────────────
+
+def _strip_answers(questions: list) -> list:
+    """Remove ans and exp fields before sending to client."""
+    return [
+        {k: v for k, v in q.items() if k not in ("ans", "exp")}
+        for q in questions
+    ]
+
+
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @practice_exam_bp.route("/")
@@ -1180,9 +1190,9 @@ def index():
 @practice_exam_bp.route("/questions")
 @certificate_required
 def get_questions_set1():
-    """JSON endpoint — Practice Exam Set 1 (90 questions)."""
+    """JSON endpoint — Practice Exam Set 1 (90 questions), answers stripped."""
     return jsonify({
-        "questions":     QUESTIONS_SET1,
+        "questions":     _strip_answers(QUESTIONS_SET1),
         "domain_meta":   DOMAIN_META,
         "total":         len(QUESTIONS_SET1),
         "pass_pct":      75,
@@ -1194,9 +1204,9 @@ def get_questions_set1():
 @practice_exam_bp.route("/questions/set2")
 @certificate_required
 def get_questions_set2():
-    """JSON endpoint — Practice Exam Set 2 (90 questions)."""
+    """JSON endpoint — Practice Exam Set 2 (90 questions), answers stripped."""
     return jsonify({
-        "questions":     QUESTIONS_SET2,
+        "questions":     _strip_answers(QUESTIONS_SET2),
         "domain_meta":   DOMAIN_META,
         "total":         len(QUESTIONS_SET2),
         "pass_pct":      75,
@@ -1211,6 +1221,7 @@ def submit_attempt():
     """
     Records a completed exam attempt.
     POST body: { "answers": {"0": 2, "1": 1, ...}, "elapsed_seconds": 3720, "set": 1 }
+    Answers are validated server-side against the full question set.
     """
     data     = request.get_json(silent=True) or {}
     answers  = data.get("answers", {})
@@ -1219,13 +1230,12 @@ def submit_attempt():
 
     questions = QUESTIONS_SET1 if exam_set == 1 else QUESTIONS_SET2
 
-    correct   = sum(
+    correct = sum(
         1 for i, q in enumerate(questions)
         if answers.get(str(i)) == q["ans"]
     )
     score_pct = round((correct / len(questions)) * 100)
     passed    = score_pct >= 75
-
 
     return jsonify({
         "correct":   correct,
