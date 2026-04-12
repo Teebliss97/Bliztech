@@ -48,6 +48,86 @@
 }
 
 /* -----------------------------
+   1b) Light theme overrides
+------------------------------ */
+[data-theme="light"] {
+  --bg:         #FFFFFF;
+  --bg-2:       #F5F5F5;
+  --bg-3:       #EBEBEB;
+  --bg-4:       #E0E0E0;
+
+  --text:       #0A0A0A;
+  --text-2:     #3A3A3A;
+  --text-3:     #6B6B6B;
+
+  --border:     rgba(0,0,0,0.08);
+  --border-2:   rgba(0,0,0,0.12);
+  --border-3:   rgba(0,0,0,0.16);
+
+  --shadow:      0 2px 16px rgba(0,0,0,0.10);
+  --shadow-lg:   0 8px 48px rgba(0,0,0,0.14);
+  --shadow-soft: 0 10px 40px rgba(0,0,0,0.08);
+  --shadow-card: 0 20px 60px rgba(0,0,0,0.10);
+}
+
+[data-theme="light"] .nav {
+  background: rgba(255,255,255,0.88);
+  border-bottom-color: rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .nav-panel.open {
+  background: #F5F5F5;
+}
+
+[data-theme="light"] .nav-panel-inner {
+  background: #F5F5F5;
+  border-color: rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .terminal {
+  background: #1A1A1A;
+}
+
+[data-theme="light"] .hero.hero-premium {
+  background: var(--bg-2);
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(0,217,126,0.22);
+  color: #0A0A0A;
+}
+
+/* ── Theme toggle button ─────────────────────────────────── */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-4);
+  color: var(--text);
+}
+
+.theme-toggle svg { pointer-events: none; }
+
+/* Show moon in dark mode, sun in light mode */
+.icon-moon { display: block; }
+.icon-sun  { display: none;  }
+
+[data-theme="light"] .icon-moon { display: none;  }
+[data-theme="light"] .icon-sun  { display: block; }
+
+/* -----------------------------
    2) Reset & Base
 ------------------------------ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
