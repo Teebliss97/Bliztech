@@ -18,6 +18,7 @@
 
   <!-- Input form -->
   <form method="POST" action="{{ url_for('main.link_analyzer') }}" class="la-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="la-input-wrap">
       <span class="la-input-icon">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
