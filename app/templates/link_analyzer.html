@@ -66,12 +66,11 @@
         <div class="side-title">Red flags found</div>
         <div class="la-flags">
           {% for flag in result.flags %}
-          <div class="la-flag la-flag-{{ result.risk_level }}">
-            <span class="la-flag-icon">
-              {% if result.risk_level == 1 %}✓{% else %}✗{% endif %}
-            </span>
-            {{ flag }}
-          </div>
+            {% set is_clean = flag.startswith("No suspicious") %}
+            <div class="la-flag {{ 'la-flag-1' if is_clean else 'la-flag-' ~ result.risk_level }}">
+              <span class="la-flag-icon">{{ '✓' if is_clean else '✗' }}</span>
+              {{ flag }}
+            </div>
           {% endfor %}
         </div>
       </div>
