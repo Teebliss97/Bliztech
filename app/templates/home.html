@@ -732,7 +732,16 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending…';
     var data = new FormData(form);
-    fetch(form.action, { method: 'POST', body: data, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+    fetch(form.action, {
+      method: 'POST',
+      body: data,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
+      }
+    })
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.ok) { formDiv.style.display = 'none'; successDiv.style.display = 'block'; }
