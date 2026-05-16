@@ -212,9 +212,9 @@ def book_session():
 
     try:
         ok = send_email(
-            to=BOOKING_RECIPIENT,
+            to_email=BOOKING_RECIPIENT,
             subject=f"Mentorship Booking: {name} — {topic}",
-            html=html,
+            html_content=html,
         )
     except Exception as e:
         current_app.logger.exception("Booking email send raised exception: %s", e)
