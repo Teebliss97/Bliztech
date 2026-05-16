@@ -12,7 +12,7 @@ from flask_login import login_required
 from flask import jsonify
 from flask_login import login_required, current_user
 from app.models import LessonRead, CourseAccess, CourseTopic
-from app.extensions import db, limiter
+from app.extensions import db, limiter, csrf
 from markupsafe import escape
 
 # ── NEW: central access helper ───────────────────────────────────────────────
@@ -173,6 +173,7 @@ def home():
 # BOOK A SESSION
 # -------------------------
 @main_bp.route("/book-session", methods=["POST"])
+@csrf.exempt
 @limiter.limit("5 per hour")
 def book_session():
     # Escape all user input before using in HTML to prevent XSS
@@ -181,7 +182,15 @@ def book_session():
     topic   = escape((request.form.get("topic") or "").strip())
     message = escape((request.form.get("message") or "").strip())
 
+    # Debug logging — visible in Render logs
+    from flask import current_app
+    current_app.logger.info(
+        "Booking attempt: name=%r email=%r topic=%r has_message=%s",
+        bool(name), bool(email), bool(topic), bool(message),
+    )
+
     if not name or not email or not topic:
+        current_app.logger.warning("Booking validation failed — missing fields")
         return jsonify({"ok": False, "error": "Please fill in all required fields."}), 400
 
     from app.email_utils import send_email
@@ -201,15 +210,21 @@ def book_session():
     </div>
     """
 
-    ok = send_email(
-        to=BOOKING_RECIPIENT,
-        subject=f"Mentorship Booking: {name} — {topic}",
-        html=html,
-    )
+    try:
+        ok = send_email(
+            to=BOOKING_RECIPIENT,
+            subject=f"Mentorship Booking: {name} — {topic}",
+            html=html,
+        )
+    except Exception as e:
+        current_app.logger.exception("Booking email send raised exception: %s", e)
+        return jsonify({"ok": False, "error": "Email service is temporarily unavailable. Please try again or email directly."}), 500
 
     if ok:
+        current_app.logger.info("Booking email sent successfully")
         return jsonify({"ok": True})
     else:
+        current_app.logger.error("send_email returned False for booking from %s", email)
         return jsonify({"ok": False, "error": "Failed to send email. Please try again."}), 500
 
 
