@@ -104,8 +104,10 @@
   /* options */
   .options-list { display:flex;flex-direction:column;gap:9px; }
   .opt-btn      { display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;padding:12px 15px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:14px;line-height:1.5;cursor:pointer;transition:border-color .15s,background .15s; }
-  .opt-btn:hover:not(:disabled):not(.correct):not(.wrong):not(.reveal) { border-color:var(--border);background:#1e2530; }
+  .opt-btn:hover:not(:disabled):not(.correct):not(.wrong):not(.reveal):not(.selected) { border-color:var(--border);background:#1e2530; }
   .opt-letter   { flex-shrink:0;width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:1px;transition:all .15s; }
+  .opt-btn.selected             { border-color:var(--accent);background:var(--accent-bg); }
+  .opt-btn.selected .opt-letter { background:var(--accent);border-color:var(--accent);color:#0d1117; }
   .opt-btn.correct             { border-color:var(--green);background:var(--green-bg); }
   .opt-btn.correct .opt-letter { background:var(--green);border-color:var(--green);color:#0d1117; }
   .opt-btn.wrong               { border-color:var(--danger);background:var(--danger-bg); }

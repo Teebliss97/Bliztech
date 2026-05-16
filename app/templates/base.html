@@ -102,7 +102,7 @@
               <a href="{{ url_for('topics.list_topics') }}" class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">Topics</a>
               <a href="{{ url_for('main.course') }}" class="{% if request.endpoint == 'main.course' or request.endpoint == 'main.course_lessons' or request.endpoint == 'main.course_lesson' %}active{% endif %}">Course</a>
               {# Free-pivot: surface practice exam in main nav since it's now public #}
-              <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">Practice Exam</a>
+              <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">CompTIA Sec+ Practice</a>
               <a href="{{ url_for('jobs.job_board') }}" class="{% if request.endpoint == 'jobs.job_board' %}active{% endif %}">Jobs</a>
               <a href="{{ url_for('main.link_analyzer') }}" class="{% if request.endpoint == 'main.link_analyzer' %}active{% endif %}">Link Checker</a>
               <a href="{{ url_for('main.support') }}" class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>
@@ -168,7 +168,7 @@
               <a href="{{ url_for('topics.list_topics') }}" class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">Topics</a>
               <a href="{{ url_for('main.course') }}" class="{% if request.endpoint == 'main.course' or request.endpoint == 'main.course_lessons' or request.endpoint == 'main.course_lesson' %}active{% endif %}">Course</a>
               {# Free-pivot: surface practice exam in main mobile nav since it's now public #}
-              <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">Practice Exam</a>
+              <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">CompTIA Sec+ Practice</a>
               <a href="{{ url_for('jobs.job_board') }}" class="{% if request.endpoint == 'jobs.job_board' %}active{% endif %}">Jobs</a>
               <a href="{{ url_for('main.link_analyzer') }}" class="{% if request.endpoint == 'main.link_analyzer' %}active{% endif %}">Link Checker</a>
               <a href="{{ url_for('main.support') }}" class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>

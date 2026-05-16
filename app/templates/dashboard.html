@@ -77,7 +77,7 @@
     </div>
     <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
       {% if stats.course_done %}
-        <p class="muted" style="margin:0;">🎉 You've completed the course!</p>
+        <p class="muted" style="margin:0;">🎉 You've completed the awareness course!</p>
         <a class="btn" href="{{ url_for('cert.certificate_home') }}">🎓 Download Certificate</a>
         <a class="btn btn-outline" href="{{ url_for('topics.list_topics') }}">Review Topics</a>
       {% else %}
@@ -94,15 +94,15 @@
     </div>
   </div>
 
-  <!-- ===================== COURSE UPSELL — shown after completion ===================== -->
+  <!-- ===================== COURSE UNLOCK CELEBRATION — shown after completion ===================== -->
   {% if stats.course_done %}
   <div class="dash-upsell">
     <div class="dash-upsell-left">
-      <div class="dash-upsell-tag">What's next</div>
-      <h2 class="dash-upsell-title">Take your skills further</h2>
+      <div class="dash-upsell-tag">🔓 Unlocked</div>
+      <h2 class="dash-upsell-title">The advanced course is yours</h2>
       <p class="dash-upsell-sub">
-        You've completed the free course. The paid course picks up where this left off —
-        technical depth, hands-on labs, and a clear path into a cybersecurity career.
+        You've completed the awareness course — the full advanced course is now unlocked.
+        Technical depth, hands-on labs, and a clear path into a cybersecurity career.
       </p>
       <div class="dash-upsell-points">
         <div class="dup-point">20 structured lessons across 4 sections</div>
@@ -112,10 +112,10 @@
       </div>
     </div>
     <div class="dash-upsell-right">
-      <div class="dash-upsell-price">£11</div>
-      <div class="dash-upsell-price-sub">one-time · lifetime access</div>
-      <a class="btn dash-upsell-btn" href="{{ url_for('main.course') }}">View the course</a>
-      <div class="dash-upsell-note">Includes certificate of completion</div>
+      <div class="dash-upsell-price">Free</div>
+      <div class="dash-upsell-price-sub">Unlocked · lifetime access</div>
+      <a class="btn dash-upsell-btn" href="{{ url_for('main.course_lessons') }}">Start the course →</a>
+      <div class="dash-upsell-note">Certificate of completion included</div>
     </div>
   </div>
   {% endif %}

@@ -236,6 +236,24 @@
     }
   }
 
+  /* ── Free pivot: "Now free" tag + unlock note ── */
+  .course-promo-unlock {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+  .course-promo-unlock strong { color: var(--green); font-weight: 500; }
+
+  .hero-course-mini-unlock {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-3);
+    line-height: 1.55;
+  }
+  .hero-course-mini-unlock strong { color: var(--green); font-weight: 500; }
+
   /* ── Modal overlay ── */
   .book-overlay {
     display: none; position: fixed; inset: 0;
@@ -315,7 +333,7 @@
         <div class="hero-feature-item">No prior IT experience needed — start from zero</div>
         <div class="hero-feature-item">Pass each quiz to unlock the next topic</div>
         <div class="hero-feature-item">Earn a free certificate when you finish</div>
-        <div class="hero-feature-item">Paid course available for career starters</div>
+        <div class="hero-feature-item">Advanced 20-lesson course unlocks at the end — free</div>
       </div>
 
       <div class="hero-trust-row">
@@ -400,14 +418,17 @@
       </div>
 
       <div class="hero-course-mini">
-        <div class="hero-course-mini-tag">Paid Course</div>
+        <div class="hero-course-mini-tag">Advanced Course</div>
         <div class="hero-course-mini-title">Get Into Cybersecurity</div>
-        <div class="hero-course-mini-desc">20 lessons, 4 labs, certificate included. From zero to job-ready. £11 / ₦20,000 one-time, lifetime access.</div>
+        <div class="hero-course-mini-desc">20 lessons, 4 labs, certificate included. From zero to job-ready.</div>
         <div class="hero-course-mini-sections">
           <span class="hero-course-mini-sec"><span>A</span> Foundation</span>
           <span class="hero-course-mini-sec"><span>B</span> Technical Core</span>
           <span class="hero-course-mini-sec"><span>C</span> Defence &amp; Response</span>
           <span class="hero-course-mini-sec"><span>D</span> Career Launchpad</span>
+        </div>
+        <div class="hero-course-mini-unlock">
+          <strong>Free</strong> — unlocked when you complete the awareness course.
         </div>
         <a href="{{ url_for('main.course') }}" class="hero-course-mini-link">View course →</a>
       </div>
@@ -574,10 +595,10 @@
 <section class="course-promo">
   <div class="course-promo-inner">
     <div class="course-promo-left">
-      <div class="course-promo-tag">Paid Course</div>
+      <div class="course-promo-tag">Advanced Course</div>
       <h2 class="course-promo-title">Ready to go further?</h2>
       <p class="course-promo-sub">
-        The free course gives you awareness. The paid course gives you depth —
+        The awareness course gives you the basics. The advanced course gives you depth —
         technical foundations, hands-on labs, and everything you need to start
         a career in cybersecurity.
       </p>
@@ -598,8 +619,11 @@
           <div class="cps-item"><span class="cps-tag">D</span><span>Career Launchpad — job roles, tools, 90-day plan</span></div>
         </div>
         <div class="course-promo-cta">
-          <div class="course-promo-price">£11 / ₦20,000 <span>one-time</span></div>
-          <a class="btn" href="{{ url_for('main.course') }}">View the course</a>
+          <div class="course-promo-price">Free</div>
+          <div class="course-promo-unlock">
+            <strong>Unlocked</strong> by completing the awareness course
+          </div>
+          <a class="btn" href="{{ url_for('main.course') }}" style="margin-top:14px;">View the course</a>
         </div>
       </div>
     </div>
