@@ -15,6 +15,12 @@ from app.models import LessonRead, CourseAccess, CourseTopic
 from app.extensions import db, limiter
 from markupsafe import escape
 
+# ── NEW: central access helper ───────────────────────────────────────────────
+from app.utils.access import (
+    has_advanced_course_access,
+    awareness_progress,
+)
+
 main_bp = Blueprint("main", __name__)
 
 YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@Bliz_Tech"
@@ -359,35 +365,41 @@ def link_analyzer():
     return render_template('link_analyzer.html', result=result, url=url)
 
 
+# =============================================================================
+#  ADVANCED COURSE — "Get Into Cybersecurity"
+#  May 2026 free pivot: no longer paid. Unlocked by completing awareness course.
+# =============================================================================
+
 # -------------------------
-# PAID COURSE — landing page
+# ADVANCED COURSE — landing page
 # -------------------------
 @main_bp.route('/course')
 def course():
-    from app.models import CourseAccess
-    has_access = False
-    if current_user.is_authenticated:
-        has_access = current_user.is_admin or bool(
-            CourseAccess.query.filter_by(user_id=current_user.id).first()
-        )
-    return render_template('course.html', has_access=has_access)
+    """
+    Free pivot: this page used to show pricing. Now it shows:
+      - "Complete the free course to unlock" gate UI when not yet eligible
+      - "Start Learning" CTA when eligible (awareness complete or admin)
+    """
+    has_access = has_advanced_course_access(current_user)
+
+    # Pass awareness progress to template so it can render the gate UI nicely
+    progress = awareness_progress(current_user)
+
+    return render_template(
+        'course.html',
+        has_access=has_access,
+        awareness=progress,
+    )
 
 
 # -------------------------
-# PAID COURSE — lesson list
+# ADVANCED COURSE — lesson list
 # -------------------------
 @main_bp.route('/course/lessons')
 @login_required
 def course_lessons():
-    from app.models import CourseTopic, CourseAccess, User
-    fresh_user = User.query.get(current_user.id)
-    has_access = (
-        fresh_user.is_admin
-        or bool(fresh_user.has_course_access)
-        or bool(CourseAccess.query.filter_by(user_id=current_user.id).first())
-    )
-    if not has_access:
-        flash("You need to purchase the course to access lessons.", "error")
+    if not has_advanced_course_access(current_user):
+        flash("Complete the free awareness course to unlock the advanced course.", "error")
         return redirect(url_for("main.course"))
 
     topics = CourseTopic.query.order_by(CourseTopic.order).all()
@@ -409,20 +421,13 @@ def course_lessons():
 
 
 # -------------------------
-# PAID COURSE — single lesson
+# ADVANCED COURSE — single lesson
 # -------------------------
 @main_bp.route('/course/lessons/<slug>')
 @login_required
 def course_lesson(slug):
-    from app.models import CourseTopic, CourseAccess, User
-    fresh_user = User.query.get(current_user.id)
-    has_access = (
-        fresh_user.is_admin
-        or bool(fresh_user.has_course_access)
-        or bool(CourseAccess.query.filter_by(user_id=current_user.id).first())
-    )
-    if not has_access:
-        flash("You need to purchase the course to access lessons.", "error")
+    if not has_advanced_course_access(current_user):
+        flash("Complete the free awareness course to unlock the advanced course.", "error")
         return redirect(url_for("main.course"))
 
     topic = CourseTopic.query.filter_by(slug=slug).first_or_404()
@@ -436,7 +441,7 @@ def course_lesson(slug):
 
 
 # -------------------------
-# PAID COURSE — thank you page
+# ADVANCED COURSE — thank you page
 # -------------------------
 @main_bp.route('/course/thankyou')
 def course_thankyou():
@@ -444,18 +449,22 @@ def course_thankyou():
 
 
 # -------------------------
-# PAID COURSE — check access (AJAX polling from thank you page)
+# ADVANCED COURSE — check access (kept for backwards compatibility)
 # -------------------------
 @main_bp.route('/course/check-access')
 @login_required
 def course_check_access():
-    from app.models import CourseAccess
-    has_access = current_user.is_admin or bool(
-        CourseAccess.query.filter_by(user_id=current_user.id).first()
-    )
-    return jsonify({"has_access": has_access})
+    """
+    Used by the old thank-you page polling.
+    Still works under the new rules — just returns True when the user
+    has completed the awareness course (or is admin).
+    """
+    return jsonify({"has_access": has_advanced_course_access(current_user)})
 
 
+# -------------------------
+# ADVANCED COURSE — mark lesson read
+# -------------------------
 @main_bp.route("/course/lessons/<slug>/mark-read", methods=["POST"])
 @login_required
 def mark_lesson_read(slug):
@@ -463,8 +472,7 @@ def mark_lesson_read(slug):
     if not topic:
         return jsonify({"ok": False, "error": "lesson not found"}), 404
 
-    has_access = current_user.is_admin or CourseAccess.query.filter_by(user_id=current_user.id).first()
-    if not has_access:
+    if not has_advanced_course_access(current_user):
         return jsonify({"ok": False, "error": "no access"}), 403
 
     existing = LessonRead.query.filter_by(user_id=current_user.id, slug=slug).first()

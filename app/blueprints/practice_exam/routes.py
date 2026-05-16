@@ -2,11 +2,13 @@
 BlizTech Academy — CompTIA Security+ Practice Exam Blueprint
 app/blueprints/practice_exam/routes.py
 
-Two full 90-question practice exams, both gated behind:
-  1. Course access  (CourseAccess table — same check as course_lesson route)
-  2. Valid, non-revoked BlizTech certificate (Certificate table)
+May 2026 free pivot:
+  - Practice exam is PUBLIC to attempt (no login, no course access required).
+  - Login REQUIRED to submit and save results to user history.
+  - Anonymous users can still see their score on the result screen,
+    but cannot save it or view history.
 
-Admins bypass the certificate check for testing.
+Two full 90-question practice exams.
 
 Register in app/__init__.py inside create_app():
     from app.blueprints.practice_exam.routes import practice_exam_bp
@@ -14,63 +16,14 @@ Register in app/__init__.py inside create_app():
 """
 
 from datetime import datetime
-from functools import wraps
 
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from app.extensions import db
-from app.models import CourseAccess, Certificate, User
+from app.models import ExamAttempt
 
 practice_exam_bp = Blueprint("practice_exam", __name__, url_prefix="/practice-exam")
-
-
-# ── Access helpers ────────────────────────────────────────────────────────────
-
-def _has_course_access() -> bool:
-    fresh = User.query.get(current_user.id)
-    return (
-        fresh.is_admin
-        or bool(fresh.has_course_access)
-        or bool(CourseAccess.query.filter_by(user_id=current_user.id).first())
-    )
-
-
-def _has_certificate() -> bool:
-    fresh = User.query.get(current_user.id)
-    if fresh.is_admin:
-        return True
-    return bool(
-        Certificate.query
-        .filter_by(user_id=current_user.id, revoked=False)
-        .first()
-    )
-
-
-# ── Decorators ────────────────────────────────────────────────────────────────
-
-def course_access_required(f):
-    @wraps(f)
-    @login_required
-    def decorated(*args, **kwargs):
-        if not _has_course_access():
-            flash("You need to purchase the course to access this resource.", "error")
-            return redirect(url_for("main.course"))
-        return f(*args, **kwargs)
-    return decorated
-
-
-def certificate_required(f):
-    @wraps(f)
-    @login_required
-    def decorated(*args, **kwargs):
-        if not _has_course_access():
-            flash("You need to purchase the course to access this resource.", "error")
-            return redirect(url_for("main.course"))
-        if not _has_certificate():
-            return render_template("practice_exam_locked.html"), 403
-        return f(*args, **kwargs)
-    return decorated
 
 
 # ── Domain metadata ───────────────────────────────────────────────────────────
@@ -1174,12 +1127,18 @@ def _strip_answers(questions: list) -> list:
     ]
 
 
-# ── Routes ────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  Routes — May 2026 pivot: PUBLIC to attempt, login required to save results
+# ══════════════════════════════════════════════════════════════════════════════
 
 @practice_exam_bp.route("/")
-@certificate_required
 def index():
-    """Practice exam landing page — choose between Set 1 and Set 2."""
+    """
+    Practice exam landing page — PUBLIC.
+    Anyone can land here and start the exam. The template should check
+    `current_user.is_authenticated` to decide whether to show "Sign in to save
+    your results" prompts.
+    """
     return render_template(
         "practice_exam.html",
         domain_meta=DOMAIN_META,
@@ -1188,9 +1147,8 @@ def index():
 
 
 @practice_exam_bp.route("/questions")
-@certificate_required
 def get_questions_set1():
-    """JSON endpoint — Practice Exam Set 1 (90 questions), answers stripped."""
+    """JSON endpoint — Practice Exam Set 1 (90 questions), answers stripped. PUBLIC."""
     return jsonify({
         "questions":     _strip_answers(QUESTIONS_SET1),
         "domain_meta":   DOMAIN_META,
@@ -1202,9 +1160,8 @@ def get_questions_set1():
 
 
 @practice_exam_bp.route("/questions/set2")
-@certificate_required
 def get_questions_set2():
-    """JSON endpoint — Practice Exam Set 2 (90 questions), answers stripped."""
+    """JSON endpoint — Practice Exam Set 2 (90 questions), answers stripped. PUBLIC."""
     return jsonify({
         "questions":     _strip_answers(QUESTIONS_SET2),
         "domain_meta":   DOMAIN_META,
@@ -1215,13 +1172,47 @@ def get_questions_set2():
     })
 
 
+@practice_exam_bp.route("/grade", methods=["POST"])
+def grade_attempt():
+    """
+    PUBLIC grading endpoint. Returns the score WITHOUT saving to DB.
+    Anonymous users hit this — they see their score but cannot save history.
+
+    POST body: { "answers": {"0": 2, "1": 1, ...}, "elapsed_seconds": 3720, "set": 1 }
+    Returns: { correct, total, score_pct, passed, set, saved: false, login_required: true|false }
+    """
+    data     = request.get_json(silent=True) or {}
+    answers  = data.get("answers", {})
+    exam_set = int(data.get("set", 1))
+
+    questions = QUESTIONS_SET1 if exam_set == 1 else QUESTIONS_SET2
+
+    correct = sum(
+        1 for i, q in enumerate(questions)
+        if answers.get(str(i)) == q["ans"]
+    )
+    score_pct = round((correct / len(questions)) * 100)
+    passed    = score_pct >= 75
+
+    return jsonify({
+        "correct":        correct,
+        "total":          len(questions),
+        "score_pct":      score_pct,
+        "passed":         passed,
+        "set":            exam_set,
+        "saved":          False,
+        "login_required": not current_user.is_authenticated,
+    })
+
+
 @practice_exam_bp.route("/submit", methods=["POST"])
-@certificate_required
+@login_required
 def submit_attempt():
     """
-    Records a completed exam attempt.
+    LOGGED-IN-ONLY endpoint. Grades the attempt AND saves it to ExamAttempt.
+
     POST body: { "answers": {"0": 2, "1": 1, ...}, "elapsed_seconds": 3720, "set": 1 }
-    Answers are validated server-side against the full question set.
+    Returns: { correct, total, score_pct, passed, set, saved: true, attempt_id }
     """
     data     = request.get_json(silent=True) or {}
     answers  = data.get("answers", {})
@@ -1237,10 +1228,105 @@ def submit_attempt():
     score_pct = round((correct / len(questions)) * 100)
     passed    = score_pct >= 75
 
+    # Save to user history
+    attempt = ExamAttempt(
+        user_id=current_user.id,
+        exam_set=f"security_plus_set{exam_set}",
+        score_pct=score_pct,
+        correct=correct,
+        total=len(questions),
+        passed=passed,
+        elapsed_secs=elapsed,
+        completed_at=datetime.utcnow(),
+    )
+    db.session.add(attempt)
+    db.session.commit()
+
     return jsonify({
-        "correct":   correct,
-        "total":     len(questions),
-        "score_pct": score_pct,
-        "passed":    passed,
-        "set":       exam_set,
+        "correct":    correct,
+        "total":      len(questions),
+        "score_pct":  score_pct,
+        "passed":     passed,
+        "set":        exam_set,
+        "saved":      True,
+        "attempt_id": attempt.id,
     })
+
+
+@practice_exam_bp.route("/review", methods=["POST"])
+def review_attempt():
+    """
+    PUBLIC review endpoint — returns each question with the correct answer
+    and explanation, plus the user's submitted answer marked correct/wrong.
+
+    Called by the frontend AFTER /grade or /submit, only on the results screen,
+    so live exam-takers never see answers. We intentionally do not log or
+    save anything from this endpoint — it's read-only.
+
+    POST body: { "answers": {"0": 2, "1": 1, ...}, "set": 1 }
+    Returns: {
+      "set": 1,
+      "items": [
+        {
+          "idx": 0,
+          "domain": 1,
+          "domain_name": "General Security Concepts",
+          "text": "...",
+          "opts": ["...", "...", "...", "..."],
+          "correct_idx": 1,
+          "chosen_idx": 2,           // null if unanswered
+          "is_correct": false,
+          "explanation": "..."
+        },
+        ...
+      ]
+    }
+    """
+    data     = request.get_json(silent=True) or {}
+    answers  = data.get("answers", {})
+    exam_set = int(data.get("set", 1))
+
+    questions = QUESTIONS_SET1 if exam_set == 1 else QUESTIONS_SET2
+
+    items = []
+    for i, q in enumerate(questions):
+        chosen_raw = answers.get(str(i))
+        try:
+            chosen = int(chosen_raw) if chosen_raw is not None else None
+        except (TypeError, ValueError):
+            chosen = None
+
+        domain_id = q.get("d")
+        items.append({
+            "idx":          i,
+            "domain":       domain_id,
+            "domain_name":  DOMAIN_META.get(domain_id, {}).get("name", ""),
+            "text":         q["text"],
+            "opts":         q["opts"],
+            "correct_idx":  q["ans"],
+            "chosen_idx":   chosen,
+            "is_correct":   (chosen == q["ans"]),
+            "explanation":  q.get("exp", ""),
+        })
+
+    return jsonify({
+        "set":   exam_set,
+        "total": len(questions),
+        "items": items,
+    })
+
+
+@practice_exam_bp.route("/history")
+@login_required
+def history():
+    """
+    LOGGED-IN-ONLY: view your past exam attempts.
+    """
+    attempts = (
+        ExamAttempt.query
+        .filter_by(user_id=current_user.id)
+        .order_by(ExamAttempt.completed_at.desc())
+        .limit(50)
+        .all()
+    )
+    return render_template("practice_exam_history.html", attempts=attempts)

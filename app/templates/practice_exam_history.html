@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}Practice Exam History — BlizTech Academy{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2330;
+    --border:    #30363d;
+    --border2:   #21262d;
+    --accent:    #00D97E;
+    --accent-bg: rgba(0,217,126,0.08);
+    --text:      #e6edf3;
+    --text-muted:#8b949e;
+    --text-dim:  #6e7681;
+    --danger:    #f85149;
+    --danger-bg: rgba(248,81,73,0.10);
+    --green:     #3fb950;
+    --green-bg:  rgba(63,185,80,0.08);
+    --font-head: 'Space Grotesk', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+  body { background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh; }
+
+  .hist-shell { max-width:860px;margin:0 auto;padding:2rem 1.25rem 5rem; }
+
+  .hist-hero  { text-align:center;padding:1.75rem 0 1.5rem; }
+  .hist-badge { display:inline-block;font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(0,217,126,.3);background:var(--accent-bg);padding:4px 14px;border-radius:20px;margin-bottom:1.25rem; }
+  .hist-title { font-family:var(--font-head);font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem;letter-spacing:-.02em; }
+  .hist-sub   { color:var(--text-muted);font-size:14px;max-width:480px;margin:0 auto; }
+
+  /* summary stats */
+  .summary-row { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:1.5rem 0; }
+  .summary-tile { background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:13px 10px;text-align:center; }
+  .summary-val { font-family:var(--font-head);font-size:1.55rem;font-weight:700;color:var(--text); }
+  .summary-val.accent { color:var(--accent); }
+  .summary-lbl { font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.07em;margin-top:3px; }
+
+  /* attempts list */
+  .attempts-section { background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-top:1.5rem; }
+  .attempts-title { font-family:var(--font-head);font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:1rem; }
+
+  .attempt-row {
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 0;border-bottom:1px solid var(--border2);flex-wrap:wrap;
+  }
+  .attempt-row:last-child { border-bottom:none; }
+
+  .attempt-meta { display:flex;flex-direction:column;gap:3px;min-width:0;flex:1; }
+  .attempt-set  { font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--text); }
+  .attempt-date { font-family:var(--font-mono);font-size:12px;color:var(--text-dim); }
+
+  .attempt-score-block { display:flex;align-items:center;gap:14px;flex-wrap:wrap; }
+  .attempt-stat { font-family:var(--font-mono);font-size:12px;color:var(--text-muted); }
+  .attempt-stat strong { color:var(--text);font-weight:500; }
+
+  .attempt-score { font-family:var(--font-head);font-size:1.4rem;font-weight:700;line-height:1;min-width:64px;text-align:right; }
+  .attempt-score.pass { color:var(--accent); }
+  .attempt-score.fail { color:var(--danger); }
+
+  .attempt-verdict {
+    display:inline-block;font-family:var(--font-mono);font-size:10.5px;font-weight:500;
+    letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;
+  }
+  .attempt-verdict.pass { color:var(--accent);background:var(--accent-bg);border:1px solid rgba(0,217,126,.25); }
+  .attempt-verdict.fail { color:var(--danger);background:var(--danger-bg);border:1px solid rgba(248,81,73,.25); }
+
+  /* empty state */
+  .empty-state { text-align:center;padding:3rem 1rem; }
+  .empty-icon  { font-size:2.5rem;margin-bottom:1rem;opacity:.6; }
+  .empty-title { font-family:var(--font-head);font-size:1.25rem;font-weight:600;margin-bottom:.5rem;color:var(--text); }
+  .empty-sub   { color:var(--text-muted);font-size:13px;margin-bottom:1.5rem; }
+
+  /* buttons */
+  .btn { display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:var(--radius);font-family:var(--font-head);font-size:14px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:opacity .15s,transform .1s; }
+  .btn:active        { transform:scale(.98); }
+  .btn-accent        { background:var(--accent);color:#0d1117; }
+  .btn-accent:hover  { opacity:.88; }
+  .btn-outline       { background:transparent;color:var(--text);border:1px solid var(--border); }
+  .btn-outline:hover { background:var(--surface2); }
+
+  .actions-row { display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:1.75rem; }
+
+  @media(max-width:600px){
+    .hist-title { font-size:1.6rem; }
+    .summary-row { grid-template-columns:repeat(2,1fr); }
+    .attempt-row { gap:8px; }
+    .attempt-score { font-size:1.2rem;min-width:auto; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hist-shell">
+
+  <div class="hist-hero">
+    <div class="hist-badge">Your history</div>
+    <h1 class="hist-title">Practice exam attempts</h1>
+    <p class="hist-sub">All your past Security+ practice exams, newest first.</p>
+  </div>
+
+  {% if attempts %}
+    {# Compute summary stats inline #}
+    {% set total_attempts = attempts|length %}
+    {% set passes = attempts|selectattr('passed')|list|length %}
+    {% set best_score = attempts|map(attribute='score_pct')|max %}
+    {% set avg_score = (attempts|map(attribute='score_pct')|sum) // total_attempts %}
+
+    <div class="summary-row">
+      <div class="summary-tile">
+        <div class="summary-val">{{ total_attempts }}</div>
+        <div class="summary-lbl">Attempts</div>
+      </div>
+      <div class="summary-tile">
+        <div class="summary-val accent">{{ best_score }}%</div>
+        <div class="summary-lbl">Best score</div>
+      </div>
+      <div class="summary-tile">
+        <div class="summary-val">{{ avg_score }}%</div>
+        <div class="summary-lbl">Average</div>
+      </div>
+      <div class="summary-tile">
+        <div class="summary-val">{{ passes }}</div>
+        <div class="summary-lbl">Passes</div>
+      </div>
+    </div>
+
+    <div class="attempts-section">
+      <div class="attempts-title">All attempts</div>
+
+      {% for a in attempts %}
+        <div class="attempt-row">
+          <div class="attempt-meta">
+            <div class="attempt-set">
+              {% if a.exam_set and 'set2' in a.exam_set %}Practice Exam — Set 2{% else %}Practice Exam — Set 1{% endif %}
+            </div>
+            <div class="attempt-date">
+              {{ a.completed_at.strftime('%d %b %Y · %H:%M') if a.completed_at else '—' }}
+            </div>
+          </div>
+
+          <div class="attempt-score-block">
+            <div class="attempt-stat">
+              <strong>{{ a.correct }}</strong> / {{ a.total }}
+            </div>
+            {% set mins = (a.elapsed_secs // 60) if a.elapsed_secs else 0 %}
+            {% set secs = (a.elapsed_secs % 60) if a.elapsed_secs else 0 %}
+            <div class="attempt-stat">
+              <strong>{{ '%02d:%02d'|format(mins, secs) }}</strong>
+            </div>
+            <span class="attempt-verdict {% if a.passed %}pass{% else %}fail{% endif %}">
+              {% if a.passed %}Pass{% else %}Fail{% endif %}
+            </span>
+            <div class="attempt-score {% if a.passed %}pass{% else %}fail{% endif %}">
+              {{ a.score_pct }}%
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="actions-row">
+      <a href="{{ url_for('practice_exam.index') }}" class="btn btn-accent">Retake an exam</a>
+      <a href="{{ url_for('main.course_lessons') }}" class="btn btn-outline">Back to lessons</a>
+    </div>
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No attempts yet</div>
+      <div class="empty-sub">Take a practice exam to see your results here.</div>
+      <a href="{{ url_for('practice_exam.index') }}" class="btn btn-accent">Start practice exam</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -86,8 +86,8 @@ def create_app():
         app.config["SESSION_COOKIE_SECURE"] = True
 
     # ── WTF / CSRF config ────────────────────────────────────
-    app.config["WTF_CSRF_TIME_LIMIT"] = 3600  # 1 hour token expiry
-    app.config["WTF_CSRF_SSL_STRICT"] = False  # allow same-site non-HTTPS in dev
+    app.config["WTF_CSRF_TIME_LIMIT"] = 3600
+    app.config["WTF_CSRF_SSL_STRICT"] = False
 
     CANONICAL_HOST = os.getenv("CANONICAL_HOST", "bliztechacademy.com")
 
@@ -117,40 +117,72 @@ def create_app():
     HSTS_PRELOAD = os.getenv("HSTS_PRELOAD", "0") == "1"
     CSP_REPORT_ONLY = os.getenv("CSP_REPORT_ONLY", "1") == "1"
 
-    def _build_csp() -> str:
+    # ──────────────────────────────────────────────────────────────────────────
+    # CSP — Free Pivot Cleanup
+    # ──────────────────────────────────────────────────────────────────────────
+    # The course is now free; Paystack is not in the active payment flow.
+    # We build TWO CSP variants:
+    #   - Default CSP: NO Paystack (clean, tight) — applied to ALL pages
+    #   - Pay CSP: Includes Paystack — applied ONLY on /pay/* routes
+    #     AND only when ENABLE_PAYSTACK_CSP=1 (off by default in free mode)
+    #
+    # Paystack code is intentionally preserved. To re-enable paid payments:
+    #   1. Set env var ENABLE_PAYSTACK_CSP=1
+    #   2. Re-link the /pay/choose page from your UI
+    ENABLE_PAYSTACK_CSP = os.getenv("ENABLE_PAYSTACK_CSP", "0") == "1"
+
+    def _build_csp(include_paystack: bool = False) -> str:
         directives = {
             "default-src": ["'self'"],
             "base-uri": ["'self'"],
             "object-src": ["'none'"],
             "frame-ancestors": ["'none'"],
-            "frame-src": ["https://js.paystack.co", "https://checkout.paystack.com"],
-            "form-action": ["'self'", "https://js.paystack.co", "https://checkout.paystack.com"],
-            "img-src": ["'self'", "data:", "https://www.google-analytics.com", "https://checkout.paystack.com"],
+            "frame-src": [],
+            "form-action": ["'self'"],
+            "img-src": ["'self'", "data:", "https://www.google-analytics.com"],
             "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
-            "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://checkout.paystack.com"],
+            "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             "script-src": [
                 "'self'",
                 "'unsafe-inline'",
                 "https://www.googletagmanager.com",
                 "https://www.google-analytics.com",
-                "https://js.paystack.co",
-                "https://checkout.paystack.com",
             ],
             "connect-src": [
                 "'self'",
                 "https://www.google-analytics.com",
                 "https://analytics.google.com",
-                "https://api.paystack.co",
-                "https://checkout.paystack.com",
             ],
             "upgrade-insecure-requests": [],
         }
+
+        if include_paystack:
+            directives["frame-src"].extend([
+                "https://js.paystack.co",
+                "https://checkout.paystack.com",
+            ])
+            directives["form-action"].extend([
+                "https://js.paystack.co",
+                "https://checkout.paystack.com",
+            ])
+            directives["img-src"].append("https://checkout.paystack.com")
+            directives["style-src"].append("https://checkout.paystack.com")
+            directives["script-src"].extend([
+                "https://js.paystack.co",
+                "https://checkout.paystack.com",
+            ])
+            directives["connect-src"].extend([
+                "https://api.paystack.co",
+                "https://checkout.paystack.com",
+            ])
+
         parts = []
         for k, v in directives.items():
             parts.append(f"{k} {' '.join(v)}" if v else f"{k}")
         return "; ".join(parts)
 
-    CSP_VALUE = _build_csp()
+    CSP_DEFAULT = _build_csp(include_paystack=False)
+    CSP_WITH_PAYSTACK = _build_csp(include_paystack=True)
 
     @app.after_request
     def set_security_headers(resp: Response):
@@ -159,10 +191,15 @@ def create_app():
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
-        if request.path.startswith("/pay/"):
+
+        is_payment_path = request.path.startswith("/pay/")
+        if is_payment_path:
             resp.headers["Cross-Origin-Opener-Policy"] = "unsafe-none"
+            csp_value = CSP_WITH_PAYSTACK if ENABLE_PAYSTACK_CSP else CSP_DEFAULT
         else:
             resp.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+            csp_value = CSP_DEFAULT
+
         resp.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
         resp.headers.setdefault("X-Frame-Options", "DENY")
         if HSTS_ENABLED:
@@ -171,9 +208,9 @@ def create_app():
                 hsts += "; preload"
             resp.headers.setdefault("Strict-Transport-Security", hsts)
         if CSP_REPORT_ONLY:
-            resp.headers.setdefault("Content-Security-Policy-Report-Only", CSP_VALUE)
+            resp.headers.setdefault("Content-Security-Policy-Report-Only", csp_value)
         else:
-            resp.headers.setdefault("Content-Security-Policy", CSP_VALUE)
+            resp.headers.setdefault("Content-Security-Policy", csp_value)
         return resp
 
     db.init_app(app)
@@ -282,7 +319,7 @@ def create_app():
     app.register_blueprint(cert_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(quiz_bp)
-    app.register_blueprint(paystack_bp)
+    app.register_blueprint(paystack_bp)  # kept registered but no longer linked from UI
     app.register_blueprint(jobs_bp)
     app.register_blueprint(practice_exam_bp)
 

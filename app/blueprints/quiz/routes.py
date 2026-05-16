@@ -3,7 +3,10 @@ from flask_login import login_required, current_user
 from datetime import datetime
 
 from app.extensions import db
-from app.models import CourseAccess, LessonRead, QuizAttempt
+from app.models import LessonRead, QuizAttempt
+
+# ── NEW: use central access helper instead of CourseAccess check ─────────────
+from app.utils.access import has_advanced_course_access
 
 quiz_bp = Blueprint("quiz", __name__, url_prefix="/course/quiz")
 
@@ -1019,10 +1022,6 @@ QUESTIONS = [
 ]
 
 
-def _has_course_access(user):
-    return user.is_admin or CourseAccess.query.filter_by(user_id=user.id).first() is not None
-
-
 def _lessons_read_count(user_id):
     return LessonRead.query.filter_by(user_id=user_id).count()
 
@@ -1036,9 +1035,10 @@ def _best_pass(user_id):
 @quiz_bp.route("/")
 @login_required
 def quiz_home():
-    if not _has_course_access(current_user):
-        flash("You need course access to take the quiz.", "error")
-        return redirect(url_for("main.home"))
+    # ── CHANGED: use awareness-based access instead of CourseAccess ──────────
+    if not has_advanced_course_access(current_user):
+        flash("Complete the free awareness course to unlock the advanced course and final quiz.", "error")
+        return redirect(url_for("main.course"))
 
     read_count = _lessons_read_count(current_user.id)
     all_read = read_count >= TOTAL_LESSONS
@@ -1063,9 +1063,10 @@ def quiz_home():
 @quiz_bp.route("/submit", methods=["POST"])
 @login_required
 def quiz_submit():
-    if not _has_course_access(current_user):
-        flash("You need course access to submit the quiz.", "error")
-        return redirect(url_for("main.home"))
+    # ── CHANGED: use awareness-based access ──────────────────────────────────
+    if not has_advanced_course_access(current_user):
+        flash("Complete the free awareness course to unlock the advanced course and final quiz.", "error")
+        return redirect(url_for("main.course"))
 
     read_count = _lessons_read_count(current_user.id)
     if read_count < TOTAL_LESSONS:

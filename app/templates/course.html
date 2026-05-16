@@ -1,655 +1,532 @@
 {% extends "base.html" %}
-{% block title %}Get Into Cybersecurity — BlizTech{% endblock %}
 
-{% block head %}
-<meta property="og:title" content="Get Into Cybersecurity — BlizTech Academy">
-<meta property="og:description" content="20 structured lessons, 4 labs, certificate included. From zero to job-ready. £11 one-time, lifetime access.">
-<meta property="og:image" content="{{ url_for('static', filename='img/og-course.png', _external=True) }}">
-<meta property="og:url" content="{{ request.base_url }}">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Get Into Cybersecurity — BlizTech Academy">
-<meta name="twitter:description" content="20 structured lessons, 4 labs, certificate included. £11 one-time, lifetime access.">
-<meta name="twitter:image" content="{{ url_for('static', filename='img/og-course.png', _external=True) }}">
-{% endblock %}
+{% block title %}Get Into Cybersecurity — Advanced Course | BlizTech Academy{% endblock %}
+
+{% block meta_description %}A complete 20-lesson advanced cybersecurity course covering foundation, technical core, defence & response, and career launchpad. Now 100% free — unlock by completing the free awareness course.{% endblock %}
 
 {% block content %}
+<section class="course-landing">
+  <div class="course-landing__container">
 
-<!-- ===== HERO ===== -->
-<section class="course-hero">
-  <div class="course-hero-inner">
-    <div class="course-hero-left">
-      <div class="course-tag">Paid Course</div>
-      <h1 class="course-title">Get Into<br><span class="course-title-accent">Cybersecurity</span></h1>
-      <p class="course-subtitle">
-        20 structured lessons across four sections — from core concepts to career readiness.
-        Built for people who want to understand cybersecurity properly, not just pass a quiz.
+    {# ─────────────────────────────────────────────────────────────────── #}
+    {#  HERO                                                                #}
+    {# ─────────────────────────────────────────────────────────────────── #}
+    <div class="course-hero">
+      <div class="course-hero__badge">Advanced Course</div>
+      <h1 class="course-hero__title">Get Into Cybersecurity</h1>
+      <p class="course-hero__subtitle">
+        A complete 20-lesson roadmap from foundation to your first cybersecurity role.
+        Four sections. Real labs. No fluff.
       </p>
 
-      <div class="course-meta-row">
-        <div class="course-meta-item">
-          <span class="course-meta-num">20</span>
-          <span class="course-meta-label">Lessons</span>
-        </div>
-        <div class="course-meta-div"></div>
-        <div class="course-meta-item">
-          <span class="course-meta-num">4</span>
-          <span class="course-meta-label">Sections</span>
-        </div>
-        <div class="course-meta-div"></div>
-        <div class="course-meta-item">
-          <span class="course-meta-num">Lifetime</span>
-          <span class="course-meta-label">Access</span>
-        </div>
-        <div class="course-meta-div"></div>
-        <div class="course-meta-item">
-          <span class="course-meta-num">Labs</span>
-          <span class="course-meta-label">Included</span>
-        </div>
-      </div>
-
-      <div class="course-cta-row">
-        {% if has_access %}
-        <a href="{{ url_for('main.course_lessons') }}" class="btn course-btn-primary">Go to my lessons →</a>
-        <span class="course-one-time">You have full access · Lifetime</span>
-        {% else %}
-        <a href="{{ url_for('paystack.pay_choose') }}" class="btn course-btn-primary">Enrol for £11 / ₦20,000</a>
-        <span class="course-one-time">One-time payment · Lifetime access</span>
-        {% endif %}
+      {# Free-pivot announcement #}
+      <div class="course-hero__free-banner">
+        <span class="course-hero__free-icon">🎉</span>
+        <span>This course is now <strong>100% FREE</strong> for everyone who completes the awareness course.</span>
       </div>
     </div>
 
-    <div class="course-hero-right">
-      <div class="course-card-preview">
-        <div class="ccp-header">
-          <span class="ccp-tag">What you will learn</span>
-        </div>
-        <div class="ccp-list">
-          <div class="ccp-item">How the internet and networks actually work</div>
-          <div class="ccp-item">How attackers think and operate</div>
-          <div class="ccp-item">How to investigate phishing emails</div>
-          <div class="ccp-item">How to read logs and respond to incidents</div>
-          <div class="ccp-item">Linux and Windows security fundamentals</div>
-          <div class="ccp-item">Cloud security and data protection</div>
-          <div class="ccp-item">What cybersecurity jobs actually involve</div>
-          <div class="ccp-item">How to start your career in the field</div>
-        </div>
-        <div class="ccp-footer">
-          <span class="ccp-cert">Includes certificate of completion</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    {# ─────────────────────────────────────────────────────────────────── #}
+    {#  ACCESS STATE — three possible UI states                             #}
+    {# ─────────────────────────────────────────────────────────────────── #}
 
-<!-- ===== FOR WHO ===== -->
-<section class="course-section course-for">
-  <div class="page-wrap">
-    <div class="cs-label">Who this is for</div>
-    <div class="course-for-grid">
-      <div class="course-for-item">
-        <div class="cfi-title">You completed the free course</div>
-        <div class="cfi-text">You know the basics. This takes you significantly further — into technical depth, real tools, and career-relevant skills.</div>
+    {% if has_access %}
+      {# ── STATE 1: User has access — show "Start Learning" ──────────── #}
+      <div class="course-access course-access--unlocked">
+        <div class="course-access__icon">✓</div>
+        <h2 class="course-access__title">You've unlocked the advanced course</h2>
+        <p class="course-access__text">
+          Jump straight into the 20 lessons. Your progress is saved as you go.
+        </p>
+        <a href="{{ url_for('main.course_lessons') }}" class="btn btn--primary btn--lg">
+          Start Learning →
+        </a>
       </div>
-      <div class="course-for-item">
-        <div class="cfi-title">You want to work in cybersecurity</div>
-        <div class="cfi-text">This course gives you the foundation every entry-level role expects — without the noise of certification prep materials.</div>
-      </div>
-      <div class="course-for-item">
-        <div class="cfi-title">You want practical knowledge</div>
-        <div class="cfi-text">Every section includes a hands-on lab. You will run real commands, use real tools, and produce real outputs.</div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ===== CURRICULUM ===== -->
-<section class="course-section course-curriculum">
-  <div class="page-wrap">
-    <div class="cs-label">Curriculum</div>
-    <h2 class="cs-title">Four sections. Twenty lessons.</h2>
-
-    <div class="curriculum-grid">
-
-      <!-- Section A -->
-      <div class="curriculum-section">
-        <div class="curriculum-section-head">
-          <span class="curr-section-tag">Section A</span>
-          <span class="curr-section-name">Foundation</span>
-        </div>
-        <div class="curriculum-lessons">
-          <div class="curr-lesson">
-            <span class="curr-num">01</span>
-            <div>
-              <div class="curr-title">Introduction to modern cybersecurity</div>
-              <div class="curr-sub">The threat landscape, why it matters, who the attackers are</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">02</span>
-            <div>
-              <div class="curr-title">Types of threats and attackers</div>
-              <div class="curr-sub">Nation states, cybercriminals, insiders, and opportunists</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">03</span>
-            <div>
-              <div class="curr-title">CIA triad and security principles</div>
-              <div class="curr-sub">Confidentiality, integrity, availability — and why they conflict</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">04</span>
-            <div>
-              <div class="curr-title">Risk, vulnerabilities, and attack surface</div>
-              <div class="curr-sub">How risk is measured and where organisations are exposed</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">05</span>
-            <div>
-              <div class="curr-title">Defence in depth</div>
-              <div class="curr-sub">Layered security — why no single control is enough</div>
-            </div>
-          </div>
-          <div class="curr-lab">
-            <span class="curr-lab-tag">Lab</span>
-            Map your own attack surface — devices, accounts, and exposure points
-          </div>
+    {% elif not current_user.is_authenticated %}
+      {# ── STATE 2: Anonymous — encourage sign-up + free course ────── #}
+      <div class="course-access course-access--locked">
+        <div class="course-access__icon">🔒</div>
+        <h2 class="course-access__title">Sign in to get started</h2>
+        <p class="course-access__text">
+          Create a free account, complete the awareness course, then unlock the
+          full advanced course at no cost.
+        </p>
+        <div class="course-access__actions">
+          <a href="{{ url_for('auth.register') }}" class="btn btn--primary btn--lg">
+            Create Free Account
+          </a>
+          <a href="{{ url_for('topics.list_topics') }}" class="btn btn--secondary btn--lg">
+            Preview Free Course
+          </a>
         </div>
       </div>
 
-      <!-- Section B -->
-      <div class="curriculum-section">
-        <div class="curriculum-section-head">
-          <span class="curr-section-tag">Section B</span>
-          <span class="curr-section-name">Technical Core</span>
-        </div>
-        <div class="curriculum-lessons">
-          <div class="curr-lesson">
-            <span class="curr-num">06</span>
-            <div>
-              <div class="curr-title">Networking fundamentals for cyber</div>
-              <div class="curr-sub">How data moves — packets, switches, routers, firewalls</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">07</span>
-            <div>
-              <div class="curr-title">IP addresses, ports, and protocols</div>
-              <div class="curr-sub">TCP/IP, UDP, common ports and what runs on them</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">08</span>
-            <div>
-              <div class="curr-title">DNS, domains, and web traffic</div>
-              <div class="curr-sub">How a URL becomes a page — and where attacks happen</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">09</span>
-            <div>
-              <div class="curr-title">Windows and Linux basics</div>
-              <div class="curr-sub">File systems, terminal commands, and OS security</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">10</span>
-            <div>
-              <div class="curr-title">Users, permissions, and access control</div>
-              <div class="curr-sub">Least privilege, admin rights, and why it matters</div>
-            </div>
-          </div>
-          <div class="curr-lab">
-            <span class="curr-lab-tag">Lab</span>
-            Run network commands — traceroute, nslookup, netstat — and read the output
-          </div>
-        </div>
-      </div>
+    {% else %}
+      {# ── STATE 3: Logged in, NOT yet completed awareness ──────────── #}
+      <div class="course-access course-access--in-progress">
+        <div class="course-access__icon">🚀</div>
+        <h2 class="course-access__title">Almost there</h2>
+        <p class="course-access__text">
+          Complete the free awareness course to unlock all 20 advanced lessons.
+        </p>
 
-      <!-- Section C -->
-      <div class="curriculum-section">
-        <div class="curriculum-section-head">
-          <span class="curr-section-tag">Section C</span>
-          <span class="curr-section-name">Defence &amp; Response</span>
+        {# Progress bar #}
+        <div class="course-progress">
+          <div class="course-progress__header">
+            <span class="course-progress__label">Awareness Course Progress</span>
+            <span class="course-progress__count">
+              {{ awareness.completed }} / {{ awareness.total }} topics
+            </span>
+          </div>
+          <div class="course-progress__bar">
+            <div class="course-progress__fill" style="width: {{ awareness.percent }}%;"></div>
+          </div>
+          <div class="course-progress__percent">{{ awareness.percent }}% complete</div>
         </div>
-        <div class="curriculum-lessons">
-          <div class="curr-lesson">
-            <span class="curr-num">11</span>
-            <div>
-              <div class="curr-title">Password security, MFA, and identity</div>
-              <div class="curr-sub">Beyond basics — credential stuffing, MFA bypass, identity attacks</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">12</span>
-            <div>
-              <div class="curr-title">Email security and phishing investigation</div>
-              <div class="curr-sub">Header analysis, SPF/DKIM/DMARC, and spotting spoofed senders</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">13</span>
-            <div>
-              <div class="curr-title">Secure browsing and website trust</div>
-              <div class="curr-sub">HTTPS, certificates, browser security, and safe habits</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">14</span>
-            <div>
-              <div class="curr-title">Malware basics and how infections happen</div>
-              <div class="curr-sub">Ransomware, trojans, delivery methods, and what to do</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">15</span>
-            <div>
-              <div class="curr-title">Logging, alerts, and incident basics</div>
-              <div class="curr-sub">What logs tell you, how to read them, and first response steps</div>
-            </div>
-          </div>
-          <div class="curr-lab">
-            <span class="curr-lab-tag">Lab</span>
-            Investigate a real phishing email — analyse headers and identify the attack
-          </div>
-        </div>
-      </div>
 
-      <!-- Section D -->
-      <div class="curriculum-section">
-        <div class="curriculum-section-head">
-          <span class="curr-section-tag">Section D</span>
-          <span class="curr-section-name">Career Launchpad</span>
-        </div>
-        <div class="curriculum-lessons">
-          <div class="curr-lesson">
-            <span class="curr-num">16</span>
-            <div>
-              <div class="curr-title">Cloud security fundamentals</div>
-              <div class="curr-sub">AWS, Azure, shared responsibility, and common misconfigurations</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">17</span>
-            <div>
-              <div class="curr-title">Data protection and privacy basics</div>
-              <div class="curr-sub">GDPR, data handling, and what organisations must do</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">18</span>
-            <div>
-              <div class="curr-title">Cybersecurity job roles explained</div>
-              <div class="curr-sub">SOC analyst, pentester, GRC, cloud security — what each role does</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">19</span>
-            <div>
-              <div class="curr-title">Beginner tools and safe practice</div>
-              <div class="curr-sub">TryHackMe, VirusTotal, Wireshark — getting started safely</div>
-            </div>
-          </div>
-          <div class="curr-lesson">
-            <span class="curr-num">20</span>
-            <div>
-              <div class="curr-title">How to start a career in cybersecurity</div>
-              <div class="curr-sub">Certifications, CVs, portfolios, and your 90-day plan</div>
-            </div>
-          </div>
-          <div class="curr-lab">
-            <span class="curr-lab-tag">Lab</span>
-            Create a TryHackMe account and complete your first room
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ===== ENROL ===== -->
-<section class="course-section course-enrol" id="enrol">
-  <div class="page-wrap">
-    <div class="enrol-card">
-      <div class="enrol-left">
-        <div class="cs-label">{% if has_access %}Your course{% else %}Enrol today{% endif %}</div>
-        <h2 class="enrol-title">Get Into Cybersecurity</h2>
-        <p class="enrol-sub">20 lessons · 4 practical labs · Certificate of completion · Lifetime access</p>
-        <ul class="enrol-list">
-          <li>Full access to all 20 lessons immediately</li>
-          <li>Hands-on labs with step-by-step instructions</li>
-          <li>Certificate of completion to share or download</li>
-          <li>Access to all future updates at no extra cost</li>
-        </ul>
-      </div>
-      <div class="enrol-right">
-        <div class="enrol-price-card">
-          {% if has_access %}
-          <div class="enrol-price" style="font-size: 32px; color: var(--green);">✓ Enrolled</div>
-          <div class="enrol-price-sub">you have lifetime access</div>
-          <a href="{{ url_for('main.course_lessons') }}" class="btn enrol-btn">Go to my lessons →</a>
+        <div class="course-access__actions">
+          {% if awareness.next_slug %}
+            <a href="{{ url_for('topics.topic_detail', slug=awareness.next_slug) }}" class="btn btn--primary btn--lg">
+              {% if awareness.completed == 0 %}Start Free Course{% else %}Continue Free Course{% endif %} →
+            </a>
           {% else %}
-          <div class="enrol-price">£11</div>
-          <div class="enrol-price-sub">one-time · lifetime access</div>
-          <a href="{{ url_for('paystack.pay_choose') }}" class="btn enrol-btn">Enrol now</a>
-          <div class="enrol-secure">Card · Bank Transfer · USSD · International</div>
+            <a href="{{ url_for('topics.list_topics') }}" class="btn btn--primary btn--lg">
+              Continue Free Course →
+            </a>
           {% endif %}
         </div>
       </div>
+    {% endif %}
+
+    {# ─────────────────────────────────────────────────────────────────── #}
+    {#  WHAT YOU'LL LEARN                                                   #}
+    {# ─────────────────────────────────────────────────────────────────── #}
+    <div class="course-sections">
+      <h2 class="course-sections__title">What's inside</h2>
+
+      <div class="course-section-grid">
+        <div class="course-section-card">
+          <div class="course-section-card__letter">A</div>
+          <h3 class="course-section-card__title">Foundation</h3>
+          <p class="course-section-card__text">
+            The mental models every cybersecurity professional needs. CIA triad,
+            threat actors, risk, defence in depth.
+          </p>
+        </div>
+
+        <div class="course-section-card">
+          <div class="course-section-card__letter">B</div>
+          <h3 class="course-section-card__title">Technical Core</h3>
+          <p class="course-section-card__text">
+            Networks, protocols, authentication, encryption. The technical
+            language you'll use every day.
+          </p>
+        </div>
+
+        <div class="course-section-card">
+          <div class="course-section-card__letter">C</div>
+          <h3 class="course-section-card__title">Defence &amp; Response</h3>
+          <p class="course-section-card__text">
+            Phishing, malware, ransomware, incident response, SIEM, EDR.
+            What blue teamers actually do.
+          </p>
+        </div>
+
+        <div class="course-section-card">
+          <div class="course-section-card__letter">D</div>
+          <h3 class="course-section-card__title">Career Launchpad</h3>
+          <p class="course-section-card__text">
+            Cloud, GDPR, pentesting, CVE, certifications, building your CV.
+            How to land your first role.
+          </p>
+        </div>
+      </div>
     </div>
+
+    {# ─────────────────────────────────────────────────────────────────── #}
+    {#  WHO IT'S FOR                                                        #}
+    {# ─────────────────────────────────────────────────────────────────── #}
+    <div class="course-who">
+      <h2 class="course-who__title">Who this course is for</h2>
+      <ul class="course-who__list">
+        <li>Career switchers moving into cybersecurity from another field</li>
+        <li>Students looking to enter the industry after graduation</li>
+        <li>IT professionals wanting to specialise in security</li>
+        <li>Anyone curious about how cybersecurity actually works</li>
+      </ul>
+    </div>
+
+    {# ─────────────────────────────────────────────────────────────────── #}
+    {#  FINAL CTA                                                           #}
+    {# ─────────────────────────────────────────────────────────────────── #}
+    {% if not has_access %}
+      <div class="course-final-cta">
+        {% if not current_user.is_authenticated %}
+          <h2 class="course-final-cta__title">Ready to start?</h2>
+          <p class="course-final-cta__text">Create your free account and begin in under a minute.</p>
+          <a href="{{ url_for('auth.register') }}" class="btn btn--primary btn--lg">
+            Create Free Account
+          </a>
+        {% else %}
+          <h2 class="course-final-cta__title">{{ awareness.total - awareness.completed }} topics away from unlocking the advanced course</h2>
+          <p class="course-final-cta__text">Keep going — the awareness course only takes a few hours total.</p>
+          <a href="{{ url_for('topics.list_topics') }}" class="btn btn--primary btn--lg">
+            Continue Free Course →
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+
   </div>
 </section>
 
 <style>
-.course-hero {
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--border);
-  padding: 72px 80px;
-  margin-left: -80px;
-  margin-right: -80px;
-  position: relative;
-  overflow: hidden;
+/* ─────────────────────────────────────────────────────────────────────────
+   COURSE LANDING — Free-pivot redesign
+   Uses BlizTech design tokens: #0A0A0A bg, #00D97E green, Space Grotesk
+   ───────────────────────────────────────────────────────────────────────── */
+
+.course-landing {
+  background: #0A0A0A;
+  color: #fff;
+  padding: 4rem 1rem 6rem;
+  min-height: 100vh;
 }
-.course-hero::before {
-  content: '';
-  position: absolute;
-  top: -100px; right: -100px;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(0,217,126,0.07) 0%, transparent 70%);
-  pointer-events: none;
-}
-@media (max-width: 900px) {
-  .course-hero { padding: 40px 24px; margin-left: -24px; margin-right: -24px; }
-}
-@media (max-width: 480px) {
-  .course-hero { padding: 32px 16px; margin-left: -16px; margin-right: -16px; }
-}
-.course-hero-inner {
-  display: grid;
-  grid-template-columns: 1fr 0.85fr;
-  gap: 60px;
-  align-items: center;
-  max-width: 1200px;
+
+.course-landing__container {
+  max-width: 1100px;
   margin: 0 auto;
 }
-@media (max-width: 900px) { .course-hero-inner { grid-template-columns: 1fr; gap: 36px; } }
-.course-tag {
+
+/* HERO */
+.course-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.course-hero__badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  background: rgba(0, 217, 126, 0.1);
+  border: 1px solid rgba(0, 217, 126, 0.3);
+  color: #00D97E;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+}
+
+.course-hero__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+  letter-spacing: -0.02em;
+}
+
+.course-hero__subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 720px;
+  margin: 0 auto 2rem;
+}
+
+.course-hero__free-banner {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--border-g);
-  background: var(--green-dim);
-  color: var(--green);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.5px;
-  margin-bottom: 16px;
+  gap: 0.75rem;
+  padding: 0.9rem 1.5rem;
+  background: rgba(0, 217, 126, 0.08);
+  border: 1px solid rgba(0, 217, 126, 0.25);
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
 }
-.course-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 54px;
-  font-weight: 700;
-  letter-spacing: -2px;
-  line-height: 1.05;
-  margin: 0 0 20px;
-}
-.course-title-accent { color: var(--green); }
-@media (max-width: 900px) { .course-title { font-size: 38px; } }
-@media (max-width: 480px) { .course-title { font-size: 30px; } }
-.course-subtitle {
-  color: var(--text-2);
-  font-size: 15px;
-  line-height: 1.75;
-  max-width: 48ch;
-  margin: 0 0 28px;
-}
-.course-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 18px 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-}
-.course-meta-item { display: flex; flex-direction: column; gap: 2px; }
-.course-meta-num {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-}
-.course-meta-label {
-  font-size: 10.5px;
-  color: var(--text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-.course-meta-div { width: 1px; height: 28px; background: var(--border); }
-.course-cta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.course-btn-primary { font-size: 14px; padding: 10px 24px; min-height: 42px; }
-.course-one-time {
-  font-size: 12px;
-  color: var(--text-3);
-  font-family: 'JetBrains Mono', monospace;
-}
-.course-card-preview {
-  border: 1px solid var(--border-g);
-  border-radius: var(--radius-xl);
-  background: var(--bg-3);
-  overflow: hidden;
-}
-.ccp-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-4);
-}
-.ccp-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--green);
-}
-.ccp-list { padding: 16px 20px; display: grid; gap: 10px; }
-.ccp-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13px;
-  color: var(--text-2);
-  line-height: 1.5;
-}
-.ccp-item::before {
-  content: '→';
-  color: var(--green);
-  flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  margin-top: 1px;
-}
-.ccp-footer {
-  padding: 12px 20px;
-  border-top: 1px solid var(--border);
-  background: var(--bg-4);
-}
-.ccp-cert {
-  font-size: 11.5px;
-  color: var(--green);
-  font-family: 'JetBrains Mono', monospace;
-}
-.course-section { padding: 60px 0; border-bottom: 1px solid var(--border); }
-.cs-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--green);
-  margin-bottom: 16px;
-}
-.cs-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin: 0 0 36px;
-}
-.course-for-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-@media (max-width: 800px) { .course-for-grid { grid-template-columns: 1fr; } }
-.course-for-item {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 22px 24px;
-  background: var(--bg-2);
-}
-.cfi-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-.cfi-text { font-size: 13px; color: var(--text-3); line-height: 1.7; }
-.curriculum-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-@media (max-width: 800px) { .curriculum-grid { grid-template-columns: 1fr; } }
-.curriculum-section {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--bg-2);
-  overflow: hidden;
-}
-.curriculum-section-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-3);
-}
-.curr-section-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  padding: 2px 7px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--border-g);
-  background: var(--green-dim);
-  color: var(--green);
-  letter-spacing: 0.5px;
-}
-.curr-section-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-}
-.curriculum-lessons { padding: 8px 0; }
-.curr-lesson {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 11px 20px;
-  border-bottom: 1px solid var(--border);
-  transition: background 0.15s;
-}
-.curr-lesson:last-of-type { border-bottom: none; }
-.curr-lesson:hover { background: var(--bg-3); }
-.curr-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--green);
-  flex-shrink: 0;
-  margin-top: 2px;
-  width: 20px;
-}
-.curr-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
-.curr-sub { font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
-.curr-lab {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 20px;
-  background: var(--green-dim);
-  border-top: 1px solid var(--border-g);
-  font-size: 12px;
-  color: var(--text-2);
-}
-.curr-lab-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  padding: 2px 7px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--border-g);
-  background: var(--bg-3);
-  color: var(--green);
-  flex-shrink: 0;
-}
-.enrol-card {
-  display: grid;
-  grid-template-columns: 1fr 0.6fr;
-  gap: 60px;
-  align-items: start;
-  border: 1px solid var(--border-g);
-  border-radius: var(--radius-xl);
-  padding: 40px 44px;
-  background: var(--bg-2);
-}
-@media (max-width: 800px) { .enrol-card { grid-template-columns: 1fr; gap: 32px; padding: 28px 24px; } }
-.enrol-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin: 0 0 8px;
-}
-.enrol-sub { font-size: 13px; color: var(--text-3); margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; }
-.enrol-list { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
-.enrol-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13.5px;
-  color: var(--text-2);
-  line-height: 1.5;
-}
-.enrol-list li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
-.enrol-price-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  background: var(--bg-3);
-  text-align: center;
-}
-.enrol-price {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -2px;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.enrol-price-sub {
-  font-size: 11px;
-  color: var(--text-3);
-  font-family: 'JetBrains Mono', monospace;
-  margin-bottom: 20px;
-}
-.enrol-btn { width: 100%; font-size: 14px; min-height: 44px; }
-.enrol-secure { margin-top: 14px; font-size: 11px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
-</style>
 
+.course-hero__free-banner strong {
+  color: #00D97E;
+}
+
+.course-hero__free-icon {
+  font-size: 1.2rem;
+}
+
+/* ACCESS STATE */
+.course-access {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.course-access--unlocked {
+  border-color: rgba(0, 217, 126, 0.3);
+  background: rgba(0, 217, 126, 0.04);
+}
+
+.course-access__icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.course-access--unlocked .course-access__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  background: #00D97E;
+  color: #0A0A0A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.course-access__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.course-access__text {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto 2rem;
+}
+
+.course-access__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* PROGRESS BAR */
+.course-progress {
+  max-width: 480px;
+  margin: 0 auto 2rem;
+  text-align: left;
+}
+
+.course-progress__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.course-progress__label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.course-progress__count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: #00D97E;
+  font-weight: 600;
+}
+
+.course-progress__bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.course-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00D97E, #00B86A);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.course-progress__percent {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.4rem;
+  text-align: right;
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn--lg {
+  padding: 1rem 2rem;
+  font-size: 1.05rem;
+}
+
+.btn--primary {
+  background: #00D97E;
+  color: #0A0A0A;
+}
+
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 217, 126, 0.3);
+}
+
+.btn--secondary {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* SECTIONS */
+.course-sections {
+  margin-bottom: 4rem;
+}
+
+.course-sections__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 2rem;
+}
+
+.course-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.course-section-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.course-section-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 217, 126, 0.3);
+}
+
+.course-section-card__letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 217, 126, 0.1);
+  color: #00D97E;
+  border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.course-section-card__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.25rem;
+  margin: 0 0 0.6rem;
+}
+
+.course-section-card__text {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* WHO IT'S FOR */
+.course-who {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin-bottom: 4rem;
+}
+
+.course-who__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  margin: 0 0 1.25rem;
+}
+
+.course-who__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.course-who__list li {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 0 0.5rem 1.75rem;
+  position: relative;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.course-who__list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #00D97E;
+  font-weight: 700;
+}
+
+/* FINAL CTA */
+.course-final-cta {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: linear-gradient(135deg, rgba(0, 217, 126, 0.05), rgba(0, 217, 126, 0.02));
+  border: 1px solid rgba(0, 217, 126, 0.2);
+  border-radius: 20px;
+}
+
+.course-final-cta__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin: 0 0 0.75rem;
+}
+
+.course-final-cta__text {
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+  .course-landing { padding: 2rem 1rem 4rem; }
+  .course-access { padding: 2rem 1.25rem; }
+  .course-who { padding: 1.75rem 1.25rem; }
+}
+</style>
 {% endblock %}

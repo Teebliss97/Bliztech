@@ -35,15 +35,16 @@
   <meta property="og:locale" content="en_GB">
 
   {% if request.endpoint == 'main.course' %}
-    <meta property="og:title" content="Get Into Cybersecurity — BlizTech Academy">
-    <meta property="og:description" content="20 structured lessons, 4 labs, certificate included. From zero to job-ready. £11 one-time, lifetime access.">
+    {# Free-pivot (May 2026): course is now free, gated by awareness completion #}
+    <meta property="og:title" content="Get Into Cybersecurity — Free Advanced Course | BlizTech Academy">
+    <meta property="og:description" content="20 structured lessons across 4 sections — foundation, technical core, defence, and career. Now 100% free for everyone who completes the awareness course.">
     <meta property="og:url" content="{{ seo_url }}">
     <meta property="og:image" content="{{ url_for('static', filename='img/og-course.png', _external=True) }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Get Into Cybersecurity — BlizTech Academy">
-    <meta name="twitter:description" content="20 structured lessons, 4 labs, certificate included. £11 one-time, lifetime access.">
+    <meta name="twitter:title" content="Get Into Cybersecurity — Free Advanced Course | BlizTech Academy">
+    <meta name="twitter:description" content="20 structured lessons across 4 sections. Now 100% free for everyone who completes the awareness course.">
     <meta name="twitter:image" content="{{ url_for('static', filename='img/og-course.png', _external=True) }}">
   {% else %}
     <meta property="og:title" content="{{ seo_title }}">
@@ -71,7 +72,7 @@
   {% block head %}{% endblock %}
 </head>
 
-<body>
+<body data-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}">
   <header class="nav {% if is_course_area %}nav-course{% endif %}">
     <div class="nav-container">
       <div class="nav-inner">
@@ -92,15 +93,16 @@
               {% if current_user.is_authenticated %}
                 <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
                 <a href="{{ url_for('cert.paid_certificate_home') }}" class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">Certificate</a>
-                {% if has_certificate %}
-                  <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">Practice Exam</a>
-                {% endif %}
+                {# Free-pivot: practice exam is now public — link visible to all logged-in users in course area #}
+                <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">Practice Exam</a>
               {% endif %}
               <a href="{{ url_for('main.support') }}" class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>
             {% else %}
               <a href="{{ url_for('main.home') }}" class="{% if request.endpoint == 'main.home' %}active{% endif %}">Home</a>
               <a href="{{ url_for('topics.list_topics') }}" class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">Topics</a>
               <a href="{{ url_for('main.course') }}" class="{% if request.endpoint == 'main.course' or request.endpoint == 'main.course_lessons' or request.endpoint == 'main.course_lesson' %}active{% endif %}">Course</a>
+              {# Free-pivot: surface practice exam in main nav since it's now public #}
+              <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">Practice Exam</a>
               <a href="{{ url_for('jobs.job_board') }}" class="{% if request.endpoint == 'jobs.job_board' %}active{% endif %}">Jobs</a>
               <a href="{{ url_for('main.link_analyzer') }}" class="{% if request.endpoint == 'main.link_analyzer' %}active{% endif %}">Link Checker</a>
               <a href="{{ url_for('main.support') }}" class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>
@@ -157,15 +159,16 @@
               {% if current_user.is_authenticated %}
                 <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
                 <a href="{{ url_for('cert.paid_certificate_home') }}" class="{% if request.endpoint and request.endpoint.startswith('cert.') %}active{% endif %}">Certificate</a>
-                {% if has_certificate %}
-                  <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">Practice Exam</a>
-                {% endif %}
+                {# Free-pivot: practice exam now public, link shown for all logged-in users in course area #}
+                <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">Practice Exam</a>
               {% endif %}
               <a href="{{ url_for('main.support') }}" class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>
             {% else %}
               <a href="{{ url_for('main.home') }}" class="{% if request.endpoint == 'main.home' %}active{% endif %}">Home</a>
               <a href="{{ url_for('topics.list_topics') }}" class="{% if request.endpoint and request.endpoint.startswith('topics.') %}active{% endif %}">Topics</a>
               <a href="{{ url_for('main.course') }}" class="{% if request.endpoint == 'main.course' or request.endpoint == 'main.course_lessons' or request.endpoint == 'main.course_lesson' %}active{% endif %}">Course</a>
+              {# Free-pivot: surface practice exam in main mobile nav since it's now public #}
+              <a href="{{ url_for('practice_exam.index') }}" class="{% if request.endpoint and request.endpoint.startswith('practice_exam.') %}active{% endif %}">Practice Exam</a>
               <a href="{{ url_for('jobs.job_board') }}" class="{% if request.endpoint == 'jobs.job_board' %}active{% endif %}">Jobs</a>
               <a href="{{ url_for('main.link_analyzer') }}" class="{% if request.endpoint == 'main.link_analyzer' %}active{% endif %}">Link Checker</a>
               <a href="{{ url_for('main.support') }}" class="{% if request.endpoint == 'main.support' %}active{% endif %}">Support</a>
